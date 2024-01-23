@@ -94,7 +94,7 @@ export const IndexPage = () => {
 
 	return (
 		<>
-			<div className='relative h-56 sm:h-64 xl:h-80 2xl:h-96 mb-8'>
+			<div className="relative h-56 sm:h-64 xl:h-80 2xl:h-96 mb-8">
 				<Carousel slideInterval={5000}>
 					<img src={Banner2} alt='...' />
 					<img src={Banner2} alt='...' />

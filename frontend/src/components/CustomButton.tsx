@@ -72,11 +72,10 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 				sizeClassName,
 				colorClassName,
 				borderedClassName,
-				className,
-			)}
-			onClick={onClick}
-		>
-			{children}
+				className
+			)
+		} onClick={onClick}>
+			{ children }
 		</button>
 	);
 };
