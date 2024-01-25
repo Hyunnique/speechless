@@ -13,4 +13,4 @@ interface CommunityView {
 	createdAt: Date;
 }
 
-export type { CommunityView }
+export type { CommunityView };

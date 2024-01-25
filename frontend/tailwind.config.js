@@ -1,16 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-	content: [
-		'./src/**/*.{js,jsx,ts,tsx}',
-		'index.html',
-		'node_modules/flowbite-react/lib/esm/**/*.js'
-	],
+	content: ['./src/**/*.{js,jsx,ts,tsx}', 'index.html', 'node_modules/flowbite-react/lib/esm/**/*.js'],
 	theme: {
 		extend: {},
 		fontFamily: {
 			nanumSquareNeo: ['NanumSquareNeo'],
 			snowTimes: ['SnowTimes'],
-			flubber: ['Flubber']
+			flubber: ['Flubber'],
 		},
 		colors: {
 			primary: {
@@ -63,7 +59,5 @@ module.exports = {
 			},
 		},
 	},
-	plugins: [
-		require('flowbite/plugin')
-	],
+	plugins: [require('flowbite/plugin')],
 };
