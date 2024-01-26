@@ -13,7 +13,7 @@ public record AuthResponse (
                 member.getId(),
                 member.getName(),
                 member.getEmail(),
-                member.getProfileImgUrl()
+                member.getProfile()
         );
     }
 }
