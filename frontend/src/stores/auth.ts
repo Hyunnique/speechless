@@ -15,28 +15,29 @@ interface LoginResponse {
 }
 
 interface AuthState {
-	accessToken: string | null;
-	refreshToken: string | null;
-	tokenExpireAt: Date | null;
-	id: string | null;
-	name: string | null;
-	email: string | null;
-	profileImage: string | null;
+	accessToken: string | undefined;
+	refreshToken: string | undefined;
+	tokenExpireAt: Date | undefined;
+	id: string | undefined;
+	name: string | undefined;
+	email: string | undefined;
+	profileImage: string | undefined;
 
 	setAuth: (loginResponse: LoginResponse) => void;
+	clearAuth: () => void;
 }
 
 const useAuthStore = create<AuthState>()(
 	// persist를 통해 localStorage에 로그인 정보 저장
 	persist(
 		(set) => ({
-			accessToken: null,
-			refreshToken: null,
-			tokenExpireAt: null,
-			id: null,
-			name: null,
-			email: null,
-			profileImage: null,
+			accessToken: undefined,
+			refreshToken: undefined,
+			tokenExpireAt: undefined,
+			id: undefined,
+			name: undefined,
+			email: undefined,
+			profileImage: undefined,
 
 			setAuth: ({ accessToken, refreshToken, authResponse }) => {
 				set({
@@ -50,6 +51,18 @@ const useAuthStore = create<AuthState>()(
 
 				set({ tokenExpireAt: new Date(Date.now() + import.meta.env.VITE_JWT_EXPIRE_TIME) });
 			},
+
+			clearAuth: () => {
+				set({
+					accessToken: undefined,
+					refreshToken: undefined,
+					tokenExpireAt: undefined,
+					id: undefined,
+					name: undefined,
+					email: undefined,
+					profileImage: undefined,
+				});
+			}
 		}),
 		{
 			name: 'auth-storage',
