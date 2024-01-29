@@ -24,6 +24,7 @@ interface AuthState {
 	profileImage: string | undefined;
 
 	setAuth: (loginResponse: LoginResponse) => void;
+	setAccessToken: (accessToken: string) => void;
 	clearAuth: () => void;
 }
 
@@ -51,7 +52,10 @@ const useAuthStore = create<AuthState>()(
 
 				set({ tokenExpireAt: new Date(Date.now() + import.meta.env.VITE_JWT_EXPIRE_TIME) });
 			},
-
+			setAccessToken: (accessToken: string) => {
+				set({ accessToken });
+				set({ tokenExpireAt: new Date(Date.now() + import.meta.env.VITE_JWT_EXPIRE_TIME) });
+			},
 			clearAuth: () => {
 				set({
 					accessToken: undefined,

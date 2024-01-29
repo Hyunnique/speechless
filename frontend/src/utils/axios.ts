@@ -1,17 +1,57 @@
-import Axios from 'axios';
+import Axios, {AxiosInstance, InternalAxiosRequestConfig} from 'axios';
+import { useAuthStore } from "../stores/auth.ts";
 
-const axios = Axios.create({
-	baseURL: import.meta.env.VITE_API_BASE_URL,
-});
+// Local Axios Custom Hook
+// 파라미터로 isAuth: boolean을 받으며, 기본값은 true
+// Token 인증이 필요한 요청에 대해서는 파라미터를 주지 않아도 자동으로 헤더에 토큰을 넣어주고, Interceptor를 통한 재인증을 시도함
+// 로그인 등 일부 Token 인증이 필요없는 요청에 대해서만 파라미터로 false를 명시해주면 된다.
 
-axios.interceptors.response.use(
-	(response) => response,
-	(error) => {
-		if (error.response.status === 401) {
-			console.log('request accessToken');
-		}
-		return Promise.reject(error);
-	},
-);
+const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
+	const authenticated: boolean = isAuth || true;
+	const authStore = useAuthStore();
 
-export { axios };
+	const instance = Axios.create({
+		baseURL: import.meta.env.VITE_API_BASE_URL
+	});
+
+	// 인증이 필요할 경우 Interceptor를 사용함
+	if (authenticated) {
+		// Request Intercept를 통해 헤더에 토큰을 넣어줌
+		instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+			if (authStore.accessToken) {
+				config.headers = config.headers || {};
+				config.headers.Authorization = `Bearer ${authStore.accessToken}`;
+			}
+
+			return config;
+		});
+
+		// Response Intercept를 통해 401 에러가 발생할 경우 재인증을 시도함
+		instance.interceptors.response.use(
+			(response) => response,
+			async (error) => {
+				console.log(error);
+				if (error.response.status === 401 && error.config.url !== '/auth/token') {
+					if (!authStore.refreshToken) {
+						authStore.clearAuth();
+						return Promise.reject(error);
+					}
+
+					const refreshResponse = await instance.post('/auth/token', null, {
+						headers: {
+							refresh: authStore.refreshToken
+						}
+					});
+
+					authStore.setAccessToken(refreshResponse.data["access_token"]);
+				}
+
+				return Promise.reject(error);
+			},
+		);
+	}
+
+	return instance;
+}
+
+export { useLocalAxios };
