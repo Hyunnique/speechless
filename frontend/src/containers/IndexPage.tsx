@@ -7,7 +7,7 @@ import { RecruitCard } from '../components/RecruitCard.tsx';
 
 import Banner1 from '../assets/images/banner-1.png';
 import { useEffect, useState } from 'react';
-import { axios } from '../utils/axios.ts';
+import { useLocalAxios } from '../utils/axios.ts';
 
 const awaitingSpeechSessions: CommunityView[] = [
 	{
@@ -72,10 +72,11 @@ const awaitingSpeechSessions: CommunityView[] = [
 	},
 ];
 export const IndexPage = () => {
+	const localAxiosWithAuth = useLocalAxios();
 	const [speechSessions, setSpeechSessions] = useState<CommunityView[]>([]);
 
 	useEffect(() => {
-		axios
+		localAxiosWithAuth
 			.get('/community/list')
 			.then((res) => {
 				// TODO: 백엔드에서 받은 response로 글을 채워준다

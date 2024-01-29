@@ -1,29 +1,32 @@
-import { useCallback, useEffect } from 'react';
-
-import { axios } from '../../utils/axios.ts';
-import { useAuthStore } from '../../stores/auth.ts';
+import { useEffect } from 'react';
+import { useLocalAxios } from "../../utils/axios.ts";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../stores/auth.ts";
 
 export const GoogleCallback = () => {
+	const navigate = useNavigate();
 	const authStore = useAuthStore();
-
-	const handleGoogleCallback = useCallback(async () => {
-		try {
-			const response = await axios.post('/auth/login', null, {
-				params: {
-					code: new URL(document.location.toString()).searchParams.get('code'),
-					'redirect-uri': import.meta.env.VITE_GOOGLE_REDIRECT_URI,
-				},
-			});
-
-			authStore.setAuth(response.data);
-		} catch (e) {
-			console.error(e);
-		}
-	}, [authStore]);
+	const localAxios = useLocalAxios(false);
 
 	useEffect(() => {
-		handleGoogleCallback();
-	}, [handleGoogleCallback]);
+		const code = new URL(document.location.toString()).searchParams.get('code');
+
+		if (authStore.accessToken) {
+			navigate('/');
+			return;
+		}
+
+		localAxios.post('/google/login', null, {
+			params: { code }
+		})
+			.then(response => {
+				authStore.setAuth(response.data);
+				navigate('/');
+			})
+			.catch(() => {
+				//navigate('/error');
+			});
+	}, []);
 
 	return <></>;
 };
