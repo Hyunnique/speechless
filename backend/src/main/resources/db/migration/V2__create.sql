@@ -11,10 +11,11 @@ CREATE TABLE `refresh_token` (
 DROP TABLE IF EXISTS `member`;
 
 CREATE TABLE `member` (
-      `id`			    INT UNSIGNED	PRIMARY KEY,
+      `id`			    INT UNSIGNED	PRIMARY KEY	AUTO_INCREMENT,
       `name`			VARCHAR(30)		NULL,
       `profile`		    VARCHAR(40)		NULL,
       `email`			VARCHAR(30)		NULL,
+      `member_type`     VARCHAR(10)     NULL,
       `created_at`	    TIMESTAMP		DEFAULT CURRENT_TIMESTAMP,
       `modified_at`	    TIMESTAMP		DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -22,7 +23,7 @@ CREATE TABLE `member` (
 DROP TABLE IF EXISTS `community`;
 
 CREATE TABLE `community` (
-     `id`			    BIGINT				PRIMARY KEY,
+     `id`			    BIGINT				PRIMARY KEY	AUTO_INCREMENT,
      `writer_id`		INT UNSIGNED		NOT NULL,
      `category_id`	    SMALLINT UNSIGNED	NOT NULL,
      `title`			VARCHAR(50)			NULL,
@@ -39,7 +40,7 @@ CREATE TABLE `community` (
 DROP TABLE IF EXISTS `message`;
 
 CREATE TABLE `message` (
-       `id`			    BIGINT			PRIMARY KEY,
+       `id`			    BIGINT			PRIMARY KEY	AUTO_INCREMENT,
        `content`		VARCHAR(500)	NULL,
        `sent_at`		TIMESTAMP		DEFAULT CURRENT_TIMESTAMP,
        `is_checked`	    TINYINT(1)		DEFAULT 0,
@@ -50,7 +51,7 @@ CREATE TABLE `message` (
 DROP TABLE IF EXISTS `statement_question`;
 
 CREATE TABLE `statement_question` (
-        `id`			    INT UNSIGNED	PRIMARY KEY,
+        `id`			    INT UNSIGNED	PRIMARY KEY	AUTO_INCREMENT,
         `question`		    VARCHAR(200)	NULL,
         `answer`		    VARCHAR(1500)	NULL,
         `statement_id`	    INT UNSIGNED	NOT NULL,
@@ -61,7 +62,7 @@ CREATE TABLE `statement_question` (
 DROP TABLE IF EXISTS `statement`;
 
 CREATE TABLE `statement` (
-         `id`			INT UNSIGNED		PRIMARY KEY,
+         `id`			INT UNSIGNED		PRIMARY KEY	AUTO_INCREMENT,
          `member_id`	INT UNSIGNED		NOT NULL,
          `created_at`	TIMESTAMP			DEFAULT CURRENT_TIMESTAMP,
          `modified_at`	TIMESTAMP			DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -74,7 +75,7 @@ CREATE TABLE `statement` (
 DROP TABLE IF EXISTS `interview_question`;
 
 CREATE TABLE `interview_question` (
-          `id`			    BIGINT			PRIMARY KEY,
+          `id`			    BIGINT			PRIMARY KEY	AUTO_INCREMENT,
           `interview_id`	BIGINT			NOT NULL,
           `question`		VARCHAR(200)	NULL,
           `answer`		    VARCHAR(2000)	NULL,
@@ -84,7 +85,7 @@ CREATE TABLE `interview_question` (
 DROP TABLE IF EXISTS `announcement_info`;
 
 CREATE TABLE `announcement_info` (
-         `id`			    BIGINT			PRIMARY KEY,
+         `id`			    BIGINT			PRIMARY KEY	AUTO_INCREMENT,
          `community_id`	    BIGINT			NOT NULL,
          `url`			    VARCHAR(200)	NULL,
          `topic`			VARCHAR(30)		NULL,
@@ -95,7 +96,7 @@ CREATE TABLE `announcement_info` (
 DROP TABLE IF EXISTS `feedback`;
 
 CREATE TABLE `feedback` (
-        `id`		    BIGINT			PRIMARY KEY,
+        `id`		    BIGINT			PRIMARY KEY	AUTO_INCREMENT,
         `report_id`	    BIGINT			NOT NULL,
         `writer_id`	    INT UNSIGNED	NOT NULL,
         `reader_id`	    INT UNSIGNED	NOT NULL
@@ -104,7 +105,7 @@ CREATE TABLE `feedback` (
 DROP TABLE IF EXISTS `feedback_detail`;
 
 CREATE TABLE `feedback_detail` (
-       `id`			    BIGINT			PRIMARY KEY,
+       `id`			    BIGINT			PRIMARY KEY	AUTO_INCREMENT,
        `feedback_id`	BIGINT			NOT NULL,
        `question`		VARCHAR(50)		NULL,
        `score`			SMALLINT		NULL,
@@ -114,7 +115,7 @@ CREATE TABLE `feedback_detail` (
 DROP TABLE IF EXISTS `ban`;
 
 CREATE TABLE `ban` (
-        `id`				BIGINT		    PRIMARY KEY,
+        `id`				BIGINT		    PRIMARY KEY	AUTO_INCREMENT,
         `block_member_id`	INT UNSIGNED	NOT NULL,
         `blocked_member_id`	INT UNSIGNED	NOT NULL
 );
@@ -122,7 +123,7 @@ CREATE TABLE `ban` (
 DROP TABLE IF EXISTS `interview_info`;
 
 CREATE TABLE `interview_info` (
-        `id`					    BIGINT			PRIMARY KEY,
+        `id`					    BIGINT			PRIMARY KEY	AUTO_INCREMENT,
         `member_id`				    INT UNSIGNED	NOT NULL,
         `topic`					    VARCHAR(30)		NULL,
         `pronunciation_score` 	    INT				NULL,
@@ -138,7 +139,7 @@ CREATE TABLE `interview_info` (
 DROP TABLE IF EXISTS `participants`;
 
 CREATE TABLE `participants` (
-        `id`					BIGINT			PRIMARY KEY,
+        `id`					BIGINT			PRIMARY KEY	AUTO_INCREMENT,
         `member_id`				INT UNSIGNED	NOT NULL,
         `community_id`			BIGINT			NOT NULL,
         `is_approved`			TINYINT(1)		NULL,
@@ -150,21 +151,21 @@ CREATE TABLE `participants` (
 DROP TABLE IF EXISTS `interview_preset`;
 
 CREATE TABLE `interview_preset` (
-        `id`		SMALLINT UNSIGNED	PRIMARY KEY,
+        `id`		SMALLINT UNSIGNED	PRIMARY KEY	AUTO_INCREMENT,
         `question`	VARCHAR(200)		NOT NULL
 );
 
 DROP TABLE IF EXISTS `category`;
 
 CREATE TABLE `category` (
-        `id`	SMALLINT UNSIGNED	PRIMARY KEY,
+        `id`	SMALLINT UNSIGNED	PRIMARY KEY	AUTO_INCREMENT,
         `name`	VARCHAR(15)			NOT NULL
 );
 
 DROP TABLE IF EXISTS `announcement_report`;
 
 CREATE TABLE `announcement_report` (
-        `id`					BIGINT			PRIMARY KEY,
+        `id`					BIGINT			PRIMARY KEY	AUTO_INCREMENT,
         `presentation_id`		BIGINT			NOT NULL,
         `member_id`				INT UNSIGNED	NOT NULL,
         `pronunciation_score`	INT				NULL,
