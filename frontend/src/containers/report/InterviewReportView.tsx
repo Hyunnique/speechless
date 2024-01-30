@@ -54,7 +54,7 @@ export const InterviewReportView: React.FC = () => {
 
                         <div className='basis-1/4 flex flex-auto'>
                             <Button className='m-1 bg-primary-300 text-white font-thin'>다운로드</Button>
-                            <Button className='m-1 bg-negative-300 text-white font-thin' on>삭제</Button>
+                            <Button className='m-1 bg-negative-300 text-white font-thin'>삭제</Button>
                         </div>
                     </List.Item>
                 ))}
