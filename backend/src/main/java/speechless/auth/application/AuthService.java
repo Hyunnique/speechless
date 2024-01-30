@@ -20,7 +20,10 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     public TokenDto login(OAuthMemberResponse oAuthMemberResponse) {
-        Member member = memberRepository.findByEmail(oAuthMemberResponse.getEmail()).orElseGet(() -> memberRepository.save(oAuthMemberResponse.toMember()));
+        System.out.println(oAuthMemberResponse);
+        System.out.println(oAuthMemberResponse.getEmail());
+        System.out.println(oAuthMemberResponse.getNickName());
+        Member member = memberRepository.findByEmailAndMemberType(oAuthMemberResponse.getEmail(), oAuthMemberResponse.getMemberType()).orElseGet(() -> memberRepository.save(oAuthMemberResponse.toMember()));
         return createTokens(member.getId());
     }
 

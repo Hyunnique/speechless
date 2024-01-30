@@ -30,4 +30,7 @@ public class Member extends BaseTimeEntity {
 
     private String profileImgUrl;
 
+    @Enumerated(EnumType.STRING)
+    private MemberType memberType;
+
 }

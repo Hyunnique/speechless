@@ -2,19 +2,18 @@ package speechless.auth.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import speechless.auth.application.AuthService;
 import speechless.auth.application.dto.OAuthMemberResponse;
-import speechless.auth.domain.OAuthClient;
+import speechless.auth.domain.OAuthClients;
 import speechless.auth.dto.TokenDto;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceFacade {
     private final AuthService authService;
-    private final OAuthClient oAuthClient;
+    private final OAuthClients oAuthClient;
 
-    public TokenDto login(String authCode, String redirectUri) {
-        OAuthMemberResponse oAuthMemberResponse = oAuthClient.request(authCode, redirectUri);
+    public TokenDto login(String authCode, String redirectUri, String provider) {
+        OAuthMemberResponse oAuthMemberResponse = oAuthClient.request(authCode, redirectUri, provider);
         return authService.login(oAuthMemberResponse);
     }
 
