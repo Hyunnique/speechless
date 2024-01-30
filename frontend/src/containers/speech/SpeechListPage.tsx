@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { SpeechSearch } from '../../components/SpeechSearch';
 import { RecruitCard } from '../../components/RecruitCard';
 import { CommunityView } from '../../types/Community.ts';
-import { axios } from '../../utils/axios.ts';
+import { useLocalAxios } from '../../utils/axios.ts';
 
 const awaitingSpeechSessions: CommunityView[] = [
       //향후, Custom hook으로 변환, useEffect 정리, 스크롤 바가 밀리는 현상 해결해야함(SpeechSearch 컴포넌트 플로팅이 이유로 추정)
@@ -179,10 +179,11 @@ export const SpeechListPage = () => {
     const [speechSessions, setSpeechSessions] = useState<CommunityView[]>([]);
     const [pageIndex, setPageIndex] = useState(1);
     const loadingRef = useRef(null);
+    const localAxios = useLocalAxios();
 
     // 데이터 로딩을 위한 useEffect
     useEffect(() => {
-        axios.get('/community/speechlist')
+        localAxios.get('/community/speechlist')
             .then((res) => {
                 setSpeechSessions(res.data);
             })

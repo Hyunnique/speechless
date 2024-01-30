@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import {CommunityView} from "../../types/Community.ts";
 
 // 더미 데이터 예시
 const detailData = {
@@ -9,17 +10,17 @@ const detailData = {
   content: '스피치 세션에 대한 세부 정보~',
   currentParticipants: 4,
   maxParticipants: 8,
-  deadline: '2024-01-31',
-  sessionStart: '2024-01-31',
+  deadline: new Date('2024-01-31'),
+  sessionStart: new Date('2024-01-31'),
   invisible: false,
   private: false,
-  createdAt: '2024-01-01',
+  createdAt: new Date('2024-01-01'),
   views: 1001
 };
 
 export const SpeechDetailPage = () => {
 	// || null?
-  const [speechDetail, setSpeechDetail] = useState({});
+  const [speechDetail, setSpeechDetail] = useState<CommunityView>(detailData);
 
   useEffect(() => {
     setSpeechDetail(detailData);
@@ -35,8 +36,8 @@ export const SpeechDetailPage = () => {
               <div className='flex justify-between items-center'>
                 <div className='flex gap-4 md:gap-10'>
                   <p className='text-sm md:text-base text-gray-600'>작성자: {speechDetail.writer}</p>
-                  <p className='text-sm md:text-base text-gray-600'>작성일: {speechDetail.createdAt}</p>
-                  <p className='text-sm md:text-base text-gray-600'>조회수: {speechDetail.views}</p>
+                  <p className='text-sm md:text-base text-gray-600'>작성일: {speechDetail.createdAt.toLocaleString()}</p>
+                  <p className='text-sm md:text-base text-gray-600'>조회수: {5}</p>
                 </div>
                 <button className='bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
                   발표 세션 이동
@@ -50,10 +51,10 @@ export const SpeechDetailPage = () => {
                   <strong>신청 현황:</strong> {speechDetail.currentParticipants}/{speechDetail.maxParticipants}
                 </div>
                 <div className='mb-2'>
-                  <strong>세션 일자:</strong> {speechDetail.sessionStart}
+                  <strong>세션 일자:</strong> {speechDetail.sessionStart.toLocaleString()}
                 </div>
                 <div>
-                  <strong>마감 일자:</strong> {speechDetail.deadline}
+                  <strong>마감 일자:</strong> {speechDetail.deadline.toLocaleString()}
                 </div>
               </div>
               <div className='w-full md:w-1/2 px-3'>
