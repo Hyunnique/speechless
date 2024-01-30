@@ -16,7 +16,7 @@ export const NaverCallback = () => {
 			return;
 		}
 
-		localAxios.post('/naver/login', null, {
+		localAxios.post('/auth/login/naver', null, {
 			params: { code }
 		})
 			.then(response => {
