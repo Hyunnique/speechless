@@ -11,7 +11,6 @@ import speechless.member.domain.repository.MemberRepository;
 @Transactional(readOnly = true)
 public class MemberQueryService {
     private final MemberRepository memberRepository;
-
     public Member findById(Long id) {
         return memberRepository.getById(id);
     }

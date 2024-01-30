@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import speechless.auth.application.AuthServiceFacade;
 import speechless.auth.dto.*;
+import speechless.auth.infra.kakao.config.KaKaoCredentials;
 import speechless.auth.support.JwtProvider;
 import speechless.auth.support.SpeechlessTokenExtractor;
 import speechless.member.application.MemberQueryService;
@@ -18,19 +19,20 @@ import speechless.member.domain.Member;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "카카오 OAuth", description = "카카오 로그인 API")
 public class AuthController {
     private final JwtProvider jwtProvider;
     private final AuthServiceFacade authServiceFacade;
     private final MemberQueryService memberQueryService;
-
+    private final KaKaoCredentials kaKaoCredentials;
     @Operation(summary = "로그인", description = "카카오 로그인")
-    @PostMapping("/login")
+    @PostMapping("/login/{provider}")
     public ResponseEntity<LoginResponse> login(
             @Parameter(description = "인가 코드", required = true, schema = @Schema(type = "string")) @RequestParam("code") String authCode,
-            @Parameter(description = "리다이렉트 URI", required = true, schema = @Schema(type = "string"))@RequestParam("redirect-uri") String redirectUri
+            @PathVariable String provider
     ) {
-        TokenDto tokenDto = authServiceFacade.login(authCode, redirectUri);
+        TokenDto tokenDto = authServiceFacade.login(authCode, kaKaoCredentials.getRedirectUri(), provider);
 
         String memberId = jwtProvider.getPayload(tokenDto.accessToken());
         Member member = memberQueryService.findById(Long.valueOf(memberId));
@@ -54,10 +56,11 @@ public class AuthController {
     }
 
     @Operation(summary = "사용자 상세 정보 조회", description = "사용자의 상세 정보를 조회")
-    @GetMapping
-    public ResponseEntity<AuthResponse> getMemberDetail(@Parameter(description = "인증 정보", required = true, schema = @Schema(implementation = AuthCredentials.class)) @Auth AuthCredentials authCredentials){
+    @GetMapping("/search")
+    public ResponseEntity<AuthResponse> getMemberDetail(@Auth AuthCredentials authCredentials){
         Member member = memberQueryService.findById(authCredentials.id());
         return ResponseEntity.ok(AuthResponse.of(member));
     }
+
 
 }
