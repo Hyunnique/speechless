@@ -16,7 +16,7 @@ export const GoogleCallback = () => {
 			return;
 		}
 
-		localAxios.post('/google/login', null, {
+		localAxios.post('/auth/login/google', null, {
 			params: { code }
 		})
 			.then(response => {

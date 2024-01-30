@@ -19,7 +19,7 @@ export const LoginPage = () => {
 	const naverAuth = () => {
 		location.href = `https://nid.naver.com/oauth2.0/authorize?client_id=${
 			import.meta.env.VITE_NAVER_CLIENT_ID
-		}&redirect_uri=${import.meta.env.VITE_NAVER_REDIRECT_URI}&state=${'RANDOM_STATE'}&response_type=code`;
+		}&redirect_uri=${import.meta.env.VITE_NAVER_REDIRECT_URI}&state=${'deer4'}&response_type=code`;
 	};
 
 	return (
