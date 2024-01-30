@@ -9,6 +9,8 @@ import { NaverCallback } from './containers/callback/NaverCallback.tsx';
 import { InterviewPage } from './containers/session/interview/InterviewPage.tsx';
 import { SpeechPage } from './containers/session/speech/SpeechPage.tsx';
 import { MyPage } from './containers/user/MyPage.tsx';
+import { SpeechListPage } from './containers/speech/SpeechListPage.tsx';
+import { SpeechDetailPage } from './containers/speech/SpeechDetailPage.tsx';
 
 export default function App() {
 	return (
@@ -19,6 +21,8 @@ export default function App() {
 						{/* 레이아웃이 필요한 페이지 */}
 						<Route path='/' element={<IndexPage />} />
 						<Route path='/login' element={<LoginPage />} />
+						<Route path='/SpeechList' element={<SpeechListPage />} />
+						<Route path='/SpeechDetail' element={<SpeechDetailPage />} />
 						<Route path='/mypage' element={<MyPage />} />
 					</Route>
 					<Route>
