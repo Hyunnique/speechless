@@ -33,12 +33,6 @@ export const MyPage = () => {
 
 				<div className='basis-3/5'>
 					<Card className='mx-2 bg-gray-50 border-2 mb-20'>
-						<div className='basis-4/5 m-5'>
-							<img
-								src='https://wcs.smartdraw.com/chart/img/basic-bar-graph.png?bn=15100111903'
-								alt='dummy graph'
-							/>
-						</div>
 						<div className='basis-1/5'>
 							<h5 className='text-xl font-semibold text-gray-800'>긍정적 감정</h5>
 							<p className='text-base text-gray-600'>
@@ -52,12 +46,6 @@ export const MyPage = () => {
 							</p>
 						</div>
 
-						<div className='basis-4/5 m-5'>
-							<img
-								src='https://wcs.smartdraw.com/chart/img/basic-bar-graph.png?bn=15100111903'
-								alt='dummy graph'
-							/>
-						</div>
 						<div className='basis-1/5'>
 							<h5 className='text-xl font-semibold text-gray-800'>발음</h5>
 							<p className='text-base text-gray-600'>

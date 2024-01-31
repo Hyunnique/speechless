@@ -12,6 +12,7 @@ import { MyPage } from './containers/user/MyPage.tsx';
 import { SpeechListPage } from './containers/speech/SpeechListPage.tsx';
 import { SpeechDetailPage } from './containers/speech/SpeechDetailPage.tsx';
 import { StatementWritePage } from './containers/statement/StatementWritePage.tsx';
+import { InterviewEnterPage } from './containers/session/interview/InterviewEnterPage.tsx';
 
 export default function App() {
 	return (
@@ -26,6 +27,7 @@ export default function App() {
 						<Route path='/SpeechDetail' element={<SpeechDetailPage />} />
 						<Route path='/mypage' element={<MyPage />} />
 						<Route path='/statement/write/:id?' element={<StatementWritePage />} />
+						<Route path='/interview' element={<InterviewEnterPage />} />
 					</Route>
 					<Route>
 						{/* 레이아웃이 필요없는 페이지 */}

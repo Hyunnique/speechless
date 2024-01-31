@@ -8,7 +8,6 @@ interface StatementForm extends Statement {
 	questions: { question: string; answer: string }[];
 }
 
-
 //id == -1: create 모드로 작동한다.
 //id != -1: update 모드로 작동한다.
 export const StatementWritePage: React.FC = () =>  {
@@ -89,77 +88,79 @@ export const StatementWritePage: React.FC = () =>  {
 	}
 
 	return (
-		<>
-			<h1 className="text-4xl font-bold leading-tight text-gray-900">자기소개서 편집</h1>
-			<Button className='bg-negative-200 mt-5' onClick={() => window.history.back()}>뒤로 가기</Button>
-				<div className='mt-5'>
-					<div className='space-y-6'>
-						<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>제목</p>
-						<TextInput className='w-1/2' value={formData.title} onChange={(e) => updateStringField('title', e.target.value)}/>
+		<div className='flex flex-col items-center justify-center'>
+			<div className='basis-4/5'>
+				<h1 className="text-4xl font-bold leading-tight text-gray-900">자기소개서 편집</h1>
+				<Button className='bg-negative-200 mt-5' onClick={() => window.history.back()}>뒤로 가기</Button>
+					<div className='mt-5'>
+						<div className='space-y-6'>
+							<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>제목</p>
+							<TextInput className='w-1/2' value={formData.title} onChange={(e) => updateStringField('title', e.target.value)}/>
 
-						<div className='grid grid-cols-3 gap-5 w-1/2'>
-							<div>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>기업 이름</p>
-								<TextInput value={formData.company} onChange={(e) => updateStringField('company', e.target.value)}/>
+							<div className='grid grid-cols-3 gap-5 w-1/2'>
+								<div>
+									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>기업 이름</p>
+									<TextInput value={formData.company} onChange={(e) => updateStringField('company', e.target.value)}/>
+								</div>
+								<div>
+									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>지원 포지션</p>
+									<TextInput value={formData.position} onChange={(e) => updateStringField('position', e.target.value)}/>
+								</div>
+								<div>
+									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>경력</p>
+									<TextInput value={formData.career} onChange={(e) => updateStringField('career', e.target.value)}/>
+								</div>
 							</div>
-							<div>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>지원 포지션</p>
-								<TextInput value={formData.position} onChange={(e) => updateStringField('position', e.target.value)}/>
-							</div>
-							<div>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>경력</p>
-								<TextInput value={formData.career} onChange={(e) => updateStringField('career', e.target.value)}/>
-							</div>
-						</div>
 
-						<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>자기소개서</p>
-						{formData.questions.map((_, index) => (
-							<div key={index} className='p-3 bg-primary-50'>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>문항</p>
-								<TextInput
-									id={`question-${index}`}
-									value={formData.questions[index].question}
+							<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>자기소개서</p>
+							{formData.questions.map((_, index) => (
+								<div key={index} className='p-3 bg-primary-50'>
+									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>문항</p>
+									<TextInput
+										id={`question-${index}`}
+										value={formData.questions[index].question}
+											onChange={(e) => {
+												const newQuestions = formData.questions.map((q, idx) =>
+													idx === index ? { ...q, question: e.target.value } : q
+												);
+												setFormData({ ...formData, questions: newQuestions });
+											}}
+									/>
+									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>답변</p>
+									<Textarea
+										id={`answer-${index}`}
+										value={formData.questions[index].answer}
 										onChange={(e) => {
 											const newQuestions = formData.questions.map((q, idx) =>
-												idx === index ? { ...q, question: e.target.value } : q
+												idx === index ? { ...q, answer: e.target.value } : q
 											);
 											setFormData({ ...formData, questions: newQuestions });
 										}}
-								/>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>답변</p>
-								<Textarea
-									id={`answer-${index}`}
-									value={formData.questions[index].answer}
-									onChange={(e) => {
-										const newQuestions = formData.questions.map((q, idx) =>
-											idx === index ? { ...q, answer: e.target.value } : q
-										);
-										setFormData({ ...formData, questions: newQuestions });
-									}}
-									className='h-40'
-								/>
-								{formData.questions.length > 1 && (
-									<div className="flex justify-end">
-										<Button onClick={() => removeQuestion(index)} className='bg-negative-300 mt-2'>
-											삭제
-										</Button>
-									</div>
-								)}
+										className='h-40'
+									/>
+									{formData.questions.length > 1 && (
+										<div className="flex justify-end">
+											<Button onClick={() => removeQuestion(index)} className='bg-negative-300 mt-2'>
+												삭제
+											</Button>
+										</div>
+									)}
+								</div>
+							))}
+							<div className="flex justify-end">
+								<Button className='bg-primary-300' onClick={addQuestion}>
+									문항 추가
+								</Button>
 							</div>
-						))}
-						<div className="flex justify-end">
-							<Button className='bg-primary-300' onClick={addQuestion}>
-								문항 추가
-							</Button>
 						</div>
 					</div>
+					
+				<div className="flex justify-end mt-10">
+					<Button className='bg-positive-300' onClick={id ? updateStatement: createStatement}>
+						저장
+					</Button>
 				</div>
-				
-			<div className="flex justify-end mt-10">
-				<Button className='bg-positive-300' onClick={id ? updateStatement: createStatement}>
-					저장
-				</Button>
 			</div>
-		</>
+		</div>
 	);
 };
