@@ -77,7 +77,11 @@ public class StatementRepositoryTest {
         list = repository.findAllByMemberId(1L,
             PageRequest.of(0, 1));
 
+<<<<<<< HEAD
         Assertions.assertThat(list.getTotalPages()).isSameAs(tn + 2);
+=======
+        Assertions.assertThat(Long.valueOf(list.getTotalPages())).isSameAs(tn + 2);
+>>>>>>> hotfix/statement_test
         Assertions.assertThat(list.getNumber()).isSameAs(0);
         Assertions.assertThat(list.getSize()).isSameAs(1);
     }
@@ -96,7 +100,11 @@ public class StatementRepositoryTest {
 
         repository.save(statement);
 
+<<<<<<< HEAD
         Statement result = repository.findByMemberIdAndId(1L, statement.getId())
+=======
+        Statement result = repository.findByMemberIdAndId(statement.getMemberId(), statement.getId())
+>>>>>>> hotfix/statement_test
             .orElseThrow(() -> new SpeechlessException(new ErrorCode(
                 HttpStatus.INTERNAL_SERVER_ERROR, "자기소개서를 찾을 수 없습니다")));
 

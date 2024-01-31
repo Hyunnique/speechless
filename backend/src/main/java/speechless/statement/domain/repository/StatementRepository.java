@@ -12,12 +12,10 @@ public interface StatementRepository extends JpaRepository<Statement, Long> {
 
     Page<Statement> findAllByMemberId(Long memberId, Pageable pageable);
 
-    @Query(value = "SELECT s FROM Member m "
-        + "JOIN Statement s "
-        + "ON s.memberId = m.id "
-        + "AND m.id = :memberId "
-        + "AND s.id = :id "
-        + "JOIN s.questions ")
+    @Query(value = "SELECT s FROM Statement s "
+        + "JOIN s.questions "
+        + "ON s.memberId = :memberId "
+        + "AND s.id = :id ")
     Optional<Statement> findByMemberIdAndId(Long memberId, Long id);
 
 }
