@@ -15,6 +15,8 @@ public class StatementResponse {
 
     private Long id;
 
+    private Long memberId;
+
     private String title;
 
     private String company;

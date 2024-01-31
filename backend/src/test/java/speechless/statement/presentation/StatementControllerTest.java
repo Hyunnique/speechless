@@ -1,5 +1,6 @@
 package speechless.statement.presentation;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,5 +55,25 @@ public class StatementControllerTest {
             .content(objectMapper.writeValueAsString(statementRequest))
             .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("자기소개서 리스트")
+    void getStatements() throws Exception {
+
+        mvc.perform(get("/statements")
+                .param("pageSize", "1")
+                .param("pageNum", "1")
+            .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("자기소개서 상세보기")
+    void getStatement() throws Exception {
+
+        mvc.perform(get("/statements/1")
+            .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 }
