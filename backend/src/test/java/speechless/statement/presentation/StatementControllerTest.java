@@ -6,23 +6,45 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import speechless.statement.application.StatementService;
 import speechless.statement.application.dto.request.StatementQuestionRequest;
 import speechless.statement.application.dto.request.StatementRequest;
 
 // Controller 테스트
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class StatementControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Mock
+    private StatementService service;
+
+    @InjectMocks
+    private StatementController controller;
+
+    @BeforeEach
+    public void init() { // mockMvc 초기화, 각메서드가 실행되기전에 초기화 되게 함
+        mvc = MockMvcBuilders.standaloneSetup(controller).build();
+        //  standaloneMockMvcBuilder() 호출하고 스프링 테스트의 설정을 커스텀하여 mockMvc 객체 생성
+    }
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -62,8 +84,8 @@ public class StatementControllerTest {
     void getStatements() throws Exception {
 
         mvc.perform(get("/statements")
-                .param("pageSize", "1")
-                .param("pageNum", "1")
+            .param("pageSize", "1")
+            .param("pageNum", "1")
             .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
     }
@@ -76,4 +98,5 @@ public class StatementControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
     }
+
 }
