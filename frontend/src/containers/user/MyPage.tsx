@@ -2,33 +2,31 @@ import React from 'react';
 import { Button, Card, Avatar} from 'flowbite-react';
 import { StatementView } from '../statement/StatementView';
 import { InterviewReportView } from '../report/InterviewReportView';
+import { useAuthStore } from '../../stores/auth';
 
 export const MyPage = () => {
+	const authStore = useAuthStore();
+
 	return (
 		<>
-			<div className='flex flex-wrap w-3/5 p-5 gap-5 border-2 rounded-3xl mx-auto'>
+			<div className='flex flex-wrap w-5/6 p-5 gap-5 border-2 rounded-3xl mx-auto'>
 				<div className='basis-1/3'>
 					<Card className='mx-2 bg-gray-50 border-2 mb-20'>
 						<div>
 							<Avatar
-								img='https://flowbite.com/docs/images/people/profile-picture-5.jpg'
+								img={authStore.profileImage}
+								alt='https://flowbite.com/docs/images/people/profile-picture-5.jpg'
 								size='xl'
 								rounded
 							></Avatar>
 						</div>
 						<div>
-							<h5 className='text-2xl font-bold tracking-widest text-gray-900'>한태희</h5>
-							<p className='font-normal text-gray-700 dark:text-gray-400'>아이디: xotpqnd</p>
-							<p className='font-normal text-gray-700 dark:text-gray-400'>이메일: xotpqnd@gmail.com</p>
+							<h5 className='text-2xl font-bold tracking-widest text-gray-900'>{authStore.name}</h5>
+							<p className='font-normal text-gray-700 dark:text-gray-400'>아이디: {authStore.id}</p>
+							<p className='font-normal text-gray-700 dark:text-gray-400'>이메일: {authStore.email}</p>
 						</div>
 
 						<div className='flex w-full justify-center gap-4 py-4'>
-							<Button
-								size='sm'
-								className='transition-transform ease-in-out duration-300 bg-gray-400 hover:-translate-y-1 hover:scale-110 hover:bg-negative-700 text-white font-bold py-2 px-4 rounded-md shadow-lg'
-							>
-								회원 탈퇴
-							</Button>
 						</div>
 					</Card>
 				</div>
@@ -76,7 +74,7 @@ export const MyPage = () => {
 				</div>
 			</div>
 
-			{/* <div className='items-center w-3/5 p-24 m-5 border-2 rounded-3xl mx-auto'>
+			{/* <div className='items-center w-5/6 p-24 m-5 border-2 rounded-3xl mx-auto'>
 				<p className='text-2xl ml-4 mb-4'>해야할 스피치 연습</p>
 				<List>
 					{MyPageData.map((item, idx) => (
@@ -85,7 +83,7 @@ export const MyPage = () => {
 				</List>
 			</div>
 
-			<div className='items-center w-3/5 p-24 m-5 border-2 rounded-3xl mx-auto'>
+			<div className='items-center w-5/6 p-24 m-5 border-2 rounded-3xl mx-auto'>
 				<p className='text-2xl ml-4 mb-4'>완료한 스피치 연습</p>
 				<List>
 					{MyPageData.map((item, idx) => (
@@ -94,14 +92,23 @@ export const MyPage = () => {
 				</List>
 			</div> */}
 
-			<div className='items-center w-3/5 p-12 m-5 border-2 rounded-3xl mx-auto'>
+			<div className='items-center w-5/6 p-12 m-5 border-2 rounded-3xl mx-auto'>
 				<p className='text-2xl ml-4 mb-4'>면접 사전 정보 관리</p>
 				<StatementView/>
 			</div>
 
-			<div className='items-center w-3/5 p-12 m-5 border-2 rounded-3xl mx-auto'>
+			<div className='items-center w-5/6 p-12 m-5 border-2 rounded-3xl mx-auto'>
 				<p className='text-2xl ml-4 mb-4'>완료한 면접 연습</p>
 				<InterviewReportView/>
+			</div>
+
+			<div className="flex justify-end">
+				<Button
+					size='sm'
+					className='transition-transform ease-in-out duration-300 bg-gray-200 hover:-translate-y-1 hover:scale-110 hover:bg-negative-700 text-white font-bold py-2 px-4 rounded-md shadow-lg'
+				>
+					회원 탈퇴
+				</Button>
 			</div>
 		</>
 	);
