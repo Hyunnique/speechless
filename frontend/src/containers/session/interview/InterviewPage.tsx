@@ -25,8 +25,8 @@ export const InterviewPage = () => {
 
 	const getToken = async () => {
 		sessionId = await requestSessionId();
-		//const realSessionId = await createSession('test_session');
-		return await createToken('ses_PflJTNJqWb');
+		const realSessionId = await createSession(sessionId);
+		return await createToken(realSessionId);
 	}
 
 	// BE에서 unique한 sessionId를 생성해줌
