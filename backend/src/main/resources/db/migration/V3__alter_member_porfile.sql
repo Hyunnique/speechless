@@ -1,0 +1,1 @@
+ALTER TABLE speechless.member MODIFY profile VARCHAR(150);
