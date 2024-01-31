@@ -12,20 +12,20 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import speechless.session.openVidu.application.SessionIdService;
 
 @OpenAPIDefinition(tags = @Tag(name = "OpenViduController", description = "OpenVidu를 사용하여 비디오 세션을 관리하는 API. 세션 초기화, 연결 생성 및 고유 세션 ID 생성 기능을 제공합니다."))
 @CrossOrigin(origins = "*")
@@ -41,9 +41,6 @@ public class OpenViduController {
 
     private OpenVidu openvidu;
 
-    @Autowired
-    private SessionIdService sessionIdService;
-
     @PostConstruct
     public void init() {
         this.openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
@@ -53,7 +50,7 @@ public class OpenViduController {
     @Operation(summary = "새로운 비디오 세션을 초기화합니다.",
         description = "필요한 경우 세션 설정을 포함하여 새로운 비디오 세션을 생성합니다.")
     @ApiResponse(responseCode = "200", description = "새로운 세션 ID를 반환합니다.")
-    @ApiResponse(responseCode = "401", description = "인증 실패, 비밀번호 불일치")
+    @ApiResponse(responseCode = "400", description = "세션 옵션에서 문제가 발생했습니다.")
     public ResponseEntity<String> initializeSession(
         @RequestBody(required = false) @Parameter(description = "세션 생성에 사용될 설정 값. 옵션으로 지정 가능.") Map<String, Object> params)
         throws OpenViduJavaClientException, OpenViduHttpException {
@@ -62,12 +59,24 @@ public class OpenViduController {
         return new ResponseEntity<>(session.getSessionId(), HttpStatus.OK);
     }
 
+    @DeleteMapping("/sessions/{sessionId}")
+    @Operation(summary = "세션을 닫습니다.",
+        description = "지정된 세션 ID를 갖는 세션을 닫습니다.")
+    @ApiResponse(responseCode = "204", description = "세션이 성공적으로 닫혔습니다.")
+    @ApiResponse(responseCode = "404", description = "세션을 찾을 수 없습니다.")
+    public ResponseEntity<Void> deleteSession(@PathVariable("sessionId") String sessionId)
+        throws OpenViduJavaClientException, OpenViduHttpException {
+        Session session = openvidu.getActiveSession(sessionId);
+        session.close();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @PostMapping("/sessions/{sessionId}/connections")
     @Operation(summary = "지정된 세션 ID에 대한 새로운 연결을 생성합니다.",
         description = "지정된 세션에 참여할 수 있는 새로운 연결을 생성합니다.")
     @ApiResponse(responseCode = "200", description = "새로운 연결 토큰을 반환합니다.")
     @ApiResponse(responseCode = "404", description = "세션을 찾을 수 없습니다.")
-    public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId,
+    public ResponseEntity<Map> createConnection(@PathVariable("sessionId") String sessionId,
         @RequestBody(required = false) @Parameter(description = "연결 생성에 사용될 설정 값. 옵션으로 지정 가능.") Map<String, Object> params)
         throws OpenViduJavaClientException, OpenViduHttpException {
         Session session = openvidu.getActiveSession(sessionId);
@@ -76,16 +85,24 @@ public class OpenViduController {
         }
         ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
         Connection connection = session.createConnection(properties);
-        return new ResponseEntity<>(connection.getToken(), HttpStatus.OK);
+        Map<String, String> connectionInfo = new HashMap<>();
+        connectionInfo.put("Token", connection.getToken());
+        connectionInfo.put("ConnectionId", connection.getConnectionId());
+        return new ResponseEntity<>(connectionInfo, HttpStatus.OK);
     }
 
-    @PostMapping("/session-id")
-    @Operation(summary = "고유한 세션 ID를 생성합니다.",
-        description = "새로운 고유한 세션 ID를 생성합니다.")
-    @ApiResponse(responseCode = "201", description = "생성된 고유 세션 ID를 반환합니다.")
-    public ResponseEntity<String> sessionId() {
-        String uuid = sessionIdService.createUuid();
-        return new ResponseEntity<>(uuid, HttpStatus.CREATED);
+    @DeleteMapping("/sessions/{sessionId}/connection/{connectionId}")
+    @Operation(summary = "지정된 세션 ID의 connection ID에 대한 연결을 제거합니다.",
+        description = "지정된 세션에서 지정된 연결을 제거합니다.")
+    @ApiResponse(responseCode = "204", description = "연결이 성공적으로 제거되었습니다.")
+    @ApiResponse(responseCode = "400", description = "세션을 찾을 수 없습니다.")
+    @ApiResponse(responseCode = "404", description = "연결을 찾을 수 없습니다.")
+    public ResponseEntity<Void> deleteConnection(@PathVariable("sessionId") String sessionId,
+        @PathVariable("connectionId") String connectionId)
+        throws OpenViduJavaClientException, OpenViduHttpException {
+        Session session = openvidu.getActiveSession(sessionId);
+        session.forceDisconnect(connectionId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @ExceptionHandler(OpenViduJavaClientException.class)
