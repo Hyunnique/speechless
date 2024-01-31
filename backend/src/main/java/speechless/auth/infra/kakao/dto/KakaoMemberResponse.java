@@ -59,7 +59,7 @@ public class KakaoMemberResponse implements OAuthMemberResponse {
 
     @Override
     public Member toMember() {
-        return Member.builder().name(getNickName()).email(getEmail()).profile(getPicture())
+        return Member.builder().name(getNickName()).email(getEmail()).profile(getPicture()).memberType(getMemberType())
                 .build();
     }
 

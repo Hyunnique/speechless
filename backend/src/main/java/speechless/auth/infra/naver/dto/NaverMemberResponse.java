@@ -50,7 +50,7 @@ public class NaverMemberResponse implements OAuthMemberResponse {
 
     @Override
     public Member toMember() {
-        return Member.builder().name(getNickName()).email(getEmail()).profile(getPicture()).build();
+        return Member.builder().name(getNickName()).email(getEmail()).profile(getPicture()).memberType(getMemberType()).build();
     }
 
     @Override

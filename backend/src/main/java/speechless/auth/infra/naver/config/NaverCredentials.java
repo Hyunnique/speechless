@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@ConfigurationProperties(prefix = "oauth.kakao")
+@ConfigurationProperties(prefix = "oauth.naver")
 public class NaverCredentials {
     private final String clientId;
     private final String redirectUri;

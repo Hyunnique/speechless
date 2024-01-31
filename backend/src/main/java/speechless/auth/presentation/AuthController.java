@@ -20,13 +20,13 @@ import speechless.member.domain.Member;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@Tag(name = "카카오 OAuth", description = "카카오 로그인 API")
+@Tag(name = "OAuth 2.0", description = "로그인 API")
 public class AuthController {
     private final JwtProvider jwtProvider;
     private final AuthServiceFacade authServiceFacade;
     private final MemberQueryService memberQueryService;
     private final KaKaoCredentials kaKaoCredentials;
-    @Operation(summary = "로그인", description = "카카오 로그인")
+    @Operation(summary = "로그인", description = "로그인")
     @PostMapping("/login/{provider}")
     public ResponseEntity<LoginResponse> login(
             @Parameter(description = "인가 코드", required = true, schema = @Schema(type = "string")) @RequestParam("code") String authCode,
@@ -48,7 +48,7 @@ public class AuthController {
         return ResponseEntity.ok(AccessTokenResponse.from(accessToken));
     }
 
-    @Operation(summary = "로그아웃", description = "사용자 로그아웃 처리")
+    @Operation(summary = "로그아웃", description = "로그아웃 처리")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@Parameter(description = "인증 정보", required = true, schema = @Schema(implementation = AuthCredentials.class)) @Auth AuthCredentials authCredentials){
         authServiceFacade.logout(authCredentials.id());
