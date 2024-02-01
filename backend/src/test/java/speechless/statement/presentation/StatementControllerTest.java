@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import speechless.auth.presentation.JwtArgumentResolver;
 import speechless.statement.application.StatementService;
 import speechless.statement.application.dto.request.StatementQuestionRequest;
 import speechless.statement.application.dto.request.StatementRequest;
@@ -40,6 +40,9 @@ public class StatementControllerTest {
 
     @Mock
     private StatementService service;
+
+    @Mock
+    private JwtArgumentResolver jwtArgumentResolver;
 
     @InjectMocks
     private StatementController controller;

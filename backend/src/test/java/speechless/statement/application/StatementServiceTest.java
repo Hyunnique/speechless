@@ -12,9 +12,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import speechless.auth.dto.AuthCredentials;
+import speechless.auth.support.JwtProvider;
 import speechless.statement.application.dto.response.StatementListResponse;
 import speechless.statement.application.dto.response.StatementResponse;
 import speechless.statement.domain.Statement;
@@ -29,6 +32,8 @@ public class StatementServiceTest {
 
     @InjectMocks
     private StatementService service;
+
+    private final AuthCredentials authCredentials = new AuthCredentials(1L);
 
     @Test
     @DisplayName("자기소개서 입력 서비스 테스트")
@@ -63,7 +68,7 @@ public class StatementServiceTest {
             )).thenReturn(new PageImpl<>(statementList));
 
         // when
-        StatementListResponse response = service.getStatements(1, 1);
+        StatementListResponse response = service.getStatements(1, 1, authCredentials);
 
         Assertions.assertThat(response.statements().size()).isSameAs(1);
         Assertions.assertThat(response.currentPage()).isSameAs(1);
@@ -87,26 +92,26 @@ public class StatementServiceTest {
             .findByMemberIdAndId(1L, 1L))
             .thenReturn(Optional.of(statement));
 
-        StatementResponse response = service.getStatement(1L);
+        StatementResponse response = service.getStatement(1L, authCredentials);
 
         Assertions.assertThat(response.getId()).isSameAs(1L);
 
     }
-    
+
     @Test
     @DisplayName("자기소개서 삭제 테스트")
     public void deleteStatement() {
-        
+
         // 삭제는 별도 로직이 없으므로 로그인 유저 검증 추가되면 체크
-        
+
     }
 
     @Test
     @DisplayName("자기소개서 수정 테스트")
     public void updateStatement() {
-        
+
         // 수정은 별도 로직이 없으므로 로그인 유저 검증 추가 후 체크
-        
+
     }
 
 }

@@ -1,6 +1,5 @@
 package speechless.statement.domain.repository;
 
-import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

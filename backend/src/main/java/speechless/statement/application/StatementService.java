@@ -1,12 +1,12 @@
 package speechless.statement.application;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import speechless.auth.dto.AuthCredentials;
 import speechless.statement.application.dto.request.StatementRequest;
 import speechless.statement.application.dto.request.StatementUpdateRequest;
 import speechless.statement.application.dto.response.StatementListResponse;
@@ -16,6 +16,7 @@ import speechless.statement.domain.StatementQuestion;
 import speechless.statement.domain.mapper.StatementMapper;
 import speechless.statement.domain.mapper.StatementQuestionMapper;
 import speechless.statement.domain.repository.StatementRepository;
+import speechless.statement.excepiton.NotAllowedStatementException;
 import speechless.statement.excepiton.StatementNotFoundException;
 
 @Service
@@ -26,12 +27,12 @@ public class StatementService {
     private final StatementRepository statementRepository;
 
     @Transactional
-    public StatementResponse createStatement(StatementRequest request) {
+    public StatementResponse createStatement(StatementRequest request,
+        AuthCredentials authCredentials) {
 
-        // TODO : 로그인 회원 입력 처리
         // request 처리
         Statement statement = StatementMapper.INSTANCE
-            .toEntity(request).toBuilder().memberId(1L).build();
+            .toEntity(request).toBuilder().memberId(authCredentials.id()).build();
 
         if (statement.isQuestionEmpty()) {
             createStatementQuestions(request, statement);
@@ -55,12 +56,12 @@ public class StatementService {
         );
     }
 
-    public StatementListResponse getStatements(int pageSize, int pageNum) {
+    public StatementListResponse getStatements(int pageSize, int pageNum,
+        AuthCredentials authCredentials) {
 
-        // TODO : member Id 추가
         // 인덱스 값 descending 정렬 => 최신순
         Page<Statement> statements = statementRepository
-            .findAllByMemberId(1L, PageRequest.of(pageNum - 1, pageSize,
+            .findAllByMemberId(authCredentials.id(), PageRequest.of(pageNum - 1, pageSize,
                 Sort.by("id").descending()));
 
         // response 파싱
@@ -70,36 +71,41 @@ public class StatementService {
             responsePage.getTotalPages() + 1, responsePage.getTotalElements());
     }
 
-    public StatementResponse getStatement(Long id) {
+    public StatementResponse getStatement(Long id, AuthCredentials authCredentials) {
 
-        // TODO : Member id 추가
-        Statement statement = statementRepository.findByMemberIdAndId(1L, id)
+        Statement statement = statementRepository.findByMemberIdAndId(authCredentials.id(), id)
             .orElseThrow(StatementNotFoundException::new);
 
         return StatementMapper.INSTANCE.toResponse(statement);
     }
 
     @Transactional
-    public void deleteStatement(Long id) {
+    public void deleteStatement(Long id, AuthCredentials authCredentials) {
+
         Statement statement = statementRepository.findById(id)
             .orElseThrow(StatementNotFoundException::new);
 
-        // TODO : 유저 id 확인 로직 추가
+        if (!authCredentials.id().equals(statement.getMemberId())) {
+            throw new NotAllowedStatementException();
+        }
 
         statementRepository.delete(statement);
     }
 
 
     @Transactional
-    public StatementResponse updateStatement(StatementUpdateRequest request) {
+    public StatementResponse updateStatement(StatementUpdateRequest request,
+        AuthCredentials authCredentials) {
 
         Statement statement = statementRepository.findById(request.getId())
             .orElseThrow(StatementNotFoundException::new);
 
-        // TODO : Member id 검증 추가
+        if (!authCredentials.id().equals(statement.getMemberId())) {
+            throw new NotAllowedStatementException();
+        }
 
         Statement updateStatement = StatementMapper.INSTANCE
-            .toEntity(request).toBuilder().memberId(1L).build();
+            .toEntity(request).toBuilder().memberId(authCredentials.id()).build();
 
         request.getQuestions().forEach(
             (questionRequest) -> {
