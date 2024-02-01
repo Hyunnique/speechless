@@ -1,18 +1,28 @@
 import { Button, Card, Checkbox, Label, TextInput, Select, Dropdown } from 'flowbite-react';
-import { Calendar } from './Calendar.tsx';
 import React from 'react';
 import { Datepicker } from 'flowbite-react';
-import { useEffect, useState } from 'react';
-
+import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 export const SpeechSearch = ( ) => {
+    const navigate = useNavigate();
+
+    const createSpeech = async () => {
+        navigate('/speech/write');
+    };
+
     return (
         <>
             <Card className='max-w-full md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl'>
+                <div className="flex justify-end">
+                    <button onClick={createSpeech} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        모집하기
+                    </button>
+                </div>
                 <form className='flex flex-col gap-4'>
                     <div>검색</div>
                     <Select className="border-black">
-                        <option>제목</option>
+                    <option>제목</option>
                         <option>France</option>
                         <option>Canada</option>
                         <option>Germany</option>
@@ -20,10 +30,10 @@ export const SpeechSearch = ( ) => {
                     <div className="flex items-center bg-white rounded px-1 py-1">
                         <input
                             type="text"
-                            className="flex-grow px-2 py-1 rounded" // 수정된 부분: 'px-2'로 패딩 값 지정
+                            className="flex-grow px-2 py-1 rounded "
                             placeholder="Search..."
                         />
-                        <button className="bg-positive-200 text-white px-4 py-1 rounded">
+                        <button className="ml-2 bg-positive-200 text-white px-1 py-1 rounded">
                             Search
                         </button>
                     </div>

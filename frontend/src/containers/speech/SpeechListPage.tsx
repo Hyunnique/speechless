@@ -3,9 +3,10 @@ import { SpeechSearch } from '../../components/SpeechSearch';
 import { RecruitCard } from '../../components/RecruitCard';
 import { CommunityView } from '../../types/Community.ts';
 import { useLocalAxios } from '../../utils/axios.ts';
+import {Link} from "react-router-dom";
 
 const awaitingSpeechSessions: CommunityView[] = [
-      //향후, Custom hook으로 변환, useEffect 정리, 스크롤 바가 밀리는 현상 해결해야함(SpeechSearch 컴포넌트 플로팅이 이유로 추정)
+      //향후, Custom hook으로 변환 useEffect 정리, 스크롤 바가 밀리는 현상 해결해야함(SpeechSearch 컴포넌트 플로팅이 이유로 추정)=>일단 해결..
     {
         id: 1,
         writer: '김민수',
@@ -188,7 +189,8 @@ export const SpeechListPage = () => {
                 setSpeechSessions(res.data);
             })
             .catch((err) => {
-                setSpeechSessions(awaitingSpeechSessions.slice(0, 6));
+                console.log("err");
+                setSpeechSessions(awaitingSpeechSessions.slice(0, 9));
             });
     }, []);
 
@@ -199,7 +201,7 @@ export const SpeechListPage = () => {
             if (firstEntry.isIntersecting) {
                 loadMoreSpeechSessions();
             }
-        }, { threshold: 1.0 });
+        }, { threshold: 0.5 });
 
         if (loadingRef.current) {
             observer.observe(loadingRef.current);
@@ -230,9 +232,11 @@ export const SpeechListPage = () => {
                         <SpeechSearch></SpeechSearch>
                     </div>
                 </div>
-                <div className="grid xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
+                <div className="ml-4 grid xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
                     {speechSessions.map((session) => (
-                        <RecruitCard key={session.id} session={session} />
+                        <Link to={`/speech/${session.id}`} key={session.id}>
+                            <RecruitCard session={session}/>
+                        </Link>
                     ))}
                     <div ref={loadingRef}>Loading...</div>
                 </div>

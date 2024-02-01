@@ -14,7 +14,7 @@ import { SpeechDetailPage } from './containers/speech/SpeechDetailPage.tsx';
 import { StatementWritePage } from './containers/statement/StatementWritePage.tsx';
 import { InterviewEnterPage } from './containers/session/interview/InterviewEnterPage.tsx';
 import { StatementDetailPage } from './containers/statement/StatementDetailPage.tsx';
-
+import {SpeechCreatePage} from "./containers/speech/SpeechCreatePage.tsx";
 export default function App() {
 	return (
 		<>
@@ -24,8 +24,9 @@ export default function App() {
 						{/* 레이아웃이 필요한 페이지 */}
 						<Route path='/' element={<IndexPage />} />
 						<Route path='/login' element={<LoginPage />} />
-						<Route path='/SpeechList' element={<SpeechListPage />} />
-						<Route path='/SpeechDetail' element={<SpeechDetailPage />} />
+						<Route path='/speech' element={<SpeechListPage />} />
+						<Route path='/speech/:id' element={<SpeechDetailPage />} />
+						<Route path='/speech/write' element={<SpeechCreatePage />} />
 						<Route path='/mypage' element={<MyPage />} />
 						<Route path='/statement/write/:id?' element={<StatementWritePage />} />
 						<Route path='/statement/detail/:id' element={<StatementDetailPage />} />

@@ -1,33 +1,82 @@
 import React, { useEffect, useState } from 'react';
 import {CommunityView} from "../../types/Community.ts";
+import { useParams } from 'react-router-dom';
+import { useLocalAxios } from '../../utils/axios';
 
-// 더미 데이터 예시
-const detailData = {
-  id: 1,
-  writer: '김민수',
-  category: 'IT',
-  title: 'IT 자유주제 5분 스피치',
-  content: '스피치 세션에 대한 세부 정보~',
-  currentParticipants: 4,
-  maxParticipants: 8,
-  deadline: new Date('2024-01-31'),
-  sessionStart: new Date('2024-01-31'),
-  invisible: false,
-  private: false,
-  createdAt: new Date('2024-01-01'),
-  views: 1001
-};
+const dummyDetailData: CommunityView[] = [
+  {
+    id: 1,
+    writer: '김민수',
+    category: 'IT',
+    title: 'IT 자유주제 5분 스피치',
+    content: '스피치 세션에 대한 세부 정보~',
+    currentParticipants: 4,
+    maxParticipants: 8,
+    deadline: new Date('2024-01-31'),
+    sessionStart: new Date('2024-01-31'),
+    invisible: false,
+    private: false,
+    createdAt: new Date('2024-01-01'),
+},
+  {
+    id: 2,
+    writer: '김민수',
+    category: 'IT',
+    title: 'IT 자유주제 5분 스피치',
+    content: '스피치 세션에 대한 세부 정보~',
+    currentParticipants: 4,
+    maxParticipants: 8,
+    deadline: new Date('2024-01-31'),
+    sessionStart: new Date('2024-01-31'),
+    invisible: false,
+    private: false,
+    createdAt: new Date('2024-01-01'),
+  },
+  {
+    id: 3,
+    writer: '김민수',
+    category: 'IT',
+    title: 'IT 자유주제 5분 스피치',
+    content: '스피치 세션에 대한 세부 정보~',
+    currentParticipants: 4,
+    maxParticipants: 8,
+    deadline: new Date('2024-01-31'),
+    sessionStart: new Date('2024-01-31'),
+    invisible: false,
+    private: false,
+    createdAt: new Date('2024-01-01'),
+  }
+]
+
 
 export const SpeechDetailPage = () => {
-	// || null?
-  const [speechDetail, setSpeechDetail] = useState<CommunityView>(detailData);
+  const [speechDetail, setSpeechDetail] = useState<CommunityView | null>(null);
+  const { id } = useParams();
+  const localAxiosWithAuth = useLocalAxios();
 
   useEffect(() => {
-    setSpeechDetail(detailData);
+    if (id) {
+      localAxiosWithAuth.get(`/community/speechDetail/${id}`)
+          .then(res => {
+            setSpeechDetail(res.data);
+          })
+          .catch((err) => {
+            // 백엔드 연결이 실패 시 더미 사용
+            const detailData = dummyDetailData.find(item => item.id === parseInt(id));
+            if (detailData) {
+              setSpeechDetail(detailData);
+            } else {
+              console.error("Error: 데이터 없음");
+            }
+          });
+    }
   }, []);
 
+  if (!speechDetail) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <>
       <div className='bg-primary-50 font-sans leading-normal tracking-normal'>
         <div className='container max-w-4xl px-4 md:px-0 mx-auto pt-6 pb-8'>
           <div className='bg-white rounded shadow'>
@@ -37,7 +86,7 @@ export const SpeechDetailPage = () => {
                 <div className='flex gap-4 md:gap-10'>
                   <p className='text-sm md:text-base text-gray-600'>작성자: {speechDetail.writer}</p>
                   <p className='text-sm md:text-base text-gray-600'>작성일: {speechDetail.createdAt.toLocaleString()}</p>
-                  <p className='text-sm md:text-base text-gray-600'>조회수: {5}</p>
+                  <p className='text-sm md:text-base text-gray-600'>조회수: 5</p>
                 </div>
                 <button className='bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
                   발표 세션 이동
@@ -71,13 +120,10 @@ export const SpeechDetailPage = () => {
               <div className='mb-4'>
                 <h2 className='font-bold text-xl mb-2'>그룹 소개</h2>
                 <p className='text-gray-700'>{speechDetail.content}</p>
-				<br />
               </div>
-              {/* 여기에 추가적인 세션 내용이 들어갈 수 있습니다 */}
             </div>
           </div>
         </div>
       </div>
-    </>
   );
 };
