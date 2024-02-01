@@ -1,8 +1,10 @@
 package speechless.member.domain;
 
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.*;
 import speechless.common.entity.BaseTimeEntity;
+import speechless.statement.domain.Statement;
 
 import static lombok.AccessLevel.PROTECTED;
 import static lombok.EqualsAndHashCode.Include;
@@ -32,5 +34,10 @@ public class Member extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private MemberType memberType;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Statement> statement = null;
 
 }

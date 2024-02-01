@@ -7,6 +7,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import speechless.auth.dto.AuthCredentials;
+import speechless.member.domain.Member;
+import speechless.member.domain.repository.MemberRepository;
+import speechless.member.exception.MemberNotFoundException;
 import speechless.statement.application.dto.request.StatementRequest;
 import speechless.statement.application.dto.request.StatementUpdateRequest;
 import speechless.statement.application.dto.response.StatementListResponse;
@@ -26,13 +29,18 @@ public class StatementService {
 
     private final StatementRepository statementRepository;
 
+    private final MemberRepository memberRepository;
+
     @Transactional
     public StatementResponse createStatement(StatementRequest request,
         AuthCredentials authCredentials) {
 
+        Member loginMember = memberRepository.findById(authCredentials.id())
+            .orElseThrow(MemberNotFoundException::new);
+
         // request 처리
         Statement statement = StatementMapper.INSTANCE
-            .toEntity(request).toBuilder().memberId(authCredentials.id()).build();
+            .toEntity(request).toBuilder().member(loginMember).build();
 
         if (statement.isQuestionEmpty()) {
             createStatementQuestions(request, statement);
@@ -59,9 +67,14 @@ public class StatementService {
     public StatementListResponse getStatements(int pageSize, int pageNum,
         AuthCredentials authCredentials) {
 
+        Member loginMember = memberRepository.findById(authCredentials.id())
+            .orElseThrow(MemberNotFoundException::new);
+
+        System.out.println(authCredentials.id());
+
         // 인덱스 값 descending 정렬 => 최신순
         Page<Statement> statements = statementRepository
-            .findAllByMemberId(authCredentials.id(), PageRequest.of(pageNum - 1, pageSize,
+            .findAllByMember(loginMember, PageRequest.of(pageNum - 1, pageSize,
                 Sort.by("id").descending()));
 
         // response 파싱
@@ -73,7 +86,10 @@ public class StatementService {
 
     public StatementResponse getStatement(Long id, AuthCredentials authCredentials) {
 
-        Statement statement = statementRepository.findByMemberIdAndId(authCredentials.id(), id)
+        Member loginMember = memberRepository.findById(authCredentials.id())
+            .orElseThrow(MemberNotFoundException::new);
+
+        Statement statement = statementRepository.findByMemberAndId(loginMember, id)
             .orElseThrow(StatementNotFoundException::new);
 
         return StatementMapper.INSTANCE.toResponse(statement);
@@ -85,7 +101,7 @@ public class StatementService {
         Statement statement = statementRepository.findById(id)
             .orElseThrow(StatementNotFoundException::new);
 
-        if (!authCredentials.id().equals(statement.getMemberId())) {
+        if (!authCredentials.id().equals(statement.getMember().getId())) {
             throw new NotAllowedStatementException();
         }
 
@@ -97,15 +113,18 @@ public class StatementService {
     public StatementResponse updateStatement(StatementUpdateRequest request,
         AuthCredentials authCredentials) {
 
+        Member loginMember = memberRepository.findById(authCredentials.id())
+            .orElseThrow(MemberNotFoundException::new);
+
         Statement statement = statementRepository.findById(request.getId())
             .orElseThrow(StatementNotFoundException::new);
 
-        if (!authCredentials.id().equals(statement.getMemberId())) {
+        if (!authCredentials.id().equals(statement.getMember().getId())) {
             throw new NotAllowedStatementException();
         }
 
         Statement updateStatement = StatementMapper.INSTANCE
-            .toEntity(request).toBuilder().memberId(authCredentials.id()).build();
+            .toEntity(request).toBuilder().member(loginMember).build();
 
         request.getQuestions().forEach(
             (questionRequest) -> {
