@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLocalAxios } from "../../../utils/axios.ts";
 import { useInterviewSessionStore } from "../../../stores/session.ts";
 
-import TalkImg from '../../../assets/images/human_face.png';
+import TalkImg from '../../../assets/images/human_robot_talk.png';
 
 export const InterviewEnterPage = () => {
 
