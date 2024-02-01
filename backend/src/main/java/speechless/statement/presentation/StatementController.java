@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import speechless.statement.application.StatementService;
 import speechless.statement.application.dto.request.StatementRequest;
+import speechless.statement.application.dto.request.StatementUpdateRequest;
 import speechless.statement.application.dto.response.StatementListResponse;
 import speechless.statement.application.dto.response.StatementResponse;
 
@@ -49,6 +51,12 @@ public class StatementController {
     public ResponseEntity<Void> deleteStatement(@PathVariable("id") Long id) {
         statementService.deleteStatement(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("")
+    public ResponseEntity<StatementResponse> updateStatement(
+        @RequestBody StatementUpdateRequest request) {
+        return new ResponseEntity<>(statementService.updateStatement(request), HttpStatus.OK);
     }
 
 }

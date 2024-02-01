@@ -16,9 +16,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString.Include;
+import org.hibernate.annotations.DynamicUpdate;
 import speechless.common.entity.BaseTimeEntity;
 
 @Entity
+@DynamicUpdate
 @Table(name = "statement_question")
 @Getter
 @Builder(toBuilder = true)

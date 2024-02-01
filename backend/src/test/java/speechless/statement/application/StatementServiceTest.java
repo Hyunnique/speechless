@@ -101,4 +101,12 @@ public class StatementServiceTest {
         
     }
 
+    @Test
+    @DisplayName("자기소개서 수정 테스트")
+    public void updateStatement() {
+        
+        // 수정은 별도 로직이 없으므로 로그인 유저 검증 추가 후 체크
+        
+    }
+
 }

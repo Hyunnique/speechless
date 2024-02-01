@@ -1,5 +1,6 @@
 package speechless.statement.application;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import speechless.statement.application.dto.request.StatementRequest;
+import speechless.statement.application.dto.request.StatementUpdateRequest;
 import speechless.statement.application.dto.response.StatementListResponse;
 import speechless.statement.application.dto.response.StatementResponse;
 import speechless.statement.domain.Statement;
@@ -31,7 +33,7 @@ public class StatementService {
         Statement statement = StatementMapper.INSTANCE
             .toEntity(request).toBuilder().memberId(1L).build();
 
-        if (statement.getQuestions() != null) {
+        if (statement.isQuestionEmpty()) {
             createStatementQuestions(request, statement);
         }
 
@@ -48,7 +50,7 @@ public class StatementService {
                 StatementQuestion sq = StatementQuestionMapper.INSTANCE
                     .toEntity(question).toBuilder().statement(statement).build();
 
-                statement.getQuestions().add(sq);
+                statement.addQuestion(sq);
             }
         );
     }
@@ -85,6 +87,33 @@ public class StatementService {
         // TODO : 유저 id 확인 로직 추가
 
         statementRepository.delete(statement);
+    }
+
+
+    @Transactional
+    public StatementResponse updateStatement(StatementUpdateRequest request) {
+
+        Statement statement = statementRepository.findById(request.getId())
+            .orElseThrow(StatementNotFoundException::new);
+
+        // TODO : Member id 검증 추가
+
+        Statement updateStatement = StatementMapper.INSTANCE
+            .toEntity(request).toBuilder().memberId(1L).build();
+
+        request.getQuestions().forEach(
+            (questionRequest) -> {
+
+                StatementQuestion question = StatementQuestionMapper.INSTANCE.toEntity(
+                    questionRequest).toBuilder().statement(updateStatement).build();
+
+                updateStatement.addQuestion(question);
+            }
+        );
+
+        statement = updateStatement;
+        statementRepository.save(statement);
+        return StatementMapper.INSTANCE.toResponse(statement);
     }
 
 }

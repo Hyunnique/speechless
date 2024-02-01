@@ -3,6 +3,7 @@ package speechless.statement.presentation;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import speechless.statement.application.StatementService;
 import speechless.statement.application.dto.request.StatementQuestionRequest;
 import speechless.statement.application.dto.request.StatementRequest;
+import speechless.statement.application.dto.request.StatementUpdateRequest;
 
 // Controller 테스트
 @ExtendWith(MockitoExtension.class)
@@ -106,6 +109,20 @@ public class StatementControllerTest {
 
         mvc.perform(delete("/statements/1")
         ).andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("자기소개서 수정")
+    void updateStatement() throws Exception {
+
+        StatementUpdateRequest request = new StatementUpdateRequest(
+            1L, "제목", "회사", "직무", 0, null
+        );
+
+        mvc.perform(put("/statements")
+            .content(objectMapper.writeValueAsString(request))
+            .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 
 }

@@ -11,18 +11,22 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 import speechless.common.entity.BaseTimeEntity;
 import speechless.member.domain.Member;
 
 @Entity
+@DynamicUpdate
 @Table(name = "statement")
 @Getter
 @Builder(toBuilder = true)
@@ -57,7 +61,20 @@ public class Statement extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "statement", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC ")
     @Builder.Default
     private List<StatementQuestion> questions = new ArrayList<>();
+
+    public List<StatementQuestion> getQuestions() {
+        return Collections.unmodifiableList(questions);
+    }
+
+    public void addQuestion(StatementQuestion question) {
+        this.questions.add(question);
+    }
+
+    public Boolean isQuestionEmpty() {
+        return questions == null || questions.isEmpty();
+    }
 
 }

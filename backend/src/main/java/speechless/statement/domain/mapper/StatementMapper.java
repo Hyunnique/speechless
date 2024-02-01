@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import speechless.statement.application.dto.request.StatementRequest;
+import speechless.statement.application.dto.request.StatementUpdateRequest;
 import speechless.statement.application.dto.response.StatementResponse;
 import speechless.statement.domain.Statement;
 
@@ -16,6 +17,9 @@ public interface StatementMapper {
 
     @Mapping(target = "questions", ignore = true)
     Statement toEntity(StatementRequest request);
+
+    @Mapping(target = "questions", ignore = true)
+    Statement toEntity(StatementUpdateRequest request);
 
     StatementResponse toResponse(Statement statement);
 

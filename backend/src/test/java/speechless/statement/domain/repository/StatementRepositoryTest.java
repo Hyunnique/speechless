@@ -1,6 +1,8 @@
 package speechless.statement.domain.repository;
 
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +31,9 @@ public class StatementRepositoryTest {
 
     @Autowired
     private StatementRepository repository;
+
+    @Autowired
+    private StatementQuestionRepository questionRepository;
 
     @DisplayName("자기소개서 입력 테스트")
     @Test
@@ -77,7 +82,7 @@ public class StatementRepositoryTest {
         // when
         list = repository.findAllByMemberId(1L,
             PageRequest.of(0, 1));
-        
+
         Assertions.assertThat(Long.valueOf(list.getTotalPages())).isSameAs(tn + 2);
         Assertions.assertThat(list.getNumber()).isSameAs(0);
         Assertions.assertThat(list.getSize()).isSameAs(1);
@@ -97,7 +102,8 @@ public class StatementRepositoryTest {
 
         repository.save(statement);
 
-        Statement result = repository.findByMemberIdAndId(statement.getMemberId(), statement.getId())
+        Statement result = repository.findByMemberIdAndId(statement.getMemberId(),
+                statement.getId())
             .orElseThrow(() -> new SpeechlessException(new ErrorCode(
                 HttpStatus.INTERNAL_SERVER_ERROR, "자기소개서를 찾을 수 없습니다")));
 
@@ -107,7 +113,7 @@ public class StatementRepositoryTest {
 
     }
 
-    @DisplayName("자기소개서 상세 테스트")
+    @DisplayName("자기소개서 삭제 테스트")
     @Test
     @Transactional
     public void statementDeleteTest() {
@@ -121,6 +127,43 @@ public class StatementRepositoryTest {
         Optional<Statement> result = repository.findById(statement.getId());
 
         Assertions.assertThat(result.isPresent()).isFalse();
+    }
+
+    @DisplayName("자기소개서 상세 테스트")
+    @Test
+    @Transactional
+    public void statementUpdateTest() {
+
+        StatementRequest statementRequest = getSaveRequest();
+        Statement statement = getStatement(statementRequest);
+        repository.save(statement);
+
+        StatementQuestionRequest newQuestion = new StatementQuestionRequest(
+            "새 문항", "새 답변"
+        );
+
+        StatementQuestion question = StatementQuestionMapper.INSTANCE.toEntity(newQuestion)
+            .toBuilder().statement(statement).build();
+
+        question = questionRepository.save(question);
+        List<StatementQuestion> questionList = statement.getQuestions();
+        List<StatementQuestion> newList = new ArrayList<>();
+        newList.add(question);
+
+        statement = statement.toBuilder()
+            .title("새로운 제목")
+            .questions(newList)
+            .build();
+
+        questionRepository.deleteAll(questionList);
+        repository.save(statement);
+        repository.flush();
+
+        Statement updateStatement = repository.findById(statement.getId())
+            .orElseThrow(RuntimeException::new);
+
+        Assertions.assertThat(updateStatement.getTitle()).isSameAs("새로운 제목");
+        Assertions.assertThat(updateStatement.getQuestions().size()).isSameAs(1);
     }
 
     private StatementRequest getSaveRequest() {
@@ -153,7 +196,7 @@ public class StatementRepositoryTest {
                 StatementQuestion sq = StatementQuestionMapper.INSTANCE
                     .toEntity(question).toBuilder().statement(statement).build();
 
-                statement.getQuestions().add(sq);
+                statement.addQuestion(sq);
             }
         );
 
