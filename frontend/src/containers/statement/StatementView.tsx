@@ -4,24 +4,35 @@ import { Statement } from '../../types/Statement';
 import { useLocalAxios } from '../../utils/axios';
 import { useNavigate } from 'react-router-dom';
 import { CustomButton } from '../../components/CustomButton';
+import { Pagination } from 'flowbite-react';
 
 // StatementView 컴포넌트: 자기소개서을 보여주고 관리하는 뷰입니다.
 export const StatementView: React.FC = () => {
     const [statements, setStatements] = useState<Statement[]>([]); // 자기소개서 목록 상태 관리
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const onPageChange = (page: number) => setCurrentPage(page);
+    const amountPerPage = 3;
+    
     
     const localAxios = useLocalAxios(true);
 
     const navigate = useNavigate();
 
     useEffect(() => {
-        getStatements(); // 컴포넌트 마운트 시 자기소개서 목록 불러오기
-    }, []);
+        getStatements();
+    }, [currentPage]);
 
     
     const getStatements = () => {
-        localAxios.get("statements")
+        localAxios.get("statements", {params: {pageSize: amountPerPage, pageNum: currentPage}})
         .then((res) => {
             setStatements(res.data.statements);
+            console.log(res.data.currentPage)
+            console.log
+            setCurrentPage(res.data.currentPage)
+            setTotalPages(Math.floor(res.data.totalCount / amountPerPage)+1);
         })
         .catch((err) => {
             console.log(err);
@@ -66,24 +77,16 @@ export const StatementView: React.FC = () => {
                             <p className='text-md tracking-tight text-gray-600 dark:text-white w-full'>{statement.company}</p>
                         </div>
                         <div className='basis-1/4 flex flex-col items-end'>
-                            <CustomButton className='w-1/2' color='green' bordered onClick={() => navigate('/statement/write/'+statement.id)}>수정</CustomButton>
+                            <CustomButton className='w-1/2' color='green' bordered onClick={() => navigate('/statement/write/'+statement.id)}>확인</CustomButton>
                             <CustomButton className='w-1/2' color='negative' bordered onClick={() => {deleteStatement(statement.id)}}>삭제</CustomButton>
                         </div>
-                        
-                        {/* <div className='basis-1/2'>
-                            <p className='m-2 text-lg tracking-tight text-gray-900 dark:text-white w-full'>{statement.title}</p>
-                        </div>
-                        <div className='basis-1/4'>
-                            <p className='m-2 tracking-tight text-gray-900 dark:text-white w-full'>{statement.company}</p>
-                        </div> */}
-
-                        {/* <div className='basis-1/4 flex flex-auto'>
-                            <Button className='m-1 bg-primary-300 text-white font-thin' onClick={() => navigate('/statement/write/'+statement.id)}>수정</Button>
-                            <Button className='m-1 bg-negative-300 text-white font-thin' onClick={() => {deleteStatement(statement.id)}}>삭제</Button>
-                        </div> */}
                     </List.Item>
                 ))}
             </List>
+
+            <div className="flex overflow-x-auto sm:justify-center">
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} nextLabel='다음' previousLabel='이전' />
+    </div>
         </>
     );
 

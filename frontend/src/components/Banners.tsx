@@ -1,4 +1,6 @@
 import { useAuthStore } from "../stores/auth";
+import Banner1Img from '../assets/images/human_face.png';
+import Banner2Img from '../assets/images/human_robot_talk.png';
 
 export const Banner1 = () => {
 
@@ -6,7 +8,7 @@ export const Banner1 = () => {
     <>
         <div className='flex items-center w-5/6 p-12 m-5 gap-10 border-2 rounded-3xl mx-auto'>
             <div className='w-1/3'>
-                <img src='/src/assets/images/human_face.png' alt='img' />
+                <img src={Banner1Img} alt='img' />
             </div>
             <div className='w-2/3'>
                 <p className='text-4xl'>
@@ -26,7 +28,7 @@ export const Banner2 = () => {
     <>
         <div className='flex items-center w-5/6 p-12 m-5 gap-10 border-2 rounded-3xl mx-auto'>
             <div className='w-1/5'>
-                <img src='/src/assets/images/human_robot_talk.png' alt='img' />
+                <img src={Banner2Img} alt='img' />
             </div>
             <div className=''>
                 <p className='text-2xl'>

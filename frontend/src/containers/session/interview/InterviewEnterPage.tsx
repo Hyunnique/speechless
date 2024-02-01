@@ -7,6 +7,8 @@ import { Button, Dropdown, Modal, TextInput} from 'flowbite-react';
 import { CustomButton } from '../../../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
 
+import TalkImg from '../../../assets/images/human_face.png';
+
 export const InterviewEnterPage = () => {
 
 	const authStore = useAuthStore();
@@ -27,7 +29,7 @@ export const InterviewEnterPage = () => {
 		<div className='p-10'>
 			<div className='flex items-center w-5/6 p-12 m-5 gap-10 border-2 rounded-3xl mx-auto'>
 				<div className='w-1/3'>
-					<img src='/src/assets/images/human_robot_talk.png' alt='img' />
+					<img src={TalkImg} alt='img' />
 				</div>
 				<div className='w-2/3'>
 					<p className='text-2xl'>

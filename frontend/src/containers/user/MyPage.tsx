@@ -79,24 +79,15 @@ export const MyPage = () => {
 					))}
 				</List>
 			</div> */}
-
-			<div className='items-center w-5/6 p-12 m-5 border-2 rounded-3xl mx-auto'>
-				<p className='text-2xl ml-4 mb-4'>면접 사전 정보 관리</p>
-				<StatementView/>
-			</div>
-
-			<div className='items-center w-5/6 p-12 m-5 border-2 rounded-3xl mx-auto'>
-				<p className='text-2xl ml-4 mb-4'>완료한 면접 연습</p>
-				<InterviewReportView/>
-			</div>
-
-			<div className="flex justify-end">
-				<Button
-					size='sm'
-					className='transition-transform ease-in-out duration-300 bg-gray-200 hover:-translate-y-1 hover:scale-110 hover:bg-negative-700 text-white font-bold py-2 px-4 rounded-md shadow-lg'
-				>
-					회원 탈퇴
-				</Button>
+			<div className='items-center w-5/6 p-24 m-5 mx-auto'>
+				<div className="flex justify-end">
+					<Button
+						size='sm'
+						className='transition-transform ease-in-out duration-300 bg-gray-200 hover:-translate-y-1 hover:scale-110 hover:bg-negative-700 text-white font-bold py-2 px-4 rounded-md shadow-lg'
+					>
+						회원 탈퇴
+					</Button>
+				</div>
 			</div>
 		</>
 	);

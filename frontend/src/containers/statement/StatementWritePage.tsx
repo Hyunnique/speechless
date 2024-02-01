@@ -28,11 +28,12 @@ export const StatementWritePage: React.FC = () =>  {
 			questions: [{ question: '', answer: '' }],
 		}
 	);
+	
+	const [disableUpdate, setDisableUpdate] = useState(true);
 
-	//update 모드일 경우 자기소개서 정보를 백엔드에서 가져온다.
+	//id가 존재할 경우 기존 데이터를 가져온다.
 	useEffect(() => {
-		console.log(id)
-		if (id){
+		if (id && disableUpdate){
 			localAxios.get(`statements/${id}`)
 			.then((res:{data:StatementForm}) => {
 				setFormData(res.data);
@@ -41,7 +42,7 @@ export const StatementWritePage: React.FC = () =>  {
 				console.log(err);
 			})
 		}
-	}, [])
+	}, [disableUpdate])
 	  
 	//questions 이외의 필드를 수정하기 위한 함수
 	const updateStringField = (field:string, value:string) => {
@@ -90,25 +91,29 @@ export const StatementWritePage: React.FC = () =>  {
 	return (
 		<div className='flex flex-col items-center justify-center'>
 			<div className='basis-4/5'>
-				<h1 className="text-4xl font-bold leading-tight text-gray-900">자기소개서 편집</h1>
-				<Button className='bg-negative-200 mt-5' onClick={() => window.history.back()}>뒤로 가기</Button>
+				<h1 className="text-4xl font-bold leading-tight text-gray-900">자기소개서 {disableUpdate?"확인":"수정"}</h1>
+				<div className='flex gap-3'>
+					<Button className='bg-negative-400 mt-5' onClick={() => window.history.back()}>뒤로 가기</Button>
+					<Button className='bg-positive-400 mt-5' onClick={() => setDisableUpdate(!disableUpdate)}>{disableUpdate?"수정":"수정취소"}</Button>
+				</div>
 					<div className='mt-5'>
 						<div className='space-y-6'>
 							<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>제목</p>
-							<TextInput className='w-1/2' value={formData.title} onChange={(e) => updateStringField('title', e.target.value)}/>
+							<TextInput disabled={disableUpdate} className='w-1/2' value={formData.title} onChange={(e) => updateStringField('title', e.target.value)}/>
 
 							<div className='grid grid-cols-3 gap-5 w-1/2'>
 								<div>
 									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>기업 이름</p>
-									<TextInput value={formData.company} onChange={(e) => updateStringField('company', e.target.value)}/>
+									<TextInput disabled={disableUpdate} value={formData.company} onChange={(e) => updateStringField('company', e.target.value)}/>
 								</div>
 								<div>
 									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>지원 포지션</p>
-									<TextInput value={formData.position} onChange={(e) => updateStringField('position', e.target.value)}/>
+									<TextInput disabled={disableUpdate} value={formData.position} onChange={(e) => updateStringField('position', e.target.value)}/>
 								</div>
 								<div>
 									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>경력</p>
-									<TextInput value={formData.career} onChange={(e) => updateStringField('career', e.target.value)}/>
+									<TextInput type='number' disabled={disableUpdate} value={formData.career} onChange={(e) => updateStringField('career', e.target.value)}/>
+									
 								</div>
 							</div>
 
@@ -117,6 +122,7 @@ export const StatementWritePage: React.FC = () =>  {
 								<div key={index} className='p-3 bg-primary-50'>
 									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>문항</p>
 									<TextInput
+										disabled={disableUpdate}
 										id={`question-${index}`}
 										value={formData.questions[index].question}
 											onChange={(e) => {
@@ -128,6 +134,7 @@ export const StatementWritePage: React.FC = () =>  {
 									/>
 									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>답변</p>
 									<Textarea
+										disabled={disableUpdate}
 										id={`answer-${index}`}
 										value={formData.questions[index].answer}
 										onChange={(e) => {
@@ -140,7 +147,7 @@ export const StatementWritePage: React.FC = () =>  {
 									/>
 									{formData.questions.length > 1 && (
 										<div className="flex justify-end">
-											<Button onClick={() => removeQuestion(index)} className='bg-negative-300 mt-2'>
+											<Button disabled={disableUpdate} onClick={() => removeQuestion(index)} className='bg-negative-300 mt-2'>
 												삭제
 											</Button>
 										</div>
@@ -148,7 +155,7 @@ export const StatementWritePage: React.FC = () =>  {
 								</div>
 							))}
 							<div className="flex justify-end">
-								<Button className='bg-primary-300' onClick={addQuestion}>
+								<Button disabled={disableUpdate} className='bg-primary-300' onClick={addQuestion}>
 									문항 추가
 								</Button>
 							</div>
@@ -156,7 +163,7 @@ export const StatementWritePage: React.FC = () =>  {
 					</div>
 					
 				<div className="flex justify-end mt-10">
-					<Button className='bg-positive-300' onClick={id ? updateStatement: createStatement}>
+					<Button disabled={disableUpdate} className='bg-positive-300' onClick={id ? updateStatement: createStatement}>
 						저장
 					</Button>
 				</div>
