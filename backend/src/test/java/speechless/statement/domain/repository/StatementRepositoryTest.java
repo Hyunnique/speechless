@@ -1,6 +1,7 @@
 package speechless.statement.domain.repository;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -104,6 +105,22 @@ public class StatementRepositoryTest {
         Assertions.assertThat(result.getQuestions().size())
             .isSameAs(statement.getQuestions().size());
 
+    }
+
+    @DisplayName("자기소개서 상세 테스트")
+    @Test
+    @Transactional
+    public void statementDeleteTest() {
+
+        StatementRequest statementRequest = getSaveRequest();
+        Statement statement = getStatement(statementRequest);
+        repository.save(statement);
+
+        repository.deleteById(statement.getId());
+
+        Optional<Statement> result = repository.findById(statement.getId());
+
+        Assertions.assertThat(result.isPresent()).isFalse();
     }
 
     private StatementRequest getSaveRequest() {

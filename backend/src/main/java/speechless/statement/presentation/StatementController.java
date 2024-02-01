@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,12 @@ public class StatementController {
     @GetMapping("/{id}")
     public ResponseEntity<StatementResponse> getStatement(@PathVariable("id") Long id) {
         return new ResponseEntity<>(statementService.getStatement(id), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteStatement(@PathVariable("id") Long id) {
+        statementService.deleteStatement(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

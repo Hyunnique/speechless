@@ -77,4 +77,14 @@ public class StatementService {
         return StatementMapper.INSTANCE.toResponse(statement);
     }
 
+    @Transactional
+    public void deleteStatement(Long id) {
+        Statement statement = statementRepository.findById(id)
+            .orElseThrow(StatementNotFoundException::new);
+
+        // TODO : 유저 id 확인 로직 추가
+
+        statementRepository.delete(statement);
+    }
+
 }

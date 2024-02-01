@@ -92,5 +92,13 @@ public class StatementServiceTest {
         Assertions.assertThat(response.getId()).isSameAs(1L);
 
     }
+    
+    @Test
+    @DisplayName("자기소개서 삭제 테스트")
+    public void deleteStatement() {
+        
+        // 삭제는 별도 로직이 없으므로 로그인 유저 검증 추가되면 체크
+        
+    }
 
 }

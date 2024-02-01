@@ -1,5 +1,6 @@
 package speechless.statement.presentation;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -97,6 +98,14 @@ public class StatementControllerTest {
         mvc.perform(get("/statements/1")
             .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("자기소개서 삭제")
+    void deleteStatement() throws Exception {
+
+        mvc.perform(delete("/statements/1")
+        ).andExpect(status().isNoContent());
     }
 
 }
