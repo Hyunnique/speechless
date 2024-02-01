@@ -179,15 +179,15 @@ public class StatementRepositoryTest {
         Assertions.assertThat(updateStatement.getQuestions().size()).isSameAs(1);
     }
 
-    private static Member createMember() {
+    private Member createMember() {
 
-        return Member.builder()
-            .id(1L)
-            .name("테스트 멤버")
-            .profile("")
-            .email("테스트 이메일")
-            .memberType(MemberType.kakao)
-            .build();
+        return memberRepository.save(
+            Member.builder()
+                .name("테스트 멤버")
+                .profile("")
+                .email("테스트 이메일")
+                .memberType(MemberType.kakao)
+                .build());
     }
 
     private StatementRequest getSaveRequest() {
