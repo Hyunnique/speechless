@@ -1,6 +1,7 @@
 package speechless.statement.domain.repository;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,8 +77,8 @@ public class StatementRepositoryTest {
         // when
         list = repository.findAllByMemberId(1L,
             PageRequest.of(0, 1));
-
-        Assertions.assertThat(list.getTotalPages()).isSameAs(tn + 2);
+        
+        Assertions.assertThat(Long.valueOf(list.getTotalPages())).isSameAs(tn + 2);
         Assertions.assertThat(list.getNumber()).isSameAs(0);
         Assertions.assertThat(list.getSize()).isSameAs(1);
     }
@@ -96,7 +97,7 @@ public class StatementRepositoryTest {
 
         repository.save(statement);
 
-        Statement result = repository.findByMemberIdAndId(1L, statement.getId())
+        Statement result = repository.findByMemberIdAndId(statement.getMemberId(), statement.getId())
             .orElseThrow(() -> new SpeechlessException(new ErrorCode(
                 HttpStatus.INTERNAL_SERVER_ERROR, "자기소개서를 찾을 수 없습니다")));
 
@@ -104,6 +105,22 @@ public class StatementRepositoryTest {
         Assertions.assertThat(result.getQuestions().size())
             .isSameAs(statement.getQuestions().size());
 
+    }
+
+    @DisplayName("자기소개서 상세 테스트")
+    @Test
+    @Transactional
+    public void statementDeleteTest() {
+
+        StatementRequest statementRequest = getSaveRequest();
+        Statement statement = getStatement(statementRequest);
+        repository.save(statement);
+
+        repository.deleteById(statement.getId());
+
+        Optional<Statement> result = repository.findById(statement.getId());
+
+        Assertions.assertThat(result.isPresent()).isFalse();
     }
 
     private StatementRequest getSaveRequest() {
