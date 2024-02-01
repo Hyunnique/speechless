@@ -1,85 +1,94 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 
-import {useEffect, useRef} from 'react';
+import { useEffect, useRef } from 'react';
 import { Button } from 'flowbite-react';
 import { CustomButton } from '../../../components/CustomButton.tsx';
 
 import { useLocalAxios } from '../../../utils/axios.ts';
+import { useNavigate } from "react-router-dom";
 
-import {OpenVidu, Publisher} from 'openvidu-browser';
+import { useInterviewSessionStore } from "../../../stores/session.ts";
+import {OpenVidu, Publisher, Session} from 'openvidu-browser';
 
 export const InterviewPage = () => {
 
 	const localAxios = useLocalAxios();
+	const navigate = useNavigate();
+
+	const interviewSessionStore = useInterviewSessionStore();
+
 	const OV = new OpenVidu();
-	const session = OV.initSession();
-	let sessionId = null;
+	let session: Session | null = null;
 	const videoRef = useRef<HTMLVideoElement>(null);
 
-	let videoEnabled = false;
+	let videoEnabled = true;
 	let audioEnabled = false;
 
 	let currentVideoDevice = null;
 	let mainStreamManager = null;
 	let publisher: Publisher | null = null;
 
-	const getToken = async () => {
-		sessionId = await requestSessionId();
-		const realSessionId = await createSession(sessionId);
-		return await createToken(realSessionId);
-	}
-
-	// BE에서 unique한 sessionId를 생성해줌
-	const requestSessionId = async () => {
-		const response = await localAxios.post('openvidu/session-id');
-		return response.data;
-	}
-
-	const createSession = async (sessionId: string) => {
-		const response = await localAxios.post('openvidu/sessions', { customSessionId: sessionId });
-		return response.data;
-	}
-
-	const createToken = async (sessionId: string) => {
+	// Connection을 생성해주는 함수
+	// 면접 페이지에서는 따로 다인 세션을 생성하지 않으므로, 페이지 진입시 session 생성
+	const createConnection = async (sessionId: string) => {
 		const response = await localAxios.post('openvidu/sessions/' + sessionId + '/connections', {}, {
 			headers: { 'Content-Type': 'application/json', },
 		});
-		return response.data; // The token
+
+		return response.data;
+	}
+
+	const initSession = async () => {
+		session = OV.initSession();
+
+		if (!interviewSessionStore.sessionId) {
+			navigate('/error/404');
+			return;
+		}
+		console.log(interviewSessionStore);
+		const sessionId = interviewSessionStore.sessionId;
+		const connectionData = await createConnection(sessionId);
+
+		interviewSessionStore.setConnection(
+			connectionData.connectionId,
+			connectionData.token
+		);
+
+		await session.connect(connectionData.token);
+		publisher = await OV.initPublisherAsync(undefined, {
+			audioSource: undefined,
+			videoSource: undefined,
+			publishAudio: audioEnabled,
+			publishVideo: videoEnabled,
+			resolution: '640x480',
+			frameRate: 30,
+			insertMode: 'APPEND',
+			mirror: false
+		});
+
+		console.log("Hello");
+		console.log(publisher);
+
+		publisher.on('streamCreated', (event) => {
+			session!.subscribe(event.stream, undefined);
+		});
+
+		const test = await session.publish(publisher);
+
+		let devices = await OV.getDevices();
+		let videoDevices = devices.filter(device => device.kind === 'videoinput');
+		let currentVideoDeviceId = publisher.stream.getMediaStream().getVideoTracks()[0].getSettings().deviceId;
+		currentVideoDevice = videoDevices.find(device => device.deviceId === currentVideoDeviceId);
+
+		mainStreamManager = publisher;
+
+		mainStreamManager.addVideoElement(videoRef.current!);
+		console.log("HELLO!!!!");
 	}
 
 	useEffect(() => {
-		getToken().then(token => {
-			console.log(token);
-			session.connect(token)
-				.then(async () => {
-					publisher = await OV.initPublisherAsync(undefined, {
-						audioSource: undefined,
-						videoSource: undefined,
-						publishAudio: audioEnabled,
-						publishVideo: videoEnabled,
-						resolution: '640x480',
-						frameRate: 30,
-						insertMode: 'APPEND',
-						mirror: false
-					});
-
-					publisher.on('streamCreated', (event) => {
-						session.subscribe(event.stream, undefined);
-					});
-
-					await session.publish(publisher);
-
-
-					let devices = await OV.getDevices();
-					let videoDevices = devices.filter(device => device.kind === 'videoinput');
-					let currentVideoDeviceId = publisher.stream.getMediaStream().getVideoTracks()[0].getSettings().deviceId;
-					currentVideoDevice = videoDevices.find(device => device.deviceId === currentVideoDeviceId);
-
-					mainStreamManager = publisher;
-
-					mainStreamManager.addVideoElement(videoRef.current!);
-					console.log("init?")
-				});
+		initSession().catch((error) => {
+			console.error(error);
 		});
 	}, []);
 
@@ -88,6 +97,14 @@ export const InterviewPage = () => {
 
 		if (publisher) {
 			publisher.publishVideo(videoEnabled);
+		}
+	}
+
+	const toggleAudio = () => {
+		audioEnabled = !audioEnabled;
+
+		if (publisher) {
+			publisher.publishAudio(audioEnabled);
 		}
 	}
 
@@ -135,7 +152,7 @@ export const InterviewPage = () => {
 				</div>
 			</div>
 			<div className='session-footer flex justify-center'>
-				<Button color='blue' onClick={() => { audioEnabled = !audioEnabled; }}>마이크 토글</Button>
+				<Button color='blue' onClick={toggleAudio}>마이크 토글</Button>
 				<Button color='blue' onClick={toggleVideo}>카메라 토글</Button>
 			</div>
 		</div>

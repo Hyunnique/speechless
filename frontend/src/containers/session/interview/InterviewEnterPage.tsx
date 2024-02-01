@@ -6,24 +6,46 @@ import { useAuthStore } from '../../../stores/auth';
 import { Button, Dropdown, Modal, TextInput} from 'flowbite-react';
 import { CustomButton } from '../../../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
+import { useLocalAxios } from "../../../utils/axios.ts";
+import { useInterviewSessionStore } from "../../../stores/session.ts";
 
 import TalkImg from '../../../assets/images/human_face.png';
 
 export const InterviewEnterPage = () => {
 
 	const authStore = useAuthStore();
+	const interviewSessionStore = useInterviewSessionStore();
 
 	const [openModal, setOpenModal] = useState(false);
-
 	const [selectedItem, setSelectedItem] = useState('');
 
 	const navigate = useNavigate();
-
-	useEffect(() => {}, []);
+	const localAxios = useLocalAxios();
 
 	const handleSelect = (item: string) => {
 		setSelectedItem(item);
-	  };
+	};
+
+	const startInterviewSession = async () => {
+		setOpenModal(false);
+		const response = await localAxios.post('openvidu/sessions');
+
+		if (interviewSessionStore.sessionId) {
+			try {
+				await localAxios.delete(`openvidu/sessions/${interviewSessionStore.sessionId}`);
+			} catch (e) {
+				console.log("session deletion failed");
+			}
+
+			interviewSessionStore.clearSession();
+		}
+
+		interviewSessionStore.setSessionId(response.data);
+		interviewSessionStore.setTitle('면접 연습');
+		//interviewSessionStore.setStatement();
+
+		navigate('/session/interview');
+	};
 
 	return (
 		<div className='p-10'>
@@ -80,7 +102,7 @@ export const InterviewEnterPage = () => {
 				</Modal.Body>
 				<Modal.Footer>
 				<div className='flex justify-end'>
-					<Button className='bg-primary-300' onClick={() => {setOpenModal(false); navigate("/session/interview") }}>
+					<Button className='bg-primary-300' onClick={ startInterviewSession }>
 						면접 시작
 					</Button>
 					<Button className='bg-primary-300' onClick={() => setOpenModal(false)}>
