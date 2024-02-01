@@ -21,6 +21,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 import speechless.common.entity.BaseTimeEntity;
 import speechless.member.domain.Member;
@@ -56,6 +57,7 @@ public class Statement extends BaseTimeEntity {
     @Column(name = "career")
     private int career;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;

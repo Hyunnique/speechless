@@ -1,6 +1,7 @@
 package speechless.member.domain;
 
 import jakarta.persistence.*;
+import java.util.Collections;
 import java.util.List;
 import lombok.*;
 import speechless.common.entity.BaseTimeEntity;
@@ -38,6 +39,15 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY,
         cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Statement> statement = null;
+    private List<Statement> statements = null;
 
+    public List<Statement> getStatement() {
+        return Collections.unmodifiableList(statements);
+    }
+
+    // 연관관계 편의 메소드
+    public void addStatement(Statement statement) {
+        this.statements.add(statement);
+        statement.setMember(this);
+    }
 }

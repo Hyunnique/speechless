@@ -35,12 +35,11 @@ public class StatementService {
     public StatementResponse createStatement(StatementRequest request,
         AuthCredentials authCredentials) {
 
-        Member loginMember = memberRepository.findById(authCredentials.id())
-            .orElseThrow(MemberNotFoundException::new);
+        Member loginMember = getLoginUser(authCredentials);
 
         // request 처리
-        Statement statement = StatementMapper.INSTANCE
-            .toEntity(request).toBuilder().member(loginMember).build();
+        Statement statement = StatementMapper.INSTANCE.toEntity(request);
+        loginMember.addStatement(statement);
 
         if (statement.isQuestionEmpty()) {
             createStatementQuestions(request, statement);
@@ -69,8 +68,6 @@ public class StatementService {
 
         Member loginMember = memberRepository.findById(authCredentials.id())
             .orElseThrow(MemberNotFoundException::new);
-
-        System.out.println(authCredentials.id());
 
         // 인덱스 값 descending 정렬 => 최신순
         Page<Statement> statements = statementRepository
@@ -139,6 +136,12 @@ public class StatementService {
         statement = updateStatement;
         statementRepository.save(statement);
         return StatementMapper.INSTANCE.toResponse(statement);
+    }
+
+    private Member getLoginUser(AuthCredentials authCredentials) {
+
+        return memberRepository.findById(authCredentials.id())
+                .orElseThrow(MemberNotFoundException::new);
     }
 
 }
