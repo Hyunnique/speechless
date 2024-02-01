@@ -13,6 +13,7 @@ import { SpeechListPage } from './containers/speech/SpeechListPage.tsx';
 import { SpeechDetailPage } from './containers/speech/SpeechDetailPage.tsx';
 import { StatementWritePage } from './containers/statement/StatementWritePage.tsx';
 import { InterviewEnterPage } from './containers/session/interview/InterviewEnterPage.tsx';
+import { StatementDetailPage } from './containers/statement/StatementDetailPage.tsx';
 
 export default function App() {
 	return (
@@ -27,6 +28,7 @@ export default function App() {
 						<Route path='/SpeechDetail' element={<SpeechDetailPage />} />
 						<Route path='/mypage' element={<MyPage />} />
 						<Route path='/statement/write/:id?' element={<StatementWritePage />} />
+						<Route path='/statement/detail/:id' element={<StatementDetailPage />} />
 						<Route path='/interview' element={<InterviewEnterPage />} />
 					</Route>
 					<Route>

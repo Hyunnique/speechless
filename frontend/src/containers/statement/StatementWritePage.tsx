@@ -3,17 +3,15 @@ import { Button, TextInput, Textarea } from 'flowbite-react';
 import { Statement } from '../../types/Statement';
 import { useLocalAxios } from '../../utils/axios';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface StatementForm extends Statement {
 	questions: { question: string; answer: string }[];
 }
 
-//id == -1: create 모드로 작동한다.
-//id != -1: update 모드로 작동한다.
 export const StatementWritePage: React.FC = () =>  {
 
 	const { id } = useParams();
-	//const { beforeRoute } = useParams();
 	
 	const localAxios = useLocalAxios(true);
 	
@@ -28,12 +26,12 @@ export const StatementWritePage: React.FC = () =>  {
 			questions: [{ question: '', answer: '' }],
 		}
 	);
-	
-	const [disableUpdate, setDisableUpdate] = useState(true);
+
+	const navigate = useNavigate();
 
 	//id가 존재할 경우 기존 데이터를 가져온다.
 	useEffect(() => {
-		if (id && disableUpdate){
+		if (id){
 			localAxios.get(`statements/${id}`)
 			.then((res:{data:StatementForm}) => {
 				setFormData(res.data);
@@ -70,6 +68,7 @@ export const StatementWritePage: React.FC = () =>  {
 		localAxios.post("statements", formData)
 		.then((res) => {
 			console.log(res);
+			navigate("/interview/detail/" + res.data.id);
 		})
 		.catch((err) => {
 			alert("자기소개서 등록에 실패했습니다.")
@@ -79,9 +78,10 @@ export const StatementWritePage: React.FC = () =>  {
 
 	//patch 메소드를 통해 벡엔드에 특정 id의 자기소개서 수정을 요청한다.
 	const updateStatement = () => {
-		localAxios.patch(`statements/${id}`, formData)
+		localAxios.put(`statements`, formData)
 		.then((res) => {
 			console.log(res);
+			navigate("/interview/detail/" + res.data.id);
 		})
 		.catch((err) => {
 			console.log(err);
@@ -90,11 +90,10 @@ export const StatementWritePage: React.FC = () =>  {
 
 	return (
 		<div className='flex flex-col items-center justify-center'>
-			<div className='basis-4/5'>
-				<h1 className="text-4xl font-bold leading-tight text-gray-900">자기소개서 {disableUpdate?"확인":"수정"}</h1>
+			<div className='basis-2/3'>
+				<h1 className="text-4xl font-bold leading-tight text-gray-900">자기소개서 {id?"수정":"생성"}</h1>
 				<div className='flex gap-3'>
-					<Button className='bg-negative-400 mt-5' onClick={() => window.history.back()}>뒤로 가기</Button>
-					<Button className='bg-positive-400 mt-5' onClick={() => setDisableUpdate(!disableUpdate)}>{disableUpdate?"수정":"수정취소"}</Button>
+					<Button className='bg-negative-400 mt-5' onClick={() => navigate(-1)}>뒤로 가기</Button>
 				</div>
 					<div className='mt-5'>
 						<div className='space-y-6'>
@@ -112,7 +111,7 @@ export const StatementWritePage: React.FC = () =>  {
 								</div>
 								<div>
 									<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>경력</p>
-									<TextInput type='number' disabled={disableUpdate} value={formData.career} onChange={(e) => updateStringField('career', e.target.value)}/>
+									<TextInput type='number' value={formData.career} onChange={(e) => updateStringField('career', e.target.value)}/>
 									
 								</div>
 							</div>
