@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @OpenAPIDefinition(tags = @Tag(name = "OpenViduController", description = "OpenVidu를 사용하여 비디오 세션을 관리하는 API. 세션 초기화, 연결 생성 및 고유 세션 ID 생성 기능을 제공합니다."))
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/openvidu")
+@RequestMapping("/openvidu/sessions")
 public class OpenViduController {
 
     @Value("${OPENVIDU_URL}")
@@ -46,7 +46,7 @@ public class OpenViduController {
         this.openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
     }
 
-    @PostMapping("/sessions")
+    @PostMapping("")
     @Operation(summary = "새로운 비디오 세션을 초기화합니다.",
         description = "필요한 경우 세션 설정을 포함하여 새로운 비디오 세션을 생성합니다.")
     @ApiResponse(responseCode = "200", description = "새로운 세션 ID를 반환합니다.")
@@ -59,7 +59,7 @@ public class OpenViduController {
         return new ResponseEntity<>(session.getSessionId(), HttpStatus.OK);
     }
 
-    @DeleteMapping("/sessions/{sessionId}")
+    @DeleteMapping("/{sessionId}")
     @Operation(summary = "세션을 닫습니다.",
         description = "지정된 세션 ID를 갖는 세션을 닫습니다.")
     @ApiResponse(responseCode = "204", description = "세션이 성공적으로 닫혔습니다.")
@@ -71,7 +71,7 @@ public class OpenViduController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/sessions/{sessionId}/connections")
+    @PostMapping("/{sessionId}/connections")
     @Operation(summary = "지정된 세션 ID에 대한 새로운 연결을 생성합니다.",
         description = "지정된 세션에 참여할 수 있는 새로운 연결을 생성합니다.")
     @ApiResponse(responseCode = "200", description = "새로운 연결 토큰을 반환합니다.")
@@ -86,12 +86,12 @@ public class OpenViduController {
         ConnectionProperties properties = ConnectionProperties.fromJson(params).build();
         Connection connection = session.createConnection(properties);
         Map<String, String> connectionInfo = new HashMap<>();
-        connectionInfo.put("Token", connection.getToken());
-        connectionInfo.put("ConnectionId", connection.getConnectionId());
+        connectionInfo.put("token", connection.getToken());
+        connectionInfo.put("connectionId", connection.getConnectionId());
         return new ResponseEntity<>(connectionInfo, HttpStatus.OK);
     }
 
-    @DeleteMapping("/sessions/{sessionId}/connection/{connectionId}")
+    @DeleteMapping("/{sessionId}/connection/{connectionId}")
     @Operation(summary = "지정된 세션 ID의 connection ID에 대한 연결을 제거합니다.",
         description = "지정된 세션에서 지정된 연결을 제거합니다.")
     @ApiResponse(responseCode = "204", description = "연결이 성공적으로 제거되었습니다.")
