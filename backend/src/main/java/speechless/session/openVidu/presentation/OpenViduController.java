@@ -5,6 +5,8 @@ import io.openvidu.java.client.ConnectionProperties;
 import io.openvidu.java.client.OpenVidu;
 import io.openvidu.java.client.OpenViduHttpException;
 import io.openvidu.java.client.OpenViduJavaClientException;
+import io.openvidu.java.client.Recording;
+import io.openvidu.java.client.RecordingProperties;
 import io.openvidu.java.client.Session;
 import io.openvidu.java.client.SessionProperties;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -51,10 +53,15 @@ public class OpenViduController {
         description = "필요한 경우 세션 설정을 포함하여 새로운 비디오 세션을 생성합니다.")
     @ApiResponse(responseCode = "200", description = "새로운 세션 ID를 반환합니다.")
     @ApiResponse(responseCode = "400", description = "세션 옵션에서 문제가 발생했습니다.")
-    public ResponseEntity<String> initializeSession(
-        @RequestBody(required = false) @Parameter(description = "세션 생성에 사용될 설정 값. 옵션으로 지정 가능.") Map<String, Object> params)
+    public ResponseEntity<String> initializeSession()
         throws OpenViduJavaClientException, OpenViduHttpException {
-        SessionProperties properties = new SessionProperties.Builder().build();
+        RecordingProperties recordingProperties = new RecordingProperties.Builder()
+            .outputMode(Recording.OutputMode.INDIVIDUAL)
+            .hasVideo(false)
+            .build();
+        SessionProperties properties = new SessionProperties.Builder()
+            .defaultRecordingProperties(recordingProperties)
+            .build();
         Session session = openvidu.createSession(properties);
         return new ResponseEntity<>(session.getSessionId(), HttpStatus.OK);
     }
