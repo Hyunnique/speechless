@@ -74,6 +74,7 @@ public class Statement extends BaseTimeEntity {
 
     public void addQuestion(StatementQuestion question) {
         this.questions.add(question);
+        question.setStatement(this);
     }
 
     public Boolean isQuestionEmpty() {

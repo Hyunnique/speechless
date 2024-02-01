@@ -1,6 +1,7 @@
 package speechless.member.domain;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.*;
@@ -39,7 +40,7 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY,
         cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Statement> statements = null;
+    private List<Statement> statements = new ArrayList<>();
 
     public List<Statement> getStatement() {
         return Collections.unmodifiableList(statements);

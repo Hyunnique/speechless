@@ -17,6 +17,4 @@ public interface StatementRepository extends JpaRepository<Statement, Long> {
         + "ON s.member.id = :memberId "
         + "AND s.id = :id ")
     Optional<Statement> findByMemberIdAndId(Long memberId, Long id);
-
-    Optional<Statement> findByMemberAndId(Member member, Long id);
 }

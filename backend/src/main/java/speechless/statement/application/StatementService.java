@@ -55,9 +55,7 @@ public class StatementService {
 
         request.getQuestions().forEach(
             (question) -> {
-                StatementQuestion sq = StatementQuestionMapper.INSTANCE
-                    .toEntity(question).toBuilder().statement(statement).build();
-
+                StatementQuestion sq = StatementQuestionMapper.INSTANCE.toEntity(question);
                 statement.addQuestion(sq);
             }
         );
@@ -78,7 +76,7 @@ public class StatementService {
         Page<StatementResponse> responsePage = statements.map(StatementMapper.INSTANCE::toResponse);
         return new StatementListResponse(
             responsePage.getContent(), responsePage.getNumber() + 1,
-            responsePage.getTotalPages() + 1, responsePage.getTotalElements());
+            responsePage.getTotalPages(), responsePage.getTotalElements());
     }
 
     public StatementResponse getStatement(Long id, AuthCredentials authCredentials) {
@@ -86,7 +84,7 @@ public class StatementService {
         Member loginMember = memberRepository.findById(authCredentials.id())
             .orElseThrow(MemberNotFoundException::new);
 
-        Statement statement = statementRepository.findByMemberAndId(loginMember, id)
+        Statement statement = statementRepository.findByMemberIdAndId(loginMember.getId(), id)
             .orElseThrow(StatementNotFoundException::new);
 
         return StatementMapper.INSTANCE.toResponse(statement);
@@ -126,9 +124,7 @@ public class StatementService {
         request.getQuestions().forEach(
             (questionRequest) -> {
 
-                StatementQuestion question = StatementQuestionMapper.INSTANCE.toEntity(
-                    questionRequest).toBuilder().statement(updateStatement).build();
-
+                StatementQuestion question = StatementQuestionMapper.INSTANCE.toEntity(questionRequest);
                 updateStatement.addQuestion(question);
             }
         );

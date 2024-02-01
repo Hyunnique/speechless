@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString.Include;
 import org.hibernate.annotations.DynamicUpdate;
 import speechless.common.entity.BaseTimeEntity;
@@ -43,6 +44,7 @@ public class StatementQuestion extends BaseTimeEntity {
     @Column(name = "answer")
     private String answer;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "statement_id")
     private Statement statement;
