@@ -11,8 +11,6 @@ import { useInterviewSessionStore } from "../../../stores/session.ts";
 
 import TalkImg from '../../../assets/images/human_face.png';
 
-import TalkImg from '../../../assets/images/human_robot_talk.png';
-
 export const InterviewEnterPage = () => {
 
 	const authStore = useAuthStore();

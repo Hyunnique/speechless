@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { List, Button, Pagination } from 'flowbite-react';
+import { List, Button } from 'flowbite-react';
 import { Statement } from '../../types/Statement';
 import { useLocalAxios } from '../../utils/axios';
 import { useNavigate } from 'react-router-dom';
@@ -29,8 +29,9 @@ export const StatementView: React.FC = () => {
         localAxios.get("statements", {params: {pageSize: amountPerPage, pageNum: currentPage}})
         .then((res) => {
             setStatements(res.data.statements);
-            console.log(res.data);
-            setCurrentPage(res.data.currentPage);
+            console.log(res.data.currentPage)
+            console.log
+            setCurrentPage(res.data.currentPage)
             setTotalPages(Math.floor(res.data.totalCount / amountPerPage)+1);
         })
         .catch((err) => {
@@ -68,20 +69,20 @@ export const StatementView: React.FC = () => {
                 </Button>
             </div>
 
-            <ul className='flex flex-col gap-3 w-5/6 mx-auto'>
+            <List className='flex flex-col gap-3 w-5/6 mx-auto'>
                 {statements.map((statement) => (
-                    <li key={statement.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2' onClick={() => navigate('/statement/detail/'+statement.id)}>
+                    <List.Item key={statement.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2 '>
                         <div className='basis-3/4 flex flex-col justify-center'>
                             <p className='text-lg font-semibold tracking-tight text-gray-900 dark:text-white w-full'>{statement.title}</p>
                             <p className='text-md tracking-tight text-gray-600 dark:text-white w-full'>{statement.company}</p>
                         </div>
                         <div className='basis-1/4 flex flex-col items-end'>
-                            <Button className='w-1/2 bg-primary-400' onClick={(e) => {e.stopPropagation(); navigate('/statement/write/'+statement.id)}}>수정</Button>
-                            <Button className='w-1/2 bg-negative-400' onClick={(e) => {e.stopPropagation(); deleteStatement(statement.id)}}>삭제</Button>
+                            <CustomButton className='w-1/2' color='green' bordered onClick={() => navigate('/statement/write/'+statement.id)}>확인</CustomButton>
+                            <CustomButton className='w-1/2' color='negative' bordered onClick={() => {deleteStatement(statement.id)}}>삭제</CustomButton>
                         </div>
-                    </li>
+                    </List.Item>
                 ))}
-            </ul>
+            </List>
 
             <div className="flex overflow-x-auto sm:justify-center">
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} nextLabel='다음' previousLabel='이전' />
