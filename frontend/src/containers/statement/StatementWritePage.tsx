@@ -187,7 +187,7 @@ export const StatementWritePage: React.FC = () =>  {
 								/>
 								<div className="text-sm text-gray-500 dark:text-gray-400">
 									{formData.questions[index].answer.length} / 1000
-								</div>ti
+								</div>
 								{formData.questions.length > 1 && (
 									<div className="flex jusfy-end">
 										<Button onClick={() => removeQuestion(index)} className='bg-negative-300 mt-2'>
