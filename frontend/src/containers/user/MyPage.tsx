@@ -1,7 +1,5 @@
 import React from 'react';
 import { Button, Card, Avatar} from 'flowbite-react';
-import { StatementView } from '../statement/StatementView';
-import { InterviewReportView } from '../report/InterviewReportView';
 import { useAuthStore } from '../../stores/auth';
 
 export const MyPage = () => {
@@ -22,7 +20,6 @@ export const MyPage = () => {
 						</div>
 						<div>
 							<h5 className='text-2xl font-bold tracking-widest text-gray-900'>{authStore.name}</h5>
-							<p className='font-normal text-gray-700 dark:text-gray-400'>아이디: {authStore.id}</p>
 							<p className='font-normal text-gray-700 dark:text-gray-400'>이메일: {authStore.email}</p>
 						</div>
 
@@ -62,23 +59,6 @@ export const MyPage = () => {
 				</div>
 			</div>
 
-			{/* <div className='items-center w-5/6 p-24 m-5 border-2 rounded-3xl mx-auto'>
-				<p className='text-2xl ml-4 mb-4'>해야할 스피치 연습</p>
-				<List>
-					{MyPageData.map((item, idx) => (
-						<MyPageItem key={idx} title={item.title} date={item.date} />
-					))}
-				</List>
-			</div>
-
-			<div className='items-center w-5/6 p-24 m-5 border-2 rounded-3xl mx-auto'>
-				<p className='text-2xl ml-4 mb-4'>완료한 스피치 연습</p>
-				<List>
-					{MyPageData.map((item, idx) => (
-						<MyPageItem key={idx} title={item.title} date={item.date} />
-					))}
-				</List>
-			</div> */}
 			<div className='items-center w-5/6 p-24 m-5 mx-auto'>
 				<div className="flex justify-end">
 					<Button

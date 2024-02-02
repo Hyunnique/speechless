@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { List, Button, Pagination } from 'flowbite-react';
+import { Button, Pagination } from 'flowbite-react';
 import { Statement } from '../../types/Statement';
 import { useLocalAxios } from '../../utils/axios';
 import { useNavigate } from 'react-router-dom';
-import { CustomButton } from '../../components/CustomButton';
 
 // StatementView 컴포넌트: 자기소개서을 보여주고 관리하는 뷰입니다.
 export const StatementView: React.FC = () => {
@@ -13,7 +12,6 @@ export const StatementView: React.FC = () => {
     const [totalPages, setTotalPages] = useState(1);
     const onPageChange = (page: number) => setCurrentPage(page);
     const amountPerPage = 3;
-    
     
     const localAxios = useLocalAxios(true);
 
@@ -27,21 +25,16 @@ export const StatementView: React.FC = () => {
     const getStatements = () => {
         localAxios.get("statements", {params: {pageSize: amountPerPage, pageNum: currentPage}})
         .then((res) => {
+
+            setCurrentPage(res.data.currentPage);
+            setTotalPages(res.data.totalPage);
+
             setStatements(res.data.statements);
             console.log(res.data);
-            setCurrentPage(res.data.currentPage);
-            setTotalPages(Math.floor(res.data.totalCount / amountPerPage)+1);
+            console.log("current: "+ currentPage + "/// totalPage: " + res.data.totalPage);
         })
         .catch((err) => {
             console.log(err);
-            setStatements([
-                {id: 1, title: '삼성전자 상반기 임원 면접', company: '삼성전자', created_at: new Date('2022-01-01T00:00:00Z'), updated_at: new Date('2022-01-01T00:00:00Z')},
-                {id: 2, title: '삼성전자 상반기 임원 면접', company: '삼성전자', created_at: new Date('2022-01-01T00:00:00Z'), updated_at: new Date('2022-01-01T00:00:00Z')},
-                {id: 3, title: '삼성전자 상반기 임원 면접', company: '삼성전자', created_at: new Date('2022-01-01T00:00:00Z'), updated_at: new Date('2022-01-01T00:00:00Z')},
-                {id: 4, title: '삼성전자 상반기 임원 면접', company: '삼성전자', created_at: new Date('2022-01-01T00:00:00Z'), updated_at: new Date('2022-01-01T00:00:00Z')},
-                {id: 5, title: '삼성전자 상반기 임원 면접', company: '삼성전자', created_at: new Date('2022-01-01T00:00:00Z'), updated_at: new Date('2022-01-01T00:00:00Z')},
-                {id: 6, title: '삼성전자 상반기 임원 면접', company: '삼성전자', created_at: new Date('2022-01-01T00:00:00Z'), updated_at: new Date('2022-01-01T00:00:00Z')},
-            ]);
         })
     }
 
@@ -49,12 +42,13 @@ export const StatementView: React.FC = () => {
     const deleteStatement = (index: number) => {
         if (confirm("정말로 삭제하시겠습니까?")){
             localAxios.delete(`statements/${index}`)
-            .then((res) => {
+            .then(() => {
+                if(currentPage==totalPages && statements.length==1){
+                    setCurrentPage(currentPage-1);
+                }
                 getStatements();
-                console.log(res);
             })
-            .catch((err) => {
-                console.log(err);
+            .catch(() => {
             })
         }
     }

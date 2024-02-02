@@ -46,7 +46,7 @@ export const StatementDetailPage: React.FC = () =>  {
 		<div className='flex flex-col w-2/3 mx-auto'>
 			<h1 className="text-4xl font-bold leading-tight text-gray-900">자기소개서 확인</h1>
 			<div className='flex flex-row gap-3'>
-				<Button className='bg-negative-400 mt-5' onClick={() => navigate(-1)}>뒤로 가기</Button>
+				<Button className='bg-negative-400 mt-5' onClick={() => navigate("/interview")}>뒤로 가기</Button>
 				<Button className='bg-primary-400 mt-5' onClick={() => navigate("/statement/write/"+id)}>수정</Button>
 			</div>
 			<div className='mt-5'>
