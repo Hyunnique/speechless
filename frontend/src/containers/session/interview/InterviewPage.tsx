@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 
-import { useEffect, useRef } from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import { Button } from 'flowbite-react';
 import { CustomButton } from '../../../components/CustomButton.tsx';
 
@@ -8,7 +8,8 @@ import { useLocalAxios } from '../../../utils/axios.ts';
 import { useNavigate } from "react-router-dom";
 
 import { useInterviewSessionStore } from "../../../stores/session.ts";
-import {OpenVidu, Publisher, Session} from 'openvidu-browser';
+import {Device, OpenVidu, Publisher, Session, StreamManager, Subscriber} from "openvidu-browser";
+import {OpenViduVideo} from "../../../components/OpenViduVideo.tsx";
 
 export const InterviewPage = () => {
 
@@ -17,16 +18,15 @@ export const InterviewPage = () => {
 
 	const interviewSessionStore = useInterviewSessionStore();
 
-	const OV = new OpenVidu();
-	let session: Session | null = null;
-	const videoRef = useRef<HTMLVideoElement>(null);
+	let OV: OpenVidu | null = null;
+	const [ session, setSession ] = useState<Session | null>(null);
+	const [ mainStreamManager, setMainStreamManager ] = useState<StreamManager | null>(null);
+	const [ publisher, setPublisher ] = useState<Publisher | null>(null);
+	const [ subscribers, setSubscribers ] = useState<(Publisher | Subscriber | StreamManager)[]>([]);
+	const [ currentVideoDevice, setCurrentVideoDevice ] = useState<Device | undefined>(undefined);
 
-	let videoEnabled = true;
-	let audioEnabled = false;
-
-	let currentVideoDevice = null;
-	let mainStreamManager = null;
-	let publisher: Publisher | null = null;
+	const [ videoEnabled, setVideoEnabled ] = useState(true);
+	const [ audioEnabled, setAudioEnabled ] = useState(true);
 
 	// Connection을 생성해주는 함수
 	// 면접 페이지에서는 따로 다인 세션을 생성하지 않으므로, 페이지 진입시 session 생성
@@ -38,14 +38,33 @@ export const InterviewPage = () => {
 		return response.data;
 	}
 
-	const initSession = async () => {
-		session = OV.initSession();
+	const initSession = useCallback(async () => {
+		if (session !== null) return;
+		if (!OV) return;
+
+		const mySession = OV.initSession();
+
+		console.log("init");
+		mySession.on('streamCreated', (event) => {
+			const subscriber = mySession.subscribe(event.stream, undefined);
+			setSubscribers((prevSubscribers) => [ ...prevSubscribers, subscriber ]);
+		});
+
+		mySession.on('streamDestroyed', (event) => {
+			deleteSubscriber(event.stream.streamManager);
+		});
+
+		mySession.on('exception', (exception) => {
+			console.warn(exception);
+		});
+
+		setSession(mySession);
 
 		if (!interviewSessionStore.sessionId) {
 			navigate('/error/404');
 			return;
 		}
-		console.log(interviewSessionStore);
+
 		const sessionId = interviewSessionStore.sessionId;
 		const connectionData = await createConnection(sessionId);
 
@@ -54,8 +73,10 @@ export const InterviewPage = () => {
 			connectionData.token
 		);
 
-		await session.connect(connectionData.token);
-		publisher = await OV.initPublisherAsync(undefined, {
+		console.log(interviewSessionStore);
+
+		await mySession.connect(connectionData.token);
+		const _publisher = await OV.initPublisherAsync(undefined, {
 			audioSource: undefined,
 			videoSource: undefined,
 			publishAudio: audioEnabled,
@@ -66,47 +87,53 @@ export const InterviewPage = () => {
 			mirror: false
 		});
 
-		console.log("Hello");
-		console.log(publisher);
-
-		publisher.on('streamCreated', (event) => {
-			session!.subscribe(event.stream, undefined);
-		});
-
-		const test = await session.publish(publisher);
+		await mySession.publish(_publisher);
 
 		let devices = await OV.getDevices();
 		let videoDevices = devices.filter(device => device.kind === 'videoinput');
-		let currentVideoDeviceId = publisher.stream.getMediaStream().getVideoTracks()[0].getSettings().deviceId;
-		currentVideoDevice = videoDevices.find(device => device.deviceId === currentVideoDeviceId);
+		let currentVideoDeviceId = _publisher.stream.getMediaStream().getVideoTracks()[0].getSettings().deviceId;
+		const _currentVideoDevice = videoDevices.find(device => device.deviceId === currentVideoDeviceId);
 
-		mainStreamManager = publisher;
+		setMainStreamManager(_publisher);
+		setPublisher(_publisher);
+		setCurrentVideoDevice(_currentVideoDevice);
 
-		mainStreamManager.addVideoElement(videoRef.current!);
-		console.log("HELLO!!!!");
-	}
+		console.log(_publisher);
+	}, [interviewSessionStore]);
 
 	useEffect(() => {
+		console.log("effect!")
+		OV = new OpenVidu();
 		initSession().catch((error) => {
 			console.error(error);
 		});
 	}, []);
 
-	const toggleVideo = () => {
-		videoEnabled = !videoEnabled;
+	const deleteSubscriber = useCallback((streamManager: StreamManager) => {
+		setSubscribers((prevSubscribers) => {
+			const index = prevSubscribers.indexOf(streamManager);
+			if (index > -1) {
+				const newSubscribers = [...prevSubscribers];
+				newSubscribers.splice(index, 1);
+				return newSubscribers;
+			} else {
+				return prevSubscribers;
+			}
+		});
+	}, [subscribers]);
 
-		if (publisher) {
-			publisher.publishVideo(videoEnabled);
-		}
-	}
+	const toggleVideo = useCallback(() => {
+		setVideoEnabled(!videoEnabled);
 
-	const toggleAudio = () => {
-		audioEnabled = !audioEnabled;
+		console.log(mainStreamManager);
+		if (publisher) publisher.publishVideo(videoEnabled);
+	}, [videoEnabled]);
 
-		if (publisher) {
-			publisher.publishAudio(audioEnabled);
-		}
-	}
+	const toggleAudio = useCallback(() => {
+		setAudioEnabled(!audioEnabled);
+
+		if (publisher) publisher.publishAudio(audioEnabled);
+	}, [audioEnabled]);
 
 	return (
 		<div className='p-10 w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col'>
@@ -144,7 +171,11 @@ export const InterviewPage = () => {
 								</span>
 							</div>
 						</div>
-						<video autoPlay={true} ref={videoRef} className="w-[640px] h-[480px] border-2 border-black" />
+						{
+							mainStreamManager
+							? <OpenViduVideo streamManager={mainStreamManager} />
+							: null
+						}
 					</div>
 				</div>
 				<div className='session-ui'>

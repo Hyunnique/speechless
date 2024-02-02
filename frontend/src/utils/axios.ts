@@ -30,20 +30,21 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 		instance.interceptors.response.use(
 			(response) => response,
 			async (error) => {
-				console.log(error);
-				if (error.response.status === 401 && error.config.url !== '/auth/token') {
+				if (error.response.status === 401 && error.config.url !== '/auth/refresh') {
 					if (!authStore.refreshToken) {
 						authStore.clearAuth();
 						return Promise.reject(error);
 					}
 
-					const refreshResponse = await instance.post('/auth/token', null, {
+					const refreshResponse = await instance.get('/auth/refresh', {
 						headers: {
-							refresh: authStore.refreshToken
+							Refresh: authStore.refreshToken
 						}
 					});
 
 					authStore.setAccessToken(refreshResponse.data["access_token"]);
+
+					return instance.request(error.config);
 				}
 
 				return Promise.reject(error);
