@@ -5,9 +5,9 @@ import { Calendar } from '../components/Calendar.tsx';
 import type { CommunityView } from '../types/Community.ts';
 import { RecruitCard } from '../components/RecruitCard.tsx';
 
-//import Banner1 from '../assets/images/banner-1.png';
-//import Banner2 from '../assets/images/banner-2.png';
-import { Banner1, Banner2 } from '../components/Banners.tsx';
+import Banner1 from '../assets/images/banner-1.png';
+import Banner2 from '../assets/images/banner-2.png';
+//import { Banner1, Banner2 } from '../components/Banners.tsx';
 
 import { useEffect, useState } from 'react';
 import { useLocalAxios } from '../utils/axios.ts';
@@ -97,8 +97,8 @@ export const IndexPage = () => {
 		<>
 			<div className="relative h-56 sm:h-64 xl:h-80 2xl:h-96 mb-8">
 				<Carousel slideInterval={5000}>
-					<Banner1/>
-					<Banner2/>
+					<img src={Banner1} alt='banner1' className='w-full h-full object-cover' />
+					<img src={Banner2} alt='banner2' className='w-full h-full object-cover' />
 				</Carousel>
 			</div>
 			<div className='grid grid-cols-1 lg:grid-cols-2'>
