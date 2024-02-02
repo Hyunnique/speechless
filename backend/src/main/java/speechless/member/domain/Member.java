@@ -3,6 +3,9 @@ package speechless.member.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import speechless.common.entity.BaseTimeEntity;
+import speechless.community.domain.Community;
+
+import java.util.List;
 
 import static lombok.AccessLevel.PROTECTED;
 import static lombok.EqualsAndHashCode.Include;
@@ -32,5 +35,9 @@ public class Member extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private MemberType memberType;
+
+    @OneToMany(mappedBy = "writer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Community> communities;
+
 
 }
