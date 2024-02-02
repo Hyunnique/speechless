@@ -1,12 +1,20 @@
 package speechless.common.error;
 
-public record ErrorResponse(int status, String message) {
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import org.springframework.http.HttpStatus;
+
+@JsonInclude(Include.NON_NULL)
+public record ErrorResponse(
+    String name, String message, String trace, HttpStatus status) {
 
     @Override
     public String toString() {
         return "{\n" +
-                "\t\"status\": " + status +
+                "\t\"name\": " + name +
                 ",\n\t\"message\": \"" + message + '\"' +
+                ",\n\t\"trace\": \"" + trace + '\"' +
+                ",\n\t\"status\": \"" + status + '\"' +
                 "\n}";
     }
 

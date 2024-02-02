@@ -79,5 +79,4 @@ public class StatementController {
             .updateStatement(request, authCredentials),
             HttpStatus.OK);
     }
-
 }
