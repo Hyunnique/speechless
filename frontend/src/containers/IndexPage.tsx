@@ -7,6 +7,8 @@ import { RecruitCard } from '../components/RecruitCard.tsx';
 
 import Banner1 from '../assets/images/banner-1.png';
 import Banner2 from '../assets/images/banner-2.png';
+import Banner3 from '../assets/images/banner-3.png';
+import Banner4 from '../assets/images/banner-4.png';
 //import { Banner1, Banner2 } from '../components/Banners.tsx';
 
 import { useEffect, useState } from 'react';
@@ -99,6 +101,8 @@ export const IndexPage = () => {
 				<Carousel slideInterval={5000}>
 					<img src={Banner1} alt='banner1' className='w-full h-full object-cover' />
 					<img src={Banner2} alt='banner2' className='w-full h-full object-cover' />
+					<img src={Banner3} alt='banner3' className='w-full h-full object-cover' />
+					<img src={Banner4} alt='banner4' className='w-full h-full object-cover' />
 				</Carousel>
 			</div>
 			<div className='grid grid-cols-1 lg:grid-cols-2'>
