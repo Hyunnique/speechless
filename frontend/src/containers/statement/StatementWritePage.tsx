@@ -68,7 +68,7 @@ export const StatementWritePage: React.FC = () =>  {
 		localAxios.post("statements", formData)
 		.then((res) => {
 			console.log(res);
-			navigate("/interview/detail/" + res.data.id);
+			navigate("/statement/detail/" + res.data.id);
 		})
 		.catch((err) => {
 			alert("자기소개서 등록에 실패했습니다.")
@@ -81,7 +81,7 @@ export const StatementWritePage: React.FC = () =>  {
 		localAxios.put(`statements`, formData)
 		.then((res) => {
 			console.log(res);
-			navigate("/interview/detail/" + res.data.id);
+			navigate("/statement/detail/" + res.data.id);
 		})
 		.catch((err) => {
 			console.log(err);
