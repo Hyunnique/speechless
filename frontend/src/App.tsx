@@ -15,32 +15,57 @@ import { StatementWritePage } from './containers/statement/StatementWritePage.ts
 import { InterviewEnterPage } from './containers/session/interview/InterviewEnterPage.tsx';
 import { StatementDetailPage } from './containers/statement/StatementDetailPage.tsx';
 import {SpeechCreatePage} from "./containers/speech/SpeechCreatePage.tsx";
+import { PrivateRoute } from './containers/layout/PrivateRoute.tsx';
+import { AuthRoute } from './containers/layout/AuthRoute.tsx';
 export default function App() {
 	return (
 		<>
 			<BrowserRouter>
 				<Routes>
+
 					<Route element={<DefaultLayout />}>
-						{/* 레이아웃이 필요한 페이지 */}
-						<Route path='/' element={<IndexPage />} />
-						<Route path='/login' element={<LoginPage />} />
-						<Route path='/speech' element={<SpeechListPage />} />
-						<Route path='/speech/:id' element={<SpeechDetailPage />} />
-						<Route path='/speech/write' element={<SpeechCreatePage />} />
-						<Route path='/mypage' element={<MyPage />} />
-						<Route path='/statement/write/:id?' element={<StatementWritePage />} />
-						<Route path='/statement/detail/:id' element={<StatementDetailPage />} />
-						<Route path='/interview' element={<InterviewEnterPage />} />
+						<Route element={<PrivateRoute />}>
+							{/* 레이아웃 있음 && 로그인 필요 */}
+							<Route path='/speech' element={<SpeechListPage />} />
+							<Route path='/speech/:id' element={<SpeechDetailPage />} />
+							<Route path='/speech/write' element={<SpeechCreatePage />} />
+							<Route path='/mypage' element={<MyPage />} />
+							<Route path='/statement/write/:id?' element={<StatementWritePage />} />
+							<Route path='/statement/detail/:id' element={<StatementDetailPage />} />
+							<Route path='/interview' element={<InterviewEnterPage />} />
+						</Route>
 					</Route>
-					<Route>
-						{/* 레이아웃이 필요없는 페이지 */}
-						<Route path='/logout' element={<LogoutPage />} />
-						<Route path='/auth/google' element={<GoogleCallback />} />
-						<Route path='/auth/kakao' element={<KakaoCallback />} />
-						<Route path='/auth/naver' element={<NaverCallback />} />
+
+					<Route element={<DefaultLayout />}>
+						<Route element={<AuthRoute />}>
+							{/* 레이아웃 있음 && 비로그인 필요 */}
+							<Route path='/login' element={<LoginPage />} />
+						</Route>
+					</Route>
+
+					<Route element={<DefaultLayout />}>
+						{/* 레이아웃 있음 && 로그인 상관없음*/}
+						<Route path='/' element={<IndexPage />} />
+					</Route>
+
+					<Route element={<PrivateRoute />}>
+						{/* 레이아웃 없음 && 로그인 필요 */}
 						<Route path='/session/interview' element={<InterviewPage />} />
 						<Route path='/session/speech' element={<SpeechPage />} />
 					</Route>
+
+					<Route element={<AuthRoute />}>
+						{/* 레이아웃 없음 && 비로그인 필요 */}
+					</Route>
+
+					{/* 레이아웃 없음 && 로그인 상관없음 */}
+					<Route path='/logout' element={<LogoutPage />} />
+					<Route path='/auth/google' element={<GoogleCallback />} />
+					<Route path='/auth/kakao' element={<KakaoCallback />} />
+					<Route path='/auth/naver' element={<NaverCallback />} />
+
+
+
 				</Routes>
 			</BrowserRouter>
 		</>
