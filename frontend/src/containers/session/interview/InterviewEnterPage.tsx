@@ -8,8 +8,18 @@ import { CustomButton } from '../../../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
 import { useLocalAxios } from "../../../utils/axios.ts";
 import { useInterviewSessionStore } from "../../../stores/session.ts";
+import { Statement } from '../../../types/Statement.ts';
 
 import TalkImg from '../../../assets/images/human_robot_talk.png';
+
+interface StatementForm extends Statement {
+	id: 0,
+	title: '',
+	company: '',
+	position: '',
+	career: '',
+	questions: [{ question: '', answer: '' }],
+}
 
 export const InterviewEnterPage = () => {
 
@@ -19,12 +29,26 @@ export const InterviewEnterPage = () => {
 	const [openModal, setOpenModal] = useState(false);
 	const [selectedItem, setSelectedItem] = useState('');
 
+	const [statements, setStatements] = useState<StatementForm[]>([]);
+
+	const [formData, setFormData] = useState({
+		title: '',
+		statement: {} as StatementForm,
+		questionsNum: 10
+	})
+
 	const navigate = useNavigate();
 	const localAxios = useLocalAxios();
 
-	const handleSelect = (item: string) => {
-		setSelectedItem(item);
-	};
+	useEffect(() => {
+		localAxios.get('/statements', {params: {pageNum: 1, pageSize: 999999999}})
+		.then((res) => {
+			setStatements(res.data.statements);
+		})
+		.catch((err) => {
+			console.log(err);
+		})
+	}, [openModal])
 
 	const startInterviewSession = async () => {
 		setOpenModal(false);
@@ -84,20 +108,21 @@ export const InterviewEnterPage = () => {
 					<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
 						연습의 제목을 입력해 주세요.
 					</p>
-					<TextInput></TextInput>
+					<TextInput value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})}></TextInput>
 					<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
 						질문을 생성할 자기소개서를 선택해 주세요.
 					</p>
-					<Dropdown label={selectedItem || "Select an option"}>
-						<Dropdown.Item onClick={() => handleSelect('Dashboard')}>Dashboard</Dropdown.Item>
-						<Dropdown.Item onClick={() => handleSelect('Settings')}>Settings</Dropdown.Item>
-						<Dropdown.Item onClick={() => handleSelect('Earnings')}>Earnings</Dropdown.Item>
-						<Dropdown.Item onClick={() => handleSelect('Sign out')}>Sign out</Dropdown.Item>
+					<Dropdown color='gray' label={selectedItem || "Select an option"}>
+						{statements.map((statement, index) => (
+							<Dropdown.Item onClick={() => {setSelectedItem(statement.title);  formData.statement=statement;} }>
+								{statement.title}
+							</Dropdown.Item>
+						))}
 					</Dropdown>
 					<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
 						맞춤 질문을 몇개 생성할지 정해 주세요.
 					</p>
-					<TextInput></TextInput>
+					<TextInput type='number' value={formData.questionsNum} onChange={(e) => setFormData({...formData, questionsNum: Number(e.target.value)})}></TextInput>
 				</div>
 				</Modal.Body>
 				<Modal.Footer>
@@ -105,8 +130,8 @@ export const InterviewEnterPage = () => {
 					<Button className='bg-primary-300' onClick={ startInterviewSession }>
 						면접 시작
 					</Button>
-					<Button className='bg-primary-300' onClick={() => setOpenModal(false)}>
-						나가기
+					<Button className='bg-negative-300' onClick={() => setOpenModal(false)}>
+						취소
 					</Button>
 				</div>
 				</Modal.Footer>
