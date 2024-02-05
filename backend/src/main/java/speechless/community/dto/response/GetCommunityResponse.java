@@ -8,7 +8,7 @@ import java.util.Date;
 public record GetCommunityResponse(
         Long id,
         String writer,
-        String contentId,
+        String category,
         String title,
         String content,
         Date sessionStart,
@@ -22,7 +22,7 @@ public record GetCommunityResponse(
         return new GetCommunityResponse(
                 community.getId(),
                 community.getWriter().getName(),
-                community.getContent(),
+                community.getCategory(),
                 community.getTitle(),
                 community.getContent(),
                 community.getSessionStart(),

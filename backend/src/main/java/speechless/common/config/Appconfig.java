@@ -15,11 +15,5 @@ import speechless.auth.infra.naver.config.NaverCredentials;
         NaverCredentials.class,
         GoogleCredentials.class
 }) public class Appconfig {
-    @Bean
-    public FlywayMigrationStrategy cleanMigrateStrategy() {
-        return flyway -> {
-            flyway.repair();
-            flyway.migrate();
-        };
-    }
+
 }
