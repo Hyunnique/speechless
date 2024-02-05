@@ -4,7 +4,6 @@ import { RecruitCard } from '../../components/RecruitCard';
 import { CommunityView } from '../../types/Community.ts';
 import { useLocalAxios } from '../../utils/axios.ts';
 import {Link} from "react-router-dom";
-import { SearchCriteria } from "../../types/SearchCriteria.ts";
 
 const awaitingSpeechSessions: CommunityView[] = [
       //향후, Custom hook으로 변환 useEffect 정리, 스크롤 바가 밀리는 현상 해결해야함(SpeechSearch 컴포넌트 플로팅이 이유로 추정)=>일단 해결..
@@ -147,14 +146,42 @@ const awaitingSpeechSessions: CommunityView[] = [
         invisible: false,
         private: false,
         createdAt: new Date()
+    },
+    {
+        id: 11,
+        writer: '김민수',
+        category: 'IT',
+        title: 'IT 자유주제 5분 스피치',
+        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
+        currentParticipants: 4,
+        maxParticipants: 8,
+        deadline: new Date(),
+        sessionStart: new Date(),
+        invisible: false,
+        private: false,
+        createdAt: new Date()
+    },
+    {
+        id: 12,
+        writer: '김민수',
+        category: 'IT',
+        title: 'IT 자유주제 5분 스피치',
+        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
+        currentParticipants: 4,
+        maxParticipants: 8,
+        deadline: new Date(),
+        sessionStart: new Date(),
+        invisible: false,
+        private: false,
+        createdAt: new Date()
     }
 ];
 export const SpeechListPage = () => {
     const [speechSessions, setSpeechSessions] = useState<CommunityView[]>([]);
     const [pageIndex, setPageIndex] = useState(1);
     const loadingRef = useRef(null);
-    const localAxios = useLocalAxios(true);
-    const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({});
+    const localAxios = useLocalAxios();
+
     // 데이터 로딩을 위한 useEffect
     useEffect(() => {
         localAxios.get('/community/speechlist')
@@ -174,7 +201,7 @@ export const SpeechListPage = () => {
             if (firstEntry.isIntersecting) {
                 loadMoreSpeechSessions();
             }
-        }, { threshold: 0.8 });
+        }, { threshold: 0.5 });
 
         if (loadingRef.current) {
             observer.observe(loadingRef.current);
@@ -197,21 +224,12 @@ export const SpeechListPage = () => {
         }
     };
 
-    useEffect(() => {
-        console.log("현재 검색 조건:", searchCriteria);
-        const filteredSessions = awaitingSpeechSessions.filter(session => {
-        });
-        setSpeechSessions(filteredSessions);
-    }, [searchCriteria]);
-
-
-
     return (
         <>
             <div className="flex">
                 <div>
                     <div className="sticky top-0 z-10">
-                        <SpeechSearch onSearch={setSearchCriteria}/>
+                        <SpeechSearch></SpeechSearch>
                     </div>
                 </div>
                 <div className="ml-4 grid xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">

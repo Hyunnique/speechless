@@ -5,28 +5,35 @@ import classNames  from "classnames";
 
 
 export const SpeechCreatePage = () => {
-    // 폼 데이터..... 날짜에 new Date()...
+    // 폼 데이터.....
     const [formData, setFormData] = useState({
+        category: '',
         title: '',
         content: '',
-        isPrivate: true,
+        currentParticipants: 0,
+        maxParticipants: 0,
+        deadline: '',
         sessionStart: '',
-        deadLine: '',
-        category: 'IT',
-        maxParticipants: 2,
+        invisible: true,
+        private: true,
+        createdAt: '',
     });
 
-    const localAxios = useLocalAxios(true);
+    const localAxios = useLocalAxios();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => {
+            const newFormData = { ...prev, [name]: value };
+            console.log(newFormData); //
+            return newFormData;
+        });
     };
     // 폼 제출
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            const response = await localAxios.post('/community', formData);
+            const response = await localAxios.post('/community/createSpeech', formData);
             alert('작성 완료');
         } catch (error) {
             console.log(formData);
@@ -34,24 +41,49 @@ export const SpeechCreatePage = () => {
         }
     };
 
-    const privateButtonClick = (value:boolean) => {
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await localAxios.get('/'); // 카테고리 불러오기
+
+                setFormData((prev) => ({
+                    ...prev,
+                    ...response.data, //
+                }));
+            } catch (error) {
+                console.error('카테고리 불러오기 실패', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const privateButtonClick = (value: boolean) => {
         setFormData((prev) => ({
             ...prev,
-            isPrivate: value,
+            private: value,
+        }));
+    };
+    const invisibleButtonClick = (value: boolean) => {
+        setFormData((prev) => ({
+            ...prev,
+            invisible: value,
         }));
     };
 
     const handleSessionStartChange = (date: Date) => {
-        setFormData((prev) => ({
-            ...prev,
-            sessionStart: date.toISOString(),
-        }));
+        setFormData((prev) => {
+            const newFormData = { ...prev, sessionStart: date.toISOString() };
+            console.log('Session Start:', newFormData.sessionStart); // 선택된 날짜를 콘솔에 출력
+            return newFormData;
+        });
     };
+
 
     const handleDeadlineChange = (date: Date) => {
         setFormData((prev) => ({
             ...prev,
-            deadLine: date.toISOString(),
+            deadline: date.toISOString(),
         }));
     };
 
@@ -94,10 +126,12 @@ export const SpeechCreatePage = () => {
                         <div className="space-x-3">
                             <button
                                 className={classNames(
-                                    'hover:bg-primary-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline',
-                                    (formData.isPrivate ? 'bg-positive-500' : 'bg-negative-500')
+                                    'bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline',
+                                    {
+                                        'bg-blue-500': formData.private, // private 값에 따라 클래스 추가
+                                    }
                                 )}
-                                name="isPrivate"
+                                name="private"
                                 onClick={() => privateButtonClick(true)}
                                 type="button"
                             >
@@ -105,14 +139,49 @@ export const SpeechCreatePage = () => {
                             </button>
                             <button
                                 className={classNames(
-                                    'hover:bg-primary-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline',
-                                    (formData.isPrivate ? 'bg-negative-500' : 'bg-positive-500')
+                                    'bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline',
+                                    {
+                                        'bg-blue-500': !formData.private, // private 값에 따라 클래스 추가
+                                    }
                                 )}
-                                name="isPrivate"
+                                name="private"
                                 onClick={() => privateButtonClick(false)}
                                 type="button"
                             >
                                 자율 참여
+                            </button>
+                        </div>
+                    </div>
+                    <div className="mb-4">
+                        <p className="block text-gray-700 text-sm font-bold mb-2">
+                            공개 여부
+                        </p>
+                        <div className="space-x-3">
+                            <button
+                                className={classNames(
+                                    'bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline',
+                                    {
+                                        'bg-blue-500': formData.invisible, // invisible 값에 따라 클래스 추가
+                                    }
+                                )}
+                                name="invisible"
+                                onClick={() => invisibleButtonClick(true)}
+                                type="button"
+                            >
+                                공개
+                            </button>
+                            <button
+                                className={classNames(
+                                    'bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline',
+                                    {
+                                        'bg-blue-500': !formData.invisible, // invisible 값에 따라 클래스 추가
+                                    }
+                                )}
+                                name="private"
+                                onClick={() => invisibleButtonClick(false)}
+                                type="button"
+                            >
+                                비공개
                             </button>
                         </div>
                     </div>
@@ -133,6 +202,7 @@ export const SpeechCreatePage = () => {
                             카테고리
                         </label>
                         <select
+                            id="category"
                             name="category"
                             value={formData.category}
                             onChange={handleChange}
@@ -142,6 +212,20 @@ export const SpeechCreatePage = () => {
                             <option value="Education">Education</option>
                             <option value="Science">Science</option>
                         </select>
+                    </div>
+                    <div className="mb-4 w-1/6">
+                        <label htmlFor="minParticipants" className="block text-gray-700 text-sm font-bold mb-2">
+                            최소 참가자 수
+                        </label>
+                        <input
+                            type="number"
+                            id="currentParticipants"
+                            name="currentParticipants"
+                            value={formData.currentParticipants}
+                            onChange={handleChange}
+                            required
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        />
                     </div>
                     <div className="mb-4 w-1/6">
                         <label htmlFor="maxParticipants" className="block text-gray-700 text-sm font-bold mb-2">
