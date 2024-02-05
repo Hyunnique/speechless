@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { List, Button } from 'flowbite-react';
 import { InterviewReport } from '../../types/Report';
 import { useLocalAxios } from '../../utils/axios';
+import { useNavigate } from 'react-router-dom';
 
 
 export const InterviewReportView: React.FC = () => {
     const [reports, setReports] = useState<InterviewReport[]>([]);
     const localAxios = useLocalAxios(true);
+    const navigate = useNavigate();
     
     useEffect(() => {
         getReports();
@@ -44,7 +46,7 @@ export const InterviewReportView: React.FC = () => {
         <>
             <ul className='flex flex-col gap-3 w-5/6 mx-auto'>
                 {reports.map((report) => (
-                    <li key={report.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2' onClick={() => navigate('/statement/detail/'+statement.id)}>
+                    <li key={report.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2' >
                         <div className='basis-3/4 flex flex-col justify-center'>
                             <p className='text-lg font-semibold tracking-tight text-gray-900 dark:text-white w-full'>{report.topic}</p>
                         </div>
