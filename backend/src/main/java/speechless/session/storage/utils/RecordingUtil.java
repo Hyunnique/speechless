@@ -2,12 +2,18 @@ package speechless.session.storage.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import speechless.session.storage.exception.UnzipException;
 
 
@@ -55,5 +61,22 @@ public class RecordingUtil {
             throw new IOException("Bad zip entry: " + zipEntry.getName());
         }
         return normalizePath;
+    }
+
+    public static String getFileName(String recordingId) {
+
+        try {
+            JSONParser parser = new JSONParser();
+            Reader reader = new FileReader(
+                "/opt/openvidu/recordings/" + recordingId + "/" + recordingId + ".json");
+            JSONObject object = (JSONObject) parser.parse(reader);
+            JSONArray files = (JSONArray) object.get("files");
+            JSONObject file = (JSONObject) files.get(0);
+            return (String) file.get("name");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -23,8 +23,7 @@ public class FileUtil {
 
     public static String bucketName;
 
-    public static void uploadFile(String id, String classification, String session, String take,
-        String path) {
+    public static void uploadFile(String fileName, String path) {
 
         final AmazonS3 s3 = AmazonS3ClientBuilder.standard()
             .withEndpointConfiguration(
@@ -33,7 +32,7 @@ public class FileUtil {
                 new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
             .build();
 
-        String objectName = id + "_" + classification + "_" + session + "/" + take;
+        String objectName = fileName;
         String filePath = path;
 
         try {
@@ -45,7 +44,7 @@ public class FileUtil {
         }
     }
 
-    public static void deleteFile(String id, String classification, String session, String take) {
+    public static void deleteFile(String fileName) {
 
         final AmazonS3 s3 = AmazonS3ClientBuilder.standard()
             .withEndpointConfiguration(
@@ -55,7 +54,7 @@ public class FileUtil {
             .build();
 
         try {
-            s3.deleteObject(bucketName, id + "_" + classification + "_" + session + "/" + take);
+            s3.deleteObject(bucketName, fileName);
         } catch (AmazonS3Exception e) {
             throw new StorageServiceException();
         } catch (SdkClientException e) {
