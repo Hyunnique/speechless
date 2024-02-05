@@ -7,7 +7,7 @@ import { useAuthStore } from "../stores/auth.ts";
 // 로그인 등 일부 Token 인증이 필요없는 요청에 대해서만 파라미터로 false를 명시해주면 된다.
 
 const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
-	const authenticated: boolean = isAuth || true;
+	const authenticated: boolean = isAuth !== undefined ? isAuth : true;
 	const authStore = useAuthStore();
 
 	const instance = Axios.create({
@@ -36,11 +36,20 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 						return Promise.reject(error);
 					}
 
-					const refreshResponse = await instance.get('/auth/refresh', {
+					const refreshAxios = Axios.create({
+						baseURL: import.meta.env.VITE_API_BASE_URL,
+					})
+
+					const refreshResponse = await refreshAxios.get('/auth/refresh', {
 						headers: {
 							Refresh: authStore.refreshToken
 						}
-					});
+					})
+
+					if (!refreshResponse.data.accessToken) {
+						authStore.clearAuth();
+						return Promise.reject(error);
+					}
 
 					console.log(refreshResponse);
 					authStore.setAccessToken(refreshResponse.data.accessToken);
