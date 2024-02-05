@@ -75,6 +75,9 @@ export const StatementWritePage: React.FC = () =>  {
 			setFormData(prev => ({ ...prev, career: numericCareer }));
 			alert("경력은 숫자를 입력해야 합니다.");
 		}
+		else if(Number(career) <0) {
+			alert("경력은 0 이상의 값만 입력 가능합니다.")
+		}
 		else {
 			setFormData(prev => ({ ...prev, ['career']: career }));
 		}
@@ -107,6 +110,9 @@ export const StatementWritePage: React.FC = () =>  {
 
 	//post 메소드를 통해 벡엔드에 새로운 자기소개서 생성을 요청한다.
 	const createStatement = () => {
+		if (!checkValidation()) {
+			return;
+		}
 		localAxios.post("statements", formData)
 		.then((res) => {
 			console.log(res);
@@ -120,6 +126,9 @@ export const StatementWritePage: React.FC = () =>  {
 
 	//put 메소드를 통해 벡엔드에 특정 id의 자기소개서 수정을 요청한다.
 	const updateStatement = () => {
+		if (!checkValidation()) {
+			return;
+		}
 		localAxios.put(`statements`, formData)
 		.then((res) => {
 			console.log(res);
@@ -128,6 +137,32 @@ export const StatementWritePage: React.FC = () =>  {
 		.catch((err) => {
 			console.log(err);
 		});
+	}
+
+	const checkValidation = () => {
+		if(formData.title === "") {
+			alert("제목를 입력해야 합니다.");
+			return false;
+		}
+		else if(formData.company === "") {
+			alert("기업 이름를 입력해야 합니다.");
+			return false;
+		}
+		else if(formData.position === "") {
+			alert("지원 포지션를 입력해야 합니다.");
+			return false;
+		}
+		else if(formData.career === "") {
+			alert("경력을 입력해야 합니다.");
+			return false;
+		}
+		else if(formData.questions?.length === 0) {
+			alert("문항을 입력해야 합니다.");
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 
 	return (
@@ -187,7 +222,7 @@ export const StatementWritePage: React.FC = () =>  {
 								/>
 								<div className="text-sm text-gray-500 dark:text-gray-400">
 									{formData.questions[index].answer.length} / 1000
-								</div>ti
+								</div>
 								{formData.questions.length > 1 && (
 									<div className="flex jusfy-end">
 										<Button onClick={() => removeQuestion(index)} className='bg-negative-300 mt-2'>
