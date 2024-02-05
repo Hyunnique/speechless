@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 import speechless.common.entity.BaseTimeEntity;
+import speechless.common.error.validation.OutOfSizeException;
 import speechless.member.domain.Member;
 
 @Entity
@@ -73,6 +74,11 @@ public class Statement extends BaseTimeEntity {
     }
 
     public void addQuestion(StatementQuestion question) {
+
+        if (this.questions.size() >= 5) {
+            throw new OutOfSizeException();
+        }
+
         this.questions.add(question);
         question.setStatement(this);
     }

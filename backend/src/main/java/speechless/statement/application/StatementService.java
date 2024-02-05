@@ -7,6 +7,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import speechless.auth.dto.AuthCredentials;
+import speechless.common.error.SpeechlessException;
+import speechless.common.error.validation.PageException;
 import speechless.member.domain.Member;
 import speechless.member.domain.repository.MemberRepository;
 import speechless.member.exception.MemberNotFoundException;
@@ -33,7 +35,7 @@ public class StatementService {
 
     @Transactional
     public StatementResponse createStatement(StatementRequest request,
-        AuthCredentials authCredentials) {
+        AuthCredentials authCredentials) throws SpeechlessException {
 
         Member loginMember = getLoginUser(authCredentials);
 
@@ -51,7 +53,7 @@ public class StatementService {
     }
 
     // 자기소개서 문항 생성
-    private void createStatementQuestions(StatementRequest request, Statement statement) {
+    private void createStatementQuestions(StatementRequest request, Statement statement) throws SpeechlessException {
 
         request.getQuestions().forEach(
             (question) -> {
@@ -62,7 +64,11 @@ public class StatementService {
     }
 
     public StatementListResponse getStatements(int pageSize, int pageNum,
-        AuthCredentials authCredentials) {
+        AuthCredentials authCredentials) throws SpeechlessException {
+
+        if (pageNum < 1 || pageSize < 1 || pageSize > 20) {
+            throw new PageException();
+        }
 
         Member loginMember = memberRepository.findById(authCredentials.id())
             .orElseThrow(MemberNotFoundException::new);
@@ -79,7 +85,7 @@ public class StatementService {
             responsePage.getTotalPages(), responsePage.getTotalElements());
     }
 
-    public StatementResponse getStatement(Long id, AuthCredentials authCredentials) {
+    public StatementResponse getStatement(Long id, AuthCredentials authCredentials) throws SpeechlessException {
 
         Member loginMember = memberRepository.findById(authCredentials.id())
             .orElseThrow(MemberNotFoundException::new);
@@ -91,14 +97,12 @@ public class StatementService {
     }
 
     @Transactional
-    public void deleteStatement(Long id, AuthCredentials authCredentials) {
+    public void deleteStatement(Long id, AuthCredentials authCredentials) throws SpeechlessException {
 
         Statement statement = statementRepository.findById(id)
             .orElseThrow(StatementNotFoundException::new);
 
-        if (!authCredentials.id().equals(statement.getMember().getId())) {
-            throw new NotAllowedStatementException();
-        }
+        checkAuth(authCredentials, statement);
 
         statementRepository.delete(statement);
     }
@@ -106,7 +110,7 @@ public class StatementService {
 
     @Transactional
     public StatementResponse updateStatement(StatementUpdateRequest request,
-        AuthCredentials authCredentials) {
+        AuthCredentials authCredentials) throws SpeechlessException {
 
         Member loginMember = memberRepository.findById(authCredentials.id())
             .orElseThrow(MemberNotFoundException::new);
@@ -114,9 +118,7 @@ public class StatementService {
         Statement statement = statementRepository.findById(request.getId())
             .orElseThrow(StatementNotFoundException::new);
 
-        if (!authCredentials.id().equals(statement.getMember().getId())) {
-            throw new NotAllowedStatementException();
-        }
+        checkAuth(authCredentials, statement);
 
         Statement updateStatement = StatementMapper.INSTANCE
             .toEntity(request).toBuilder().member(loginMember).build();
@@ -134,10 +136,16 @@ public class StatementService {
         return StatementMapper.INSTANCE.toResponse(statement);
     }
 
-    private Member getLoginUser(AuthCredentials authCredentials) {
+    private Member getLoginUser(AuthCredentials authCredentials) throws SpeechlessException {
 
         return memberRepository.findById(authCredentials.id())
-                .orElseThrow(MemberNotFoundException::new);
+            .orElseThrow(MemberNotFoundException::new);
+    }
+
+    private void checkAuth(AuthCredentials authCredentials, Statement statement) throws SpeechlessException {
+        if (!authCredentials.id().equals(statement.getMember().getId())) {
+            throw new NotAllowedStatementException();
+        }
     }
 
 }

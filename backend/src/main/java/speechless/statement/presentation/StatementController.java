@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +35,7 @@ public class StatementController {
     @PostMapping("")
     public ResponseEntity<StatementResponse> createStatement(
         @Parameter(hidden = true) @Auth AuthCredentials authCredentials,
-        @RequestBody StatementRequest request) {
+        @RequestBody @Validated StatementRequest request) {
         return new ResponseEntity<>(statementService
             .createStatement(request, authCredentials),
             HttpStatus.CREATED);
@@ -73,7 +74,7 @@ public class StatementController {
     @PutMapping("")
     public ResponseEntity<StatementResponse> updateStatement(
         @Parameter(hidden = true) @Auth AuthCredentials authCredentials,
-        @RequestBody StatementUpdateRequest request) {
+        @RequestBody @Validated StatementUpdateRequest request) {
 
         return new ResponseEntity<>(statementService
             .updateStatement(request, authCredentials),
