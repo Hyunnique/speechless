@@ -14,8 +14,8 @@ export class FaceAnalyzer {
 	private intervalId: number | null = null;
 	private lastKnownScore: number;
 	public scores: number[] = [];
-	public startTime: number;
-	public endTime: number;
+	public startTime: number | undefined;
+	public endTime: number | undefined;
 
 	constructor(videoRef: React.RefObject<HTMLVideoElement>) {
 		this.videoRef = videoRef;
