@@ -84,7 +84,7 @@ export const InterviewPage = () => {
 			resolution: '640x480',
 			frameRate: 30,
 			insertMode: 'APPEND',
-			mirror: false
+			mirror: true
 		});
 
 		await mySession.publish(_publisher);
@@ -134,6 +134,18 @@ export const InterviewPage = () => {
 
 		if (publisher) publisher.publishAudio(audioEnabled);
 	}, [audioEnabled]);
+
+	const startAnswer = useCallback(async () => {
+		const response = await localAxios.post('openvidu/recording/start/' + interviewSessionStore.sessionId)
+		console.log(response);
+		console.log("answer start");
+	}, []);
+
+	const stopAnswer = useCallback(async () => {
+		const response = await localAxios.post('openvidu/recording/stop/' + interviewSessionStore.sessionId)
+		console.log(response);
+		console.log("answer stop");
+	}, []);
 
 	return (
 		<div className='p-10 w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col'>
@@ -185,6 +197,8 @@ export const InterviewPage = () => {
 			<div className='session-footer flex justify-center'>
 				<Button color='blue' onClick={toggleAudio}>마이크 토글</Button>
 				<Button color='blue' onClick={toggleVideo}>카메라 토글</Button>
+				<Button color='blue' onClick={startAnswer}>답변 시작</Button>
+				<Button color='blue' onClick={stopAnswer}>답변 종료</Button>
 			</div>
 		</div>
 	);

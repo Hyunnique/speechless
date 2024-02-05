@@ -42,7 +42,8 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 						}
 					});
 
-					authStore.setAccessToken(refreshResponse.data["access_token"]);
+					console.log(refreshResponse);
+					authStore.setAccessToken(refreshResponse.data.accessToken);
 
 					return instance.request(error.config);
 				}
