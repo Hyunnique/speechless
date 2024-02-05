@@ -1,0 +1,10 @@
+${AnsiColor.BRIGHT_RED}   _____ _____  ______ ______ _____ _    _ _      ______  _____ _____
+${AnsiColor.BRIGHT_YELLOW}  / ____|  __ \|  ____|  ____/ ____| |  | | |    |  ____|/ ____/ ____|
+${AnsiColor.GREEN} | (___ | |__) | |__  | |__ | |    | |__| | |    | |__  | (___| (___
+${AnsiColor.CYAN}  \___ \|  ___/|  __| |  __|| |    |  __  | |    |  __|  \___ \\___ \
+${AnsiColor.BLUE}  ____) | |    | |____| |___| |____| |  | | |____| |____ ____) |___) |
+${AnsiColor.MAGENTA} |_____/|_|    |______|______\_____|_|  |_|______|______|_____/_____/
+
+
+${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}
