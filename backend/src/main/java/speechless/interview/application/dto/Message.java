@@ -1,4 +1,4 @@
-package speechless.interview.dto;
+package speechless.interview.application.dto;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;

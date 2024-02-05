@@ -5,8 +5,10 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import speechless.interview.dto.GptRequest;
-import speechless.interview.dto.GptResponse;
+import speechless.interview.application.dto.GptRequest;
+import speechless.interview.application.dto.GptResponse;
+import speechless.interview.exception.GptBadRequestException;
+import speechless.interview.exception.GptServerErrorException;
 
 @Component
 public class GptUtil {
@@ -25,10 +27,10 @@ public class GptUtil {
             .body(request)
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
-                throw new RuntimeException("잘못된 요청으로 인한 API 오류");
+                throw new GptBadRequestException();
             })
             .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
-                throw new RuntimeException("API 서버 처리 실패");
+                throw new GptServerErrorException();
             })
             .body(GptResponse.class);
     }

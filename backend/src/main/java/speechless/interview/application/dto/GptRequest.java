@@ -1,4 +1,4 @@
-package speechless.interview.dto;
+package speechless.interview.application.dto;
 
 import java.util.List;
 
