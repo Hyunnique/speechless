@@ -42,23 +42,19 @@ export const InterviewReportView: React.FC = () => {
 
     return(
         <>
-            <List>
+            <ul className='flex flex-col gap-3 w-5/6 mx-auto'>
                 {reports.map((report) => (
-                    <List.Item key={report.id} className='mt-4 p-1 flex bg-primary-50 border-2 shadow-sm rounded-3xl'>
-                        <div className='basis-3/4'>
-                            <p className='m-2 text-lg tracking-tight text-gray-900 dark:text-white w-full'>{report.topic}</p>
+                    <li key={report.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2' onClick={() => navigate('/statement/detail/'+statement.id)}>
+                        <div className='basis-3/4 flex flex-col justify-center'>
+                            <p className='text-lg font-semibold tracking-tight text-gray-900 dark:text-white w-full'>{report.topic}</p>
                         </div>
-                        {/* <div className='basis-1/4'>
-                            <p className='m-2 tracking-tight text-gray-900 dark:text-white w-full'>{report.company}</p>
-                        </div> */}
-
-                        <div className='basis-1/4 flex flex-auto'>
-                            <Button className='m-1 bg-primary-300 text-white font-thin'>다운로드</Button>
-                            <Button className='m-1 bg-negative-300 text-white font-thin'>삭제</Button>
+                        <div className='basis-1/4 flex flex-col items-end'>
+                            <Button className='w-1/2 bg-primary-400'>다운로드</Button>
+                            <Button className='w-1/2 bg-negative-400'>삭제</Button>
                         </div>
-                    </List.Item>
+                    </li>
                 ))}
-            </List>
+            </ul>
         </>
     );
 
