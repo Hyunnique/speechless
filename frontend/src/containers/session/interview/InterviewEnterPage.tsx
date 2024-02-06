@@ -41,7 +41,7 @@ export const InterviewEnterPage = () => {
 	const localAxios = useLocalAxios();
 
 	useEffect(() => {
-		localAxios.get('/statements', {params: {pageNum: 1, pageSize: 999999999}})
+		localAxios.get('/statements', {params: {pageNum: 1, pageSize: 10}})
 		.then((res) => {
 			setStatements(res.data.statements);
 		})
@@ -52,7 +52,9 @@ export const InterviewEnterPage = () => {
 
 	const startInterviewSession = async () => {
 		setOpenModal(false);
-		const response = await localAxios.post('openvidu/sessions');
+		const response = await localAxios.post('openvidu/sessions', {
+			topic: formData.title
+		});
 
 		if (interviewSessionStore.sessionId) {
 			try {
@@ -64,7 +66,8 @@ export const InterviewEnterPage = () => {
 			interviewSessionStore.clearSession();
 		}
 
-		interviewSessionStore.setSessionId(response.data);
+		interviewSessionStore.setSessionId(response.data.sessionId);
+		interviewSessionStore.setInterviewId(response.data.interviewId);
 		interviewSessionStore.setTitle(formData.title);
 		interviewSessionStore.setStatement(formData.statement);
 		interviewSessionStore.setQuestionsCount(formData.questionsNum);

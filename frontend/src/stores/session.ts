@@ -5,6 +5,8 @@ import type {Statement} from "../types/Statement.ts";
 
 interface InterviewSessionState {
 	sessionId: string | null;
+	interviewId: string | null;
+	recordingId: string | null;
 	connectionId: string | null;
 	connectionString: string | null;
 	title: string | null;
@@ -14,6 +16,8 @@ interface InterviewSessionState {
 	questionCursor: number;
 
 	setSessionId: (sessionId: string) => void;
+	setInterviewId: (interviewId: string) => void;
+	setRecordingId: (recordingId: string) => void;
 	setConnection: (connectionId: string, connectionToken: string) => void;
 	setTitle: (title: string) => void;
 	setQuestionsCount: (questionsCount: number) => void;
@@ -29,6 +33,8 @@ const useInterviewSessionStore = create<InterviewSessionState>()(
 	persist(
 		(set) => ({
 			sessionId: null,
+			interviewId: null,
+			recordingId: null,
 			connectionId: null,
 			connectionString: null,
 			title: null,
@@ -38,6 +44,8 @@ const useInterviewSessionStore = create<InterviewSessionState>()(
 			questionCursor: -1,
 
 			setSessionId: (sessionId: string) => set({ sessionId }),
+			setInterviewId: (interviewId: string) => set({ interviewId }),
+			setRecordingId: (recordingId: string) => set({ recordingId }),
 			setConnection: (connectionId: string, connectionString: string) => set({ connectionId, connectionString }),
 			setTitle: (title: string) => set({ title }),
 			setQuestionsCount: (questionsCount: number) => set({ questionsCount }),
@@ -47,6 +55,7 @@ const useInterviewSessionStore = create<InterviewSessionState>()(
 
 			clearSession: () => {
 				set({ sessionId: null });
+				set({ interviewId: null });
 				set({ connectionId: null });
 				set({ connectionString: null });
 				set({ title: null });

@@ -89,8 +89,8 @@ export const InterviewPage = () => {
 				const happyScore = detections[0].expressions.happy;
 				const intScore = Math.floor(happyScore*100);
 				setScores([...scores, intScore]);
+				setLastEmotion(detections[0].expressions.asSortedArray()[0]);
 			}
-			setLastEmotion(detections[0].expressions.asSortedArray()[0]);
 	
 		}, 1000);
 	}
@@ -169,23 +169,26 @@ export const InterviewPage = () => {
 
 	const startQuestion = () => {
 		setStage('Question');
-		allowTime.current = 10;
+		allowTime.current = 20;
 		setTimer(20);
 	};
 
 	const startAnswer = async () => {
 		const response = await localAxios.post('openvidu/recording/start/' + interviewSessionStore.sessionId)
-		console.log(response);
+		interviewSessionStore.setRecordingId(response.data);
 		console.log("answer start");
 		setStage('Answer');
-		allowTime.current = 10;
+		allowTime.current = 30;
 		setTimer(30);
 		
 		startFaceAnalyze();
 	};
 
 	const stopAnswer = async () => {
-		const response = await localAxios.post('openvidu/recording/stop/' + interviewSessionStore.sessionId)
+		const response = await localAxios.post('openvidu/recording/stop/' + interviewSessionStore.recordingId, {
+			interviewId: interviewSessionStore.interviewId,
+			question: interviewSessionStore.questions[questionCursor.current].question
+		})
 		console.log(response);
 		console.log("answer stop");
 
@@ -212,20 +215,26 @@ export const InterviewPage = () => {
 			headers: { 'Content-Type': 'application/json', },
 		});
 
+		console.log(response);
 		return response.data;
 	}
 
 	const initSession = useCallback(async () => {
-		let ov = new OpenVidu();
+		const ov = new OpenVidu();
 		if (session !== null) return;
 		if (!ov) return;
 
 		const mySession = ov.initSession();
 
-		console.log("init");
+		//console.log("init");
 		mySession.on('streamCreated', (event) => {
 			const subscriber = mySession.subscribe(event.stream, undefined);
 			setSubscribers((prevSubscribers) => [ ...prevSubscribers, subscriber ]);
+		});
+
+		mySession.on('signal', (e) => {
+			console.log("signal litsen: ");
+			console.log(e);
 		});
 
 		mySession.on('streamDestroyed', (event) => {
@@ -251,7 +260,7 @@ export const InterviewPage = () => {
 			connectionData.token
 		);
 
-		console.log(interviewSessionStore);
+		//console.log(interviewSessionStore);
 
 		await mySession.connect(connectionData.token);
 		const _publisher = await ov.initPublisherAsync(undefined, {
@@ -276,9 +285,17 @@ export const InterviewPage = () => {
 		setPublisher(_publisher);
 		setCurrentVideoDevice(_currentVideoDevice);
 
-		console.log(_publisher);
+		//console.log(_publisher);
 
 		setOV(ov);
+
+		const testResp = await localAxios.post('interview/question', {
+			interviewId: interviewSessionStore.interviewId,
+			sessionId: sessionId,
+			statementId: interviewSessionStore.statement!.id,
+			questionCnt: interviewSessionStore.questionsCount
+		});
+
 	}, [interviewSessionStore]);
 
 	useEffect(() => {
