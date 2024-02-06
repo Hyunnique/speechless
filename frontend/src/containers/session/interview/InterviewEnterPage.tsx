@@ -11,6 +11,7 @@ import { useInterviewSessionStore } from "../../../stores/session.ts";
 import { Statement } from '../../../types/Statement.ts';
 
 import TalkImg from '../../../assets/images/human_robot_talk.png';
+import {TitledCard} from "../../../components/TitledCard.tsx";
 
 interface StatementForm extends Statement {
 	id: 0,
@@ -83,35 +84,36 @@ export const InterviewEnterPage = () => {
 		formData.statement = statement;
 	};
 
+	const writeStatement = () => {
+		navigate('/statement/write');
+	}
+
 	return (
-		<div className='p-10'>
-			<div className='flex items-center w-5/6 p-12 m-5 gap-10 border-2 rounded-3xl mx-auto'>
-				<div className='w-1/3'>
-					<img src={TalkImg} alt='img' />
+		<div className='w-3/4 mx-auto'>
+			<div className='flex w-full p-12 gap-32 border-2 rounded-xl shadow-md mb-10'>
+				<div className='w-1/3 h-full h-fit'>
+					<img src={TalkImg} alt='img' className='w-[320px] h-[320px] object-cover' />
 				</div>
-				<div className='w-2/3'>
-					<p className='text-2xl'>
+				<div className='w-2/3 flex flex-col justify-between'>
+					<p className='flex-1 text-lg flex items-center'>
 						기업에 지원한 자기소개서를 기반으로<br/>
-						면접 연습을 할 수 있습니다. <br/>
+						면접 연습을 할 수 있습니다. <br/> <br />
 						자기소개서를 추가하고 <br/>
-						{authStore.name?authStore.name:'사용자'}님에게 맞는 면접 연습을 시작하세요!
+						{ authStore.name ? authStore.name : '사용자' }님에게 맞는 면접 연습을 시작하세요!
 					</p>
-					<div className='flex justify-center mt-8'>
-						<CustomButton className='w-1/4 text-lg' color='green' onClick={() => setOpenModal(true)}>연습 시작</CustomButton>
+					<div className='text-right'>
+						<CustomButton className='w-1/4 text-lg' size='md' color='positive' onClick={() => setOpenModal(true)}>연습 시작</CustomButton>
 					</div>
 				</div>
 			</div>
 
-			<div className='items-center w-5/6 p-12 m-5 border-2 rounded-3xl mx-auto'>
-				<p className='text-2xl ml-4 mb-4'>자기소개서 관리</p>
-				<StatementView/>
-			</div>
+			<TitledCard className='p-12 w-full !bg-white mb-10' title='면접 사전 정보 관리' buttonLabel='+&nbsp;&nbsp;사전 정보 추가' buttonOnClick={ writeStatement }>
+				<StatementView />
+			</TitledCard>
 
-			<div className='items-center w-5/6 p-12 m-5 border-2 rounded-3xl mx-auto'>
-				<p className='text-2xl ml-4 mb-4'>완료한 면접 연습</p>
-				<InterviewReportView/>
-			</div>
-
+			<TitledCard className='p-12 w-full !bg-white' title='면접 연습 기록 관리'>
+				<InterviewReportView />
+			</TitledCard>
 
 			<Modal show={openModal} onClose={() => setOpenModal(false)}>
 				<Modal.Header className="flex items-center">

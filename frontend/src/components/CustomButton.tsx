@@ -21,7 +21,7 @@ interface CustomButtonProps {
 		| 'naver';
 	bordered?: boolean;
 	className?: string;
-	onClick?: () => void;
+	onClick?: (e: React.MouseEvent) => void;
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonProps) => {
@@ -48,8 +48,8 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 							? 'bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50'
 							: color === 'green'
 								? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-50'
-								: color === 'blue'
-									? 'bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-50'
+								: color === 'blue' // fixed
+									? 'bg-blue-700 text-white border-blue-300 hover:bg-blue-800'
 									: color === 'indigo'
 										? 'bg-indigo-100 text-indigo-800 border-indigo-300 hover:bg-indigo-50'
 										: color === 'purple'
@@ -74,7 +74,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 				borderedClassName,
 				className
 			)
-		} onClick={onClick}>
+		} onClick={props.onClick}>
 			{ children }
 		</button>
 	);

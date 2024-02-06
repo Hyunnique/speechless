@@ -34,7 +34,7 @@ export const Header = () => {
 					<div className='logo font-flubber text-5xl tracking-tighter text-primary-500'>Speechless</div>
 				</Navbar.Brand>
 				<div className='flex md:order-2'>
-					{!authStore.id ? (
+					{!authStore.accessToken ? (
 						<Link className='text-xl font-medium' to='/login'>
 							로그인
 						</Link>

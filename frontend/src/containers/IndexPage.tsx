@@ -105,9 +105,9 @@ export const IndexPage = () => {
 					<img src={Banner4} alt='banner4' className='w-full h-full object-cover' />
 				</Carousel>
 			</div>
-			<div className='grid grid-cols-1 lg:grid-cols-2'>
+			<div className='grid grid-cols-1 lg:grid-cols-2 gap-4 px-2 mb-20 h-[400px]'>
 				<TitledCard title='내가 참여할 발표 세션'>
-					<ul className='flex flex-col gap-4 h-full justify-center'>
+					<ul className='flex flex-col px-4 gap-4 h-full justify-center'>
 						{awaitingSpeechSessions.slice(0, 3).map((session) => {
 							return (
 								<li key={session.id} className='flex justify-between border-b-2 px-2 pb-2'>

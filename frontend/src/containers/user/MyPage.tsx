@@ -2,72 +2,39 @@ import React from 'react';
 import { Button, Card, Avatar} from 'flowbite-react';
 import { useAuthStore } from '../../stores/auth';
 
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { Line } from 'react-chartjs-2';
+import {CustomButton} from "../../components/CustomButton.tsx";
+
+ChartJS.register(
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	Title,
+	Tooltip,
+	Legend
+);
+
 export const MyPage = () => {
 	const authStore = useAuthStore();
 
 	return (
 		<>
-			<div className='flex flex-wrap w-5/6 p-5 gap-5 border-2 rounded-3xl mx-auto'>
-				<div className='basis-1/3'>
-					<Card className='mx-2 bg-gray-50 border-2 mb-20'>
-						<div>
-							<Avatar
-								img={authStore.profileImage}
-								alt='https://flowbite.com/docs/images/people/profile-picture-5.jpg'
-								size='xl'
-								rounded
-							></Avatar>
-						</div>
-						<div>
-							<h5 className='text-2xl font-bold tracking-widest text-gray-900'>{authStore.name}</h5>
-							<p className='font-normal text-gray-700 dark:text-gray-400'>이메일: {authStore.email}</p>
-						</div>
+			<Card className='w-3/4 mx-auto px-10 py-5'>
+				<div className='w-full flex flex-row'>
+					<div className='basis-1/3 flex flex-col gap-2 items-center'>
+						<Avatar img={authStore.profileImage} alt='https://flowbite.com/docs/images/people/profile-picture-5.jpg' size='xl' rounded />
+						<p className='text-2xl font-semibold tracking-tight'>{authStore.name}</p>
+						<p className='text-md font-semibold text-gray-600'>{authStore.email}</p>
+					</div>
+					<div className='basis-2/3'>
 
-						<div className='flex w-full justify-center gap-4 py-4'>
-						</div>
-					</Card>
+					</div>
 				</div>
-
-				<div className='basis-3/5'>
-					<Card className='mx-2 bg-gray-50 border-2 mb-20'>
-						<div className='basis-1/5'>
-							<h5 className='text-xl font-semibold text-gray-800'>긍정적 감정</h5>
-							<p className='text-base text-gray-600'>
-								평균: <span className='font-medium text-primary-600'>76%</span>
-							</p>
-							<p className='text-base text-gray-600'>
-								최고: <span className='font-medium text-primary-600'>95%</span>
-							</p>
-							<p className='text-base text-gray-600'>
-								최근: <span className='font-medium text-primary-600'>84%</span>
-							</p>
-						</div>
-
-						<div className='basis-1/5'>
-							<h5 className='text-xl font-semibold text-gray-800'>발음</h5>
-							<p className='text-base text-gray-600'>
-								평균: <span className='font-medium text-primary-600'>3.4</span>
-							</p>
-							<p className='text-base text-gray-600'>
-								최고: <span className='font-medium text-primary-600'>5</span>
-							</p>
-							<p className='text-base text-gray-600'>
-								최근: <span className='font-medium text-primary-600'>4</span>
-							</p>
-						</div>
-					</Card>
-				</div>
-			</div>
-
-			<div className='items-center w-5/6 p-24 m-5 mx-auto'>
-				<div className="flex justify-end">
-					<Button
-						size='sm'
-						className='transition-transform ease-in-out duration-300 bg-gray-200 hover:-translate-y-1 hover:scale-110 hover:bg-negative-700 text-white font-bold py-2 px-4 rounded-md shadow-lg'
-					>
-						회원 탈퇴
-					</Button>
-				</div>
+			</Card>
+			<div className='w-3/4 mx-auto flex justify-center mt-5'>
+				<CustomButton color='negative'>회원 데이터 삭제</CustomButton>
 			</div>
 		</>
 	);
