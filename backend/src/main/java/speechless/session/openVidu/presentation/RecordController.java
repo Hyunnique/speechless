@@ -86,13 +86,14 @@ public class RecordController {
             String fileName = getFileName(recordingId);
             uploadFile(fileName,
                 "/opt/openvidu/recordings/" + recordingId + "/" + fileName);
-            this.openVidu.deleteRecording(recordingId);
+
             SttRequest request = new SttRequest(fileName, "ko-KR", "sync");
             SttResponse response = Stt(request);
 
             interviewQuestionService.asyncCreateFeedback(recordRequest.interviewId(),
                 getSessionId(recordingId), recordRequest.question(), response.getText());
 
+            this.openVidu.deleteRecording(recordingId);
             deleteFile(fileName);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (OpenViduJavaClientException | OpenViduHttpException e) {
