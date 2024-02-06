@@ -2,7 +2,7 @@ package speechless.interview.application.dto;
 
 import java.util.List;
 
-public record GptRequest(String model, List<Message> messages) {
+public record GptRequest(String model, List<Message> messages, Float temperature) {
 
     @Override
     public String toString() {
