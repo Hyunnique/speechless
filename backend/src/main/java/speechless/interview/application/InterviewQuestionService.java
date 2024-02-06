@@ -1,7 +1,9 @@
 package speechless.interview.application;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -15,8 +17,11 @@ import speechless.interview.application.dto.Message.UserType;
 import speechless.interview.application.dto.request.QuestionRequest;
 import speechless.interview.domain.InterviewInfo;
 import speechless.interview.domain.InterviewQuestion;
+import speechless.interview.domain.mapper.InterviewQuestionMapper;
 import speechless.interview.domain.repository.InterviewInfoRepository;
 import speechless.interview.utils.GptUtil;
+import speechless.session.openVidu.dto.Signal;
+import speechless.session.openVidu.utils.SignalUtil;
 import speechless.statement.domain.Statement;
 import speechless.statement.domain.StatementQuestion;
 import speechless.statement.domain.repository.StatementRepository;
@@ -30,18 +35,25 @@ public class InterviewQuestionService {
 
     private final Float TEMPERATURE = 0.2f;
 
+    private final SignalUtil signalUtil;
+
     private final InterviewInfoRepository interviewInfoRepository;
 
     private final StatementRepository statementRepository;
 
-    private GptResponse callGpt(List<Message> messages) throws Exception {
+    private GptResponse callGpt(String sessionId, List<Message> messages) throws Exception {
         GptResponse response;
 
         try {
             response = GptUtil.call(new GptRequest(MODEL, messages, TEMPERATURE));
         } catch (SpeechlessException e) {
 
-            // TODO : Exception 정보 사용자에게 전달
+            // Exception to Map
+            Map<String, Object> data = new HashMap<>();
+            data.put("name", e.getClass().getSimpleName());
+            data.put("message", e.getErrorCode().message());
+
+            signalUtil.sendSignal(new Signal(sessionId, data));
 
             throw e;
         }
@@ -75,12 +87,16 @@ public class InterviewQuestionService {
                 new Message(UserType.USER, createQuestionUserMessage(question)))
         );
 
-        GptResponse gptResponse = callGpt(gptMessage);
+        GptResponse gptResponse = callGpt(request.sessionId(), gptMessage);
 
         // 질문 파싱
         List<String> content = parsingQuestion(gptResponse, request.questionCnt());
 
-        // TODO : 생성된 질문 전달
+        // 생성된 질문 전달
+        Map<String, Object> data = new HashMap<>();
+        data.put("questions", content);
+
+        signalUtil.sendSignal(new Signal(request.sessionId(), data));
     }
 
     // 질문 배경 질의 생성
@@ -143,7 +159,7 @@ public class InterviewQuestionService {
     @Transactional
     @Async
     public void asyncCreateFeedback(
-        Long interviewId, String question, String answer
+        Long interviewId, String sessionId, String question, String answer
     ) throws Exception {
 
         InterviewInfo interview = interviewInfoRepository.findByInterviewId(interviewId);
@@ -153,7 +169,7 @@ public class InterviewQuestionService {
         gptMessage.add(new Message(UserType.SYSTEM, createFeedbackSystemMessage()));
         gptMessage.add(new Message(UserType.USER, createFeedbackUserMessage(question, answer)));
 
-        GptResponse response = callGpt(gptMessage);
+        GptResponse response = callGpt(sessionId, gptMessage);
 
         String feedback = response.getChoices().get(0).getMessage().getContent();
         InterviewQuestion questionEntity = InterviewQuestion.builder()
@@ -162,7 +178,10 @@ public class InterviewQuestionService {
         interview.addQuestion(questionEntity);
         interviewInfoRepository.save(interview);
 
-        // TODO : response 전달
+        Map<String, Object> data = new HashMap<>();
+        data.put("data", InterviewQuestionMapper.INSTANCE.questionToResponse(questionEntity));
+
+        signalUtil.sendSignal(new Signal(sessionId, data));
 
     }
 

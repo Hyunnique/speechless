@@ -4,6 +4,7 @@ import static speechless.session.speechToText.utils.SttUtil.Stt;
 import static speechless.session.storage.utils.FileUtil.deleteFile;
 import static speechless.session.storage.utils.FileUtil.uploadFile;
 import static speechless.session.storage.utils.RecordingUtil.getFileName;
+import static speechless.session.storage.utils.RecordingUtil.getSessionId;
 import static speechless.session.storage.utils.RecordingUtil.unzipFile;
 
 import io.openvidu.java.client.OpenVidu;
@@ -12,13 +13,12 @@ import io.openvidu.java.client.OpenViduJavaClientException;
 import io.openvidu.java.client.Recording;
 import io.openvidu.java.client.Recording.OutputMode;
 import io.openvidu.java.client.RecordingProperties;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +27,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import speechless.interview.application.InterviewQuestionService;
+import speechless.session.openVidu.dto.request.RecordRequest;
 import speechless.session.speechToText.dto.SttRequest;
 import speechless.session.speechToText.dto.SttResponse;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/openvidu/recording")
 public class RecordController {
@@ -43,6 +46,8 @@ public class RecordController {
     private Map<String, Boolean> sessionRecordings = new ConcurrentHashMap<>();
 
     private OpenVidu openVidu;
+
+    private InterviewQuestionService interviewQuestionService;
 
     @PostConstruct
     public void init() {
@@ -66,7 +71,10 @@ public class RecordController {
     }
 
     @PostMapping("/stop/{recordingId}")
-    public ResponseEntity<?> stopRecording(@PathVariable("recordingId") String recordingId) {
+    public ResponseEntity<?> stopRecording(
+        @PathVariable("recordingId") String recordingId,
+        @RequestBody RecordRequest recordRequest
+    ) throws Exception {
 
         try {
             Recording recording = this.openVidu.stopRecording(recordingId);
@@ -81,6 +89,10 @@ public class RecordController {
             this.openVidu.deleteRecording(recordingId);
             SttRequest request = new SttRequest(fileName, "ko-KR", "sync");
             SttResponse response = Stt(request);
+
+            interviewQuestionService.asyncCreateFeedback(recordRequest.interviewId(),
+                getSessionId(recordingId), recordRequest.question(), response.getText());
+
             deleteFile(fileName);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (OpenViduJavaClientException | OpenViduHttpException e) {

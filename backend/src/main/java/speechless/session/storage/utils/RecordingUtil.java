@@ -79,4 +79,17 @@ public class RecordingUtil {
             throw new RuntimeException(e);
         }
     }
+
+    public static String getSessionId(String recordingId) {
+
+        try {
+            JSONParser parser = new JSONParser();
+            Reader reader = new FileReader(
+                "/opt/openvidu/recordings/" + recordingId + "/" + recordingId + ".json");
+            JSONObject object = (JSONObject) parser.parse(reader);
+            return (String) object.get("sessionId");
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
