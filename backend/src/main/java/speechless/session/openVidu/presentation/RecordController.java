@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 import speechless.session.speechToText.dto.SttRequest;
 import speechless.session.speechToText.dto.SttResponse;
 
-@OpenAPIDefinition(tags = @Tag(name = "RecordController", description = "Openvidu의 비디오 세션에서 녹화를 시작, 종료합니다."))
 @RestController
 @RequestMapping("/openvidu/recording")
 public class RecordController {

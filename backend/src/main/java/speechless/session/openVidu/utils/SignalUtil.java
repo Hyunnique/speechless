@@ -1,13 +1,11 @@
 package speechless.session.openVidu.utils;
 
 import java.util.Base64;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import speechless.session.openVidu.dto.Signal;
 
 @Component
 public class SignalUtil {
@@ -18,7 +16,7 @@ public class SignalUtil {
     @Value("${OPENVIDU_SECRET}")
     private String OPENVIDU_SECRET;
 
-    public ResponseEntity<Map> sendSignal(Map<String, String> params) {
+    public void sendSignal(Signal params) {
         RestClient client = RestClient.create();
         client.post()
             .uri(OPENVIDU_URL + "openvidu/signal")
@@ -27,6 +25,5 @@ public class SignalUtil {
             .contentType(MediaType.APPLICATION_JSON)
             .body(params)
             .retrieve();
-        return new ResponseEntity<>(params, HttpStatus.OK);
     }
 }
