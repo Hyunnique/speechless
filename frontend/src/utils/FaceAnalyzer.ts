@@ -1,5 +1,4 @@
 import * as faceapi from 'face-api.js';
-
 /*
 - 정수로 점수 저장
 - this.scores에 현재까지 저장된 점수 저장
@@ -14,63 +13,79 @@ export class FaceAnalyzer {
 	private intervalId: number | null = null;
 	private lastKnownScore: number;
 	public scores: number[] = [];
+	public lastEmotion: { expression: string; probability: number } = { expression: '', probability: -1 };
 	public startTime: number | undefined;
 	public endTime: number | undefined;
-
 	constructor(videoRef: React.RefObject<HTMLVideoElement>) {
 		this.videoRef = videoRef;
 		this.lastKnownScore = -1;
 		this.loadModels();
 	}
-
 	private async loadModels() {
 		await faceapi.nets.tinyFaceDetector.loadFromUri(this.modelUrl);
 		await faceapi.nets.faceLandmark68Net.loadFromUri(this.modelUrl);
 		await faceapi.nets.faceRecognitionNet.loadFromUri(this.modelUrl);
 		await faceapi.nets.faceExpressionNet.loadFromUri(this.modelUrl);
 	}
-
 	public start() {
 		if (this.intervalId !== null) {
 			return;
-	}
-
-	this.startTime = Date.now();
-
-	this.lastKnownScore = -1;
-
-	this.intervalId = window.setInterval(async () => {
-		console.log(this.scores);
-
-		if (!this.videoRef.current) {
-		this.scores.push(-1);
-		return;
 		}
+		this.startTime = Date.now();
+		this.lastKnownScore = -1;
+		this.intervalId = window.setInterval(async () => {
+			if (!this.videoRef.current) {
+				return;
+			}
+			const detections = await faceapi
+			.detectAllFaces(this.videoRef.current, new faceapi.TinyFaceDetectorOptions())
+			.withFaceLandmarks()
+			.withFaceExpressions();
+	// 		if (detections.length >= 1) {
+	// 			const happyScore = detections[0].expressions.happy;
+	// 			secCumul.push(happyScore);
+	// 		}
+	// 		cnt += 1;
+	// 		if(cnt >= 10){
+	// 			if (secCumul.length==0) {
+	// 				this.scores.push(-1);
+	// 			}
+	// 			else{
+	// 				const meanScore = Math.floor(secCumul.reduce((a, b) => a + b, 0) / secCumul.length * 100);
+	// 				this.scores.push(meanScore);
+	// 			}
 
-		const detections = await faceapi
-		.detectAllFaces(this.videoRef.current, new faceapi.TinyFaceDetectorOptions())
-		.withFaceLandmarks()
-		.withFaceExpressions();
+	// 			this.lastEmotion = detections[0].expressions.asSortedArray()[0];
 
-		if (detections.length >= 1) {
-		const happyScore = detections[0].expressions.happy;
-		const integerScore = Math.round(happyScore * 100);
-		this.scores.push(integerScore);
-		this.lastKnownScore = integerScore;
-		} else {
-		// No faces detected or more than one face detected, use the last known score
-		this.scores.push(this.lastKnownScore);
-		}
+	// 			secCumul = [];
+	// 			cnt = 0;
+	// 		}
+	// 	}, 100);
+	// }
+			if (detections.length >= 1) {
+				const happyScore = detections[0].expressions.happy;
+				const intScore = Math.floor(happyScore*100);
+				this.scores.push(intScore);
+			}
 
-	}, 1000);
+			this.lastEmotion = detections[0].expressions.asSortedArray()[0];
+
+			//secCumul = [];
+			//cnt = 0;
+	
+		}, 1000);
 	}
-
 	public stop() {
 		if (this.intervalId) {
 			clearInterval(this.intervalId);
 			this.intervalId = null;
 			this.endTime = Date.now();
 		}
+	}
+
+	public clear(){
+		this.stop();
+		this.scores = [];
 	}
 	
 	public getScoreAtSection(sec: number): number {

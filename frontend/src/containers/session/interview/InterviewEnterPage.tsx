@@ -65,10 +65,19 @@ export const InterviewEnterPage = () => {
 		}
 
 		interviewSessionStore.setSessionId(response.data);
-		interviewSessionStore.setTitle('면접 연습');
-		//interviewSessionStore.setStatement();
+		interviewSessionStore.setTitle(formData.title);
+		interviewSessionStore.setStatement(formData.statement);
+		interviewSessionStore.setQuestionsCount(formData.questionsNum);
 
 		navigate('/session/interview');
+	};
+
+	const onChangeFormStatement = (statement: StatementForm) => {
+		setSelectedItem(statement.title);
+
+		if (formData.title.trim() === '') formData.title = statement.title;
+
+		formData.statement = statement;
 	};
 
 	return (
@@ -102,38 +111,36 @@ export const InterviewEnterPage = () => {
 
 
 			<Modal show={openModal} onClose={() => setOpenModal(false)}>
-				<Modal.Header>면접 연습 시작</Modal.Header>
-				<Modal.Body>
-				<div className="space-y-6">
-					<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-						연습의 제목을 입력해 주세요.
-					</p>
-					<TextInput value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})}></TextInput>
-					<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+				<Modal.Header className="flex items-center">
+					면접 연습 시작
+				</Modal.Header>
+				<Modal.Body className='space-y-6 w-full'>
+					<p className="text-md text-gray-600 font-semibold">
 						질문을 생성할 자기소개서를 선택해 주세요.
 					</p>
-					<Dropdown color='gray' label={selectedItem || "Select an option"}>
-						{statements.map((statement, index) => (
-							<Dropdown.Item onClick={() => {setSelectedItem(statement.title);  formData.statement=statement;} }>
-								{statement.title}
-							</Dropdown.Item>
-						))}
-					</Dropdown>
-					<p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+					<div className='w-1/2'>
+						<Dropdown color='teal' label={selectedItem || "자기소개서를 선택해주세요."}>
+							{statements.map((statement, index) => (
+								<Dropdown.Item key={ statement.id } onClick={() => { onChangeFormStatement(statement); } }>
+									{statement.title}
+								</Dropdown.Item>
+							))}
+						</Dropdown>
+					</div>
+					<p className="text-md text-gray-600 font-semibold">
+						연습의 제목을 입력해주세요.
+					</p>
+					<TextInput value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+					<p className="text-md text-gray-600 font-semibold">
 						맞춤 질문을 몇개 생성할지 정해 주세요.
 					</p>
 					<TextInput type='number' value={formData.questionsNum} onChange={(e) => setFormData({...formData, questionsNum: Number(e.target.value)})}></TextInput>
-				</div>
 				</Modal.Body>
 				<Modal.Footer>
-				<div className='flex justify-end'>
-					<Button className='bg-primary-300' onClick={ startInterviewSession }>
-						면접 시작
-					</Button>
-					<Button className='bg-negative-300' onClick={() => setOpenModal(false)}>
-						취소
-					</Button>
-				</div>
+					<div className='flex justify-end w-full gap-4'>
+						<CustomButton color='negative' size='md' onClick={() => setOpenModal(false)}>취소</CustomButton>
+						<CustomButton color='positive' size='md' onClick={ startInterviewSession }>면접 시작</CustomButton>
+					</div>
 				</Modal.Footer>
 			</Modal>
 		</div>

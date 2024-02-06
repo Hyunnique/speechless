@@ -39,7 +39,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 		color === 'primary'
 			? 'bg-primary-100 text-primary-800 border-primary-300 hover:bg-primary-50'
 			: color === 'positive'
-				? 'bg-positive-100 text-positive-800 border-positive-300 hover:bg-positive-50'
+				? 'bg-positive-300 text-white border-positive-500 hover:bg-positive-500'
 				: color === 'negative'
 					? 'bg-negative-500 text-negative-50 border-negative-500 hover:bg-negative-600'
 					: color === 'red'
@@ -68,7 +68,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 	return (
 		<button
 			className={classNames(
-				'font-medium px-4 py-1 rounded-md',
+				'font-medium px-6 py-3 rounded-md',
 				sizeClassName,
 				colorClassName,
 				borderedClassName,
