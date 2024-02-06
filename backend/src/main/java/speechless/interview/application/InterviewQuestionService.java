@@ -1,5 +1,6 @@
 package speechless.interview.application;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import speechless.interview.application.dto.GptResponse;
 import speechless.interview.application.dto.Message;
 import speechless.interview.application.dto.Message.UserType;
 import speechless.interview.application.dto.request.QuestionRequest;
+import speechless.interview.application.dto.response.InterviewQuestionResponse;
 import speechless.interview.domain.InterviewInfo;
 import speechless.interview.domain.InterviewQuestion;
 import speechless.interview.domain.mapper.InterviewQuestionMapper;
@@ -35,6 +37,8 @@ public class InterviewQuestionService {
 
     private final Float TEMPERATURE = 0.2f;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     private final SignalUtil signalUtil;
 
     private final InterviewInfoRepository interviewInfoRepository;
@@ -48,12 +52,12 @@ public class InterviewQuestionService {
             response = GptUtil.call(new GptRequest(MODEL, messages, TEMPERATURE));
         } catch (SpeechlessException e) {
 
-            // Exception to Map
+            // Exception to response
             Map<String, Object> data = new HashMap<>();
             data.put("name", e.getClass().getSimpleName());
             data.put("message", e.getErrorCode().message());
 
-            signalUtil.sendSignal(new Signal(sessionId, data));
+            signalUtil.sendSignal(new Signal(sessionId, objectMapper.writeValueAsString(data)));
 
             throw e;
         }
@@ -70,8 +74,6 @@ public class InterviewQuestionService {
         Statement statement = statementRepository.findByMemberIdAndId(memberId,
                 request.statementId())
             .orElseThrow(StatementNotFoundException::new);
-
-        InterviewInfo interview = interviewInfoRepository.findByInterviewId(request.interviewId());
 
         List<Message> gptMessage = new ArrayList<>(2);
 
@@ -90,13 +92,8 @@ public class InterviewQuestionService {
         GptResponse gptResponse = callGpt(request.sessionId(), gptMessage);
 
         // 질문 파싱
-        List<String> content = parsingQuestion(gptResponse, request.questionCnt());
-
-        // 생성된 질문 전달
-        Map<String, Object> data = new HashMap<>();
-        data.put("questions", content);
-
-        signalUtil.sendSignal(new Signal(request.sessionId(), data));
+        List<String> data = parsingQuestion(gptResponse, request.questionCnt());
+        signalUtil.sendSignal(new Signal(request.sessionId(), objectMapper.writeValueAsString(data)));
     }
 
     // 질문 배경 질의 생성
@@ -178,10 +175,8 @@ public class InterviewQuestionService {
         interview.addQuestion(questionEntity);
         interviewInfoRepository.save(interview);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("data", InterviewQuestionMapper.INSTANCE.questionToResponse(questionEntity));
-
-        signalUtil.sendSignal(new Signal(sessionId, data));
+        InterviewQuestionResponse data = InterviewQuestionMapper.INSTANCE.questionToResponse(questionEntity);
+        signalUtil.sendSignal(new Signal(sessionId, objectMapper.writeValueAsString(data)));
 
     }
 

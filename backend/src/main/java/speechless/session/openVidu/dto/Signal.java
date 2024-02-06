@@ -4,6 +4,6 @@ import java.util.Map;
 
 public record Signal(
     String session,
-    Map<String, Object> data) {
+    String data) {
 
 }
