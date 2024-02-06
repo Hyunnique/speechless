@@ -9,6 +9,7 @@ import speechless.common.entity.BaseTimeEntity;
 import speechless.community.domain.Community;
 
 import java.util.List;
+import speechless.interview.domain.InterviewInfo;
 import speechless.statement.domain.Statement;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -57,5 +58,7 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "writer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Community> communities;
 
-
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<InterviewInfo> interviews = new ArrayList<>();
 }

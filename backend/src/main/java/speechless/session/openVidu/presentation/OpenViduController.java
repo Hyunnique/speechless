@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import speechless.auth.dto.AuthCredentials;
+import speechless.auth.presentation.Auth;
+import speechless.interview.application.InterviewInfoService;
+import speechless.session.openVidu.dto.OpenviduCreateRequest;
+import speechless.session.openVidu.dto.OpenviduCreateResponse;
+import speechless.session.openVidu.dto.OpenviduDeleteRequest;
 
 @OpenAPIDefinition(tags = @Tag(name = "OpenViduController", description = "OpenVidu를 사용하여 비디오 세션을 관리하는 API. 세션 초기화, 연결 생성 및 고유 세션 ID 생성 기능을 제공합니다."))
 @CrossOrigin(origins = "*")
@@ -43,6 +50,9 @@ public class OpenViduController {
 
     private OpenVidu openvidu;
 
+    @Autowired
+    private InterviewInfoService infoService;
+
     @PostConstruct
     public void init() {
         this.openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
@@ -53,8 +63,10 @@ public class OpenViduController {
         description = "필요한 경우 세션 설정을 포함하여 새로운 비디오 세션을 생성합니다.")
     @ApiResponse(responseCode = "200", description = "새로운 세션 ID를 반환합니다.")
     @ApiResponse(responseCode = "400", description = "세션 옵션에서 문제가 발생했습니다.")
-    public ResponseEntity<String> initializeSession()
-        throws OpenViduJavaClientException, OpenViduHttpException {
+    public ResponseEntity<OpenviduCreateResponse> initializeSession(
+        @RequestBody OpenviduCreateRequest request,
+        @Parameter(hidden = true) @Auth AuthCredentials authCredentials)
+        throws Exception {
         RecordingProperties recordingProperties = new RecordingProperties.Builder()
             .outputMode(Recording.OutputMode.INDIVIDUAL)
             .hasVideo(false)
@@ -63,7 +75,9 @@ public class OpenViduController {
             .defaultRecordingProperties(recordingProperties)
             .build();
         Session session = openvidu.createSession(properties);
-        return new ResponseEntity<>(session.getSessionId(), HttpStatus.OK);
+        Long interviewId = infoService.createInterviewInfo(authCredentials, request.getTopic());
+        OpenviduCreateResponse response = new OpenviduCreateResponse(session.getSessionId(), interviewId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/{sessionId}")
@@ -71,10 +85,12 @@ public class OpenViduController {
         description = "지정된 세션 ID를 갖는 세션을 닫습니다.")
     @ApiResponse(responseCode = "204", description = "세션이 성공적으로 닫혔습니다.")
     @ApiResponse(responseCode = "404", description = "세션을 찾을 수 없습니다.")
-    public ResponseEntity<Void> deleteSession(@PathVariable("sessionId") String sessionId)
+    public ResponseEntity<Void> deleteSession(
+        @RequestBody OpenviduDeleteRequest request, @PathVariable("sessionId") String sessionId)
         throws OpenViduJavaClientException, OpenViduHttpException {
         Session session = openvidu.getActiveSession(sessionId);
         session.close();
+        infoService.updateInterviewInfo(request.getInterviewId(), request.getPronounceScore(), request.getFaceScore(), request.getFaceGraph());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -105,7 +121,8 @@ public class OpenViduController {
     @ApiResponse(responseCode = "400", description = "세션을 찾을 수 없습니다.")
     @ApiResponse(responseCode = "404", description = "연결을 찾을 수 없습니다.")
     public ResponseEntity<Void> deleteConnection(@PathVariable("sessionId") String sessionId,
-        @PathVariable("connectionId") String connectionId)
+        @PathVariable("connectionId") String connectionId,
+        @Parameter(hidden = true) @Auth AuthCredentials authCredentials)
         throws OpenViduJavaClientException, OpenViduHttpException {
         Session session = openvidu.getActiveSession(sessionId);
         session.forceDisconnect(connectionId);
