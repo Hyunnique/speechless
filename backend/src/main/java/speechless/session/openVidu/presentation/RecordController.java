@@ -84,6 +84,8 @@ public class RecordController {
             Path targetPath = Paths.get("/opt/openvidu/recordings/" + recordingId);
             unzipFile(sourcePath, targetPath);
             String fileName = getFileName(recordingId);
+            String sessionId = getSessionId(recordingId);
+            
             uploadFile(fileName,
                 "/opt/openvidu/recordings/" + recordingId + "/" + fileName);
 
@@ -91,7 +93,7 @@ public class RecordController {
             SttResponse response = Stt(request);
 
             interviewQuestionService.asyncCreateFeedback(recordRequest.interviewId(),
-                getSessionId(recordingId), recordRequest.question(), response.getText());
+                sessionId, recordRequest.question(), response.getText());
 
             this.openVidu.deleteRecording(recordingId);
             deleteFile(fileName);
