@@ -32,13 +32,13 @@ public class InterviewQuestion {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "question")
+    @Column(name = "question", length = 200)
     private String question;
 
-    @Column(name = "answer")
+    @Column(name = "answer", length = 2000)
     private String answer;
 
-    @Column(name = "feedback")
+    @Column(name = "feedback", length = 1000)
     private String feedback;
 
     @Setter

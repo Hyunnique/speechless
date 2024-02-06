@@ -44,15 +44,15 @@ public class Statement extends BaseTimeEntity {
     private Long id;
 
     @Basic
-    @Column(name = "title")
+    @Column(name = "title", length = 20)
     private String title;
 
     @Basic
-    @Column(name = "company")
+    @Column(name = "company", length = 20)
     private String company;
 
     @Basic
-    @Column(name = "position")
+    @Column(name = "position", length = 30)
     private String position;
 
     @Column(name = "career")

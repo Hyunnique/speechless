@@ -37,11 +37,11 @@ public class StatementQuestion extends BaseTimeEntity {
     private Long id;
 
     @Basic
-    @Column(name = "question")
+    @Column(name = "question", length = 200)
     private String question;
 
     @Basic
-    @Column(name = "answer")
+    @Column(name = "answer", length = 1000)
     private String answer;
 
     @Setter

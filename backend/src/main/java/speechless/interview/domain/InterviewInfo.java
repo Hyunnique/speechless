@@ -47,7 +47,7 @@ public class InterviewInfo extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "topic")
+    @Column(name = "topic", length = 30)
     private String topic;
 
     @Column(name = "pronunciation_score")
