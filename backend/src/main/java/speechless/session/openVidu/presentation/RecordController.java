@@ -47,7 +47,7 @@ public class RecordController {
 
     private OpenVidu openVidu;
 
-    private InterviewQuestionService interviewQuestionService;
+    private final InterviewQuestionService interviewQuestionService;
 
     @PostConstruct
     public void init() {
@@ -85,7 +85,7 @@ public class RecordController {
             unzipFile(sourcePath, targetPath);
             String fileName = getFileName(recordingId);
             String sessionId = getSessionId(recordingId);
-            
+
             uploadFile(fileName,
                 "/opt/openvidu/recordings/" + recordingId + "/" + fileName);
 
