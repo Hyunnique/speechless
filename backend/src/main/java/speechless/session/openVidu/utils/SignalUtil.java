@@ -21,7 +21,7 @@ public class SignalUtil {
     public void sendSignal(Signal params) {
         RestClient client = RestClient.create();
         String temp= client.post()
-            .uri(OPENVIDU_URL + "openvidu/signal")
+            .uri(OPENVIDU_URL + "openvidu/api/signal")
             .header("Authorization",
                 "Basic " + Base64.getEncoder().encodeToString(OPENVIDU_SECRET.getBytes()))
             .contentType(MediaType.APPLICATION_JSON)
