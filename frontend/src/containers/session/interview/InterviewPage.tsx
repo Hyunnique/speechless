@@ -14,6 +14,8 @@ import {OpenViduVideo} from "../../../components/OpenViduVideo.tsx";
 //import { FaceAnalyzer } from '../../../utils/FaceAnalyzer.ts';
 import * as faceapi from 'face-api.js';
 
+import { CountdownCircleTimer } from 'react-countdown-circle-timer';
+
 export const InterviewPage = () => {
 
 	const localAxios = useLocalAxios();
@@ -35,14 +37,9 @@ export const InterviewPage = () => {
 
 	const [ currentQuestion, setCurrentQuestion ] = useState('');
 
-	const [ stage, setStage ] = useState('Start');
 	const questionCursor = useRef(0);
 
-	//const faceAnalyzer = useRef<FaceAnalyzer>(new FaceAnalyzer(videoRef))
-	const [lastEmotion, setLastEmotion] = useState({expression: '', probability: -1}); 
-	const [scores, setScores] = useState([] as number[]);
-	const intervalId = useRef<number | null>(null);
-	const modelUrl = '/models';
+	const voicesRef = useRef<SpeechSynthesisVoice[]>();
 
 	// 페이지 진입시 서비스 플로우 시작
 	useEffect(() => {
@@ -63,81 +60,25 @@ export const InterviewPage = () => {
 				});
 			});
 		loadModels();
+		
+		//TTS 설정
+		const setVoices = () => {
+			voicesRef.current = window.speechSynthesis.getVoices();
+		};
+		setVoices();
+		window.speechSynthesis.onvoiceschanged = setVoices; // 목소리 변경 시 이벤트 리스너 설정
+
+		//타이머 설정
+		restartTimer(999, 999);
+
+		//전이 상태 Start로 설정
+		setStage('Start')
+
+		return () => {
+			window.speechSynthesis.onvoiceschanged = null; // 컴포넌트가 언마운트될 때 이벤트 리스너 해제
+		};
+
 	}, []);
-
-	const loadModels = async () => {
-		await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
-		await faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl);
-		await faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl);
-		await faceapi.nets.faceExpressionNet.loadFromUri(modelUrl);
-	}
-
-	const startFaceAnalyze = () => {
-		if (intervalId.current !== null) {
-			return;
-		}
-		intervalId.current = window.setInterval(async () => {
-			if (!videoRef.current) {
-				return;
-			}
-			const detections = await faceapi
-			.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-			.withFaceLandmarks()
-			.withFaceExpressions();
-
-			if (detections.length >= 1) {
-				const happyScore = detections[0].expressions.happy;
-				const intScore = Math.floor(happyScore*100);
-				setScores([...scores, intScore]);
-				setLastEmotion(detections[0].expressions.asSortedArray()[0]);
-			}
-	
-		}, 1000);
-	}
-	const stopFaceAnalyze = () => {
-		if (intervalId.current) {
-			clearInterval(intervalId.current);
-			intervalId.current = null;
-		}
-	}
-
-	const [timer, setTimer] = useState(-1);
-	const allowTime = useRef(0);
-	const [disableNextButton, setDisableNextButton] = useState(false);
-	useEffect(() => {
-		if(timer <0) {
-			return;
-		}
-		if (timer > allowTime.current) {
-			setDisableNextButton(true);
-		} 
-		else {
-		setDisableNextButton(false);
-		}
-		const interval = setInterval(() => {
-		  	if (timer > 0) {
-				setTimer((prevTimer) => prevTimer - 1);
-		  	}
-			else {
-				clearInterval(interval);
-				moveToNextState();
-		  	}
-		}, 1000);
-		return () => {clearInterval(interval)};
-	  }, [timer]);
-
-	const moveToNextState= () => {
-		//setDisableNextButton(false);
-		if(stage=="Start" || stage=="Wait"){
-			return startQuestion();
-		}
-		if(stage=='Question'){
-			return startAnswer();
-		}
-		if(stage=="Answer"){
-			return stopAnswer();
-		}
-	}
 
 	const setPresetQuestions = async () => {
 		//const response = await localAxios.get('basic-question');
@@ -164,48 +105,7 @@ export const InterviewPage = () => {
 		// presetQuestions 중에서 랜덤으로 5개를 뽑아서 interviewSessionStore에 저장
 		const randomQuestions = presetQuestions.sort(() => Math.random() - Math.random()).slice(0, 5);
 		setCurrentQuestion(randomQuestions[0]);
-		interviewSessionStore.setQuestions(randomQuestions.map((question) => ({ question, answer: '' })));
-	};
-
-	const startQuestion = () => {
-		setStage('Question');
-		allowTime.current = 20;
-		setTimer(20);
-	};
-
-	const startAnswer = async () => {
-		const response = await localAxios.post('openvidu/recording/start/' + interviewSessionStore.sessionId)
-		interviewSessionStore.setRecordingId(response.data);
-		console.log("answer start");
-		setStage('Answer');
-		allowTime.current = 30;
-		setTimer(30);
-		
-		startFaceAnalyze();
-	};
-
-	const stopAnswer = async () => {
-		const response = await localAxios.post('openvidu/recording/stop/' + interviewSessionStore.recordingId, {
-			interviewId: interviewSessionStore.interviewId,
-			question: interviewSessionStore.questions[questionCursor.current].question
-		})
-		console.log(response);
-		console.log("answer stop");
-
-		interviewSessionStore.questions[questionCursor.current].answer = response.data.text;
-
-		console.log(interviewSessionStore.questions)
-		
-		questionCursor.current += 1;
-		if(questionCursor.current >= interviewSessionStore.questions.length) {
-			setStage('End');
-		} else {
-			setCurrentQuestion(interviewSessionStore.questions[questionCursor.current].question);
-			allowTime.current = 20;
-			setStage('Wait')
-			setTimer(20);
-		}
-		stopFaceAnalyze();
+		interviewSessionStore.setQuestions(randomQuestions.map((question) => ({ question, answer: '' , faceScore: 0, speechScore: 0})));
 	};
 
 	// Connection을 생성해주는 함수
@@ -330,6 +230,208 @@ export const InterviewPage = () => {
 		if (publisher) publisher.publishAudio(audioEnabled);
 	}, [audioEnabled]);
 
+
+	/*
+	* face-api 기능 --------------------------------------------------
+	*/
+	const [lastEmotion, setLastEmotion] = useState({expression: '', probability: -1}); 
+	const [scores, setScores] = useState([] as number[]);
+	const intervalId = useRef<number | null>(null);
+	const modelUrl = '/models';
+
+	const loadModels = async () => {
+		await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
+		await faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl);
+		await faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl);
+		await faceapi.nets.faceExpressionNet.loadFromUri(modelUrl);
+	}
+
+	const startFaceAnalyze = () => {
+		if (intervalId.current !== null) {
+			return;
+		}
+		intervalId.current = window.setInterval(async () => {
+			if (!videoRef.current) {
+				return;
+			}
+			const detections = await faceapi
+			.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+			.withFaceLandmarks()
+			.withFaceExpressions();
+
+			if (detections.length >= 1) {
+				const happyScore = detections[0].expressions.happy;
+				const intScore = Math.floor(happyScore*100);
+				setScores([...scores, intScore]);
+				setLastEmotion(detections[0].expressions.asSortedArray()[0]);
+			}
+	
+		}, 1000);
+	}
+	const stopFaceAnalyze = () => {
+		if (intervalId.current) {
+			clearInterval(intervalId.current);
+			intervalId.current = null;
+		}
+	}
+
+	const clearFaceAnalyze = () => {
+		stopFaceAnalyze();
+		setScores([]);
+	}
+	/*
+	* face-api 기능 끝 --------------------------------------------------
+	*/
+
+
+	/*
+	* TTS 기능 --------------------------------------------------
+	*/
+	const speech = (txt: string) => {
+		const lang = "ko-KR";
+		const utterThis = new SpeechSynthesisUtterance(txt);
+	  
+		utterThis.lang = lang;
+	  
+		// voicesRef.current 확인
+		if (!voicesRef.current || voicesRef.current.length === 0) {
+		  voicesRef.current = window.speechSynthesis.getVoices();
+		}
+	  
+		const kor_voice = voicesRef.current.find(
+		  (elem) => elem.lang === lang || elem.lang === lang.replace("-", "_")
+		);
+	  
+		if (kor_voice) {
+		  utterThis.voice = kor_voice;
+		} else {
+		  console.log("한국어 목소리를 찾을 수 없습니다.");
+		  return;
+		}
+	  
+		window.speechSynthesis.speak(utterThis);
+	};
+	/*
+	* TTS 기능 끝 --------------------------------------------------
+	*/
+
+
+	/*
+	* 타이머 기능 --------------------------------------------------
+	*/
+	const [uniqueKey, setUniqueKey] = useState(-1);
+	const [duration, setDuration] = useState<number>();
+	const [clickAllowTime, setClickAllowTime] = useState<number>();
+	const [remainingTime, setRemainingTime] = useState<number>();
+	const [disableNextButton, setDisableNextButton] = useState(false);
+
+	const restartTimer = (duration: number, clickAllowTime: number) => {
+		setDuration(duration);
+		setClickAllowTime(clickAllowTime);
+		console.log("타이머 리스타트")
+
+		// uniqueKey를 변경하여 타이머를 재시작합니다.
+		setUniqueKey(prevKey => prevKey + 1);
+	};
+
+	const timerOnUpdate = (remainingTime: number) => {
+		setRemainingTime(remainingTime)
+	}
+
+	useEffect(() => {
+		refreshButtonClickState();
+	}, [duration])
+	
+	useEffect(() => {
+		refreshButtonClickState();
+		if(remainingTime === 0) {
+			moveToNextState();
+		}
+
+	}, [remainingTime]);
+
+	const refreshButtonClickState = () => {
+		if(!remainingTime || !clickAllowTime) {
+			return;
+		}
+
+		if (remainingTime > clickAllowTime) {
+			setDisableNextButton(true);
+		} 
+		else {
+			setDisableNextButton(false);
+		}
+	}
+	/*
+	* 타이머 기능 끝 --------------------------------------------------
+	*/
+
+
+	/*
+	* 상태 전이 기능 --------------------------------------------------
+	*/
+	const [ stage, setStage ] = useState<string>();
+
+	const startQuestion = () => {
+		speech(interviewSessionStore.questions[questionCursor.current].question);
+		setStage('Question');
+		restartTimer(15, 10);
+	};
+
+	const startAnswer = async () => {
+		const response = await localAxios.post('openvidu/recording/start/' + interviewSessionStore.sessionId)
+		interviewSessionStore.setRecordingId(response.data);
+		console.log("answer start");
+		setStage('Answer');
+		restartTimer(60, 50);
+		
+		startFaceAnalyze();
+	};
+
+	const stopAnswer = async () => {
+		stopFaceAnalyze();
+		const response = await localAxios.post('openvidu/recording/stop/' + interviewSessionStore.recordingId, {
+			interviewId: interviewSessionStore.interviewId,
+			question: interviewSessionStore.questions[questionCursor.current].question
+		})
+		console.log(response);
+		console.log("answer stop");
+
+		interviewSessionStore.questions[questionCursor.current].answer = response.data.text;
+		interviewSessionStore.questions[questionCursor.current].faceScore = Math.floor(scores.reduce((a, b) => a + b, 0) / scores.length);
+		interviewSessionStore.questions[questionCursor.current].speechScore = Math.floor(response.data.confidence * 100);
+
+		clearFaceAnalyze();
+
+		console.log(interviewSessionStore.questions)
+		
+		questionCursor.current += 1;
+		if(questionCursor.current >= interviewSessionStore.questions.length) {
+			setStage('End');
+		} else {
+			setCurrentQuestion(interviewSessionStore.questions[questionCursor.current].question);
+			restartTimer(999, 999);
+			setStage('Wait')
+
+		}
+	};
+
+	const moveToNextState= () => {
+		//setDisableNextButton(false);
+		if(stage=="Start" || stage=="Wait"){
+			return startQuestion();
+		}
+		if(stage=='Question'){
+			return startAnswer();
+		}
+		if(stage=="Answer"){
+			return stopAnswer();
+		}
+	}
+	/*
+	* 상태 전이 기능 끝 --------------------------------------------------
+	*/
+
 	return (
 		<div className='p-10 w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col'>
 			<div className='session-header flex justify-end'>
@@ -369,12 +471,6 @@ export const InterviewPage = () => {
 									<span className='text-xl font-semibold'>Score: </span>
 									<span className='text-xl font-semibold'>{scores[scores.length - 1]}</span>
 								</div>
-								{/* <div className='session-indicator-voice flex gap-2 items-center'>
-									<span className='text-xl font-semibold'>발음</span>
-									<span className='material-symbols-outlined text-yellow-400 text-5xl'>
-										sentiment_satisfied
-									</span>
-								</div> */}
 							</div>
 							{
 								<video autoPlay={true} ref={videoRef} />
@@ -385,7 +481,7 @@ export const InterviewPage = () => {
 						{
 							interviewSessionStore.questions.slice(0, questionCursor.current).map((question, index) => {
 								return (
-									<div key={index}>
+									<div key={index} className='mt-4'>
 										<div className='w-full flex justify-start border-b-2 border-gray-500'>
 											<div className='session-question flex justify-center items-center'>
 												{question.question}
@@ -396,6 +492,11 @@ export const InterviewPage = () => {
 												{question.answer}
 											</div>
 										</div>
+										<div className='w-full flex justify-end border-b-2 border-gray-500'>
+											<div className='session-answer flex justify-center items-center'>
+												표정 점수: {question.faceScore} &nbsp; 발음 점수: {question.speechScore}
+											</div>
+										</div>
 									</div>
 								);
 							})
@@ -403,7 +504,8 @@ export const InterviewPage = () => {
 					</div>
 				</div>
 			</div>
-			<div className='session-footer flex justify-center'>
+			<div className='flex flex-col items-center'>
+				<div className='session-footer flex justify-center basis-3/4'>
 				<Button color='blue' onClick={toggleAudio}>마이크 토글</Button>
 				<Button color='blue' onClick={toggleVideo}>카메라 토글</Button>
 				<Button color='blue' disabled={disableNextButton} onClick={moveToNextState}>
@@ -416,7 +518,20 @@ export const InterviewPage = () => {
 						"에러 발생"
 					}
 				</Button>
-				{timer >0 ? timer : ""}
+				</div>
+				<div className='basis-1/4'>
+					<CountdownCircleTimer
+						key={uniqueKey} // key prop으로 uniqueKey를 사용합니다.
+						isPlaying
+						duration={duration || 999}
+						colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+						colorsTime={[60, 45, 20, 0]}
+						onUpdate={timerOnUpdate}
+						size={100}
+					>
+						{({ remainingTime }) => remainingTime}
+					</CountdownCircleTimer>
+				</div>
 			</div>
 		</div>
 	);
