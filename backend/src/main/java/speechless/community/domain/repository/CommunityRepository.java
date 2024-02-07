@@ -21,7 +21,7 @@ public interface CommunityRepository extends JpaRepository<Community, Long>, Cus
 interface CustomCommunityRepository{
     List<Community> findCommunitiesWithCursor(Long cursor, int limit);
 
-    List<Community> searchCommunities(String title, Member writer, String content,
+    List<Community> searchCommunities(String title, String writerName, String content,
                                       String category, Boolean recruiting, Integer maxParticipants,
                                       Long cursor, int limit);
 }

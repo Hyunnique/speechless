@@ -14,7 +14,7 @@ public record GetCommunityResponse(
         Date sessionStart,
         Date deadline,
         LocalDateTime createdAt,
-        Integer maxParticipants,
+        int maxParticipants,
         Long hit
 ) {
     public static GetCommunityResponse from(Community community) {

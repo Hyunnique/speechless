@@ -44,7 +44,6 @@ public class Community extends BaseTimeEntity {
 
     private boolean isInvisible;
 
-
     private boolean isDeleted;
 
     @Column(nullable = false)
