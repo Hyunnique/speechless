@@ -90,7 +90,7 @@ public class OpenViduController {
         throws OpenViduJavaClientException, OpenViduHttpException {
         Session session = openvidu.getActiveSession(sessionId);
         session.close();
-        infoService.updateInterviewInfo(request.getInterviewId(), request.getPronounceScore(), request.getFaceScore(), request.getFaceGraph());
+        infoService.updateInterviewInfo(request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

@@ -12,6 +12,7 @@ import speechless.interview.domain.repository.InterviewInfoRepository;
 import speechless.member.domain.Member;
 import speechless.member.domain.repository.MemberRepository;
 import speechless.member.exception.MemberNotFoundException;
+import speechless.session.openVidu.dto.OpenviduDeleteRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -32,18 +33,26 @@ public class InterviewInfoService {
         return interviewInfo.getId();
     }
 
-    public void updateInterviewInfo(Long id, Integer pronounciationScore, Integer faceScore,
-        String faceGraph) {
-        InterviewInfo interviewInfo = interviewRepository.findByInterviewId(id);
+    public void updateInterviewInfo(OpenviduDeleteRequest request) {
+
+        if (isCompletion(request)) return;
+
+        InterviewInfo interviewInfo = interviewRepository.findByInterviewId(request.getInterviewId());
 
         interviewInfo = interviewInfo.toBuilder()
-            .faceScore(faceScore)
-            .faceGraph(faceGraph)
-            .pronunciationScore(pronounciationScore)
+            .faceScore(request.getFaceScore())
+            .faceGraph(request.getFaceGraph())
+            .pronunciationScore(request.getPronunciationScore())
+            .pronunciationGraph(request.getPronunciationGraph())
+            .isCompletion(true)
             .endTime(LocalDateTime.now())
             .build();
 
         interviewRepository.save(interviewInfo);
+    }
+
+    private boolean isCompletion(OpenviduDeleteRequest request) {
+        return request.getPronunciationGraph() == null || request.getFaceGraph() == null;
     }
 
     public List<InterviewInfoResponse> getInterviewInfos(AuthCredentials authCredentials) {
