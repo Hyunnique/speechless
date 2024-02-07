@@ -8,13 +8,14 @@ import { useLocalAxios } from '../../../utils/axios.ts';
 import { useNavigate } from "react-router-dom";
 
 import { useInterviewSessionStore } from "../../../stores/session.ts";
-import {Device, OpenVidu, Publisher, Session, StreamManager, Subscriber} from "openvidu-browser";
+import {Device, OpenVidu, Publisher, Session, SignalEvent, StreamManager, Subscriber} from "openvidu-browser";
 import {OpenViduVideo} from "../../../components/OpenViduVideo.tsx";
 
 //import { FaceAnalyzer } from '../../../utils/FaceAnalyzer.ts';
 import * as faceapi from 'face-api.js';
 
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
+import { InterviewQuestion } from '../../../types/Interview.ts';
 
 export const InterviewPage = () => {
 
@@ -36,16 +37,18 @@ export const InterviewPage = () => {
 	const [ audioEnabled, setAudioEnabled ] = useState(true);
 
 	const [ currentQuestion, setCurrentQuestion ] = useState('');
-
+	
+	const questionsRef = useRef<InterviewQuestion[]>([]);
 	const questionCursor = useRef(0);
+	const feedbackCursor = useRef(0);
 
 	const voicesRef = useRef<SpeechSynthesisVoice[]>();
 
 	// 페이지 진입시 서비스 플로우 시작
 	useEffect(() => {
+		setPresetQuestions();
 		initSession()
 			.then(() => {
-				setPresetQuestions();
 			})
 			.catch((e) => {
 				console.error(e);
@@ -102,12 +105,12 @@ export const InterviewPage = () => {
 			"동료가 잘못을 했을 때 어떻게 조치할 것인가요?"
 		];
 
-		// presetQuestions 중에서 랜덤으로 5개를 뽑아서 interviewSessionStore에 저장
-		const randomQuestions = presetQuestions.sort(() => Math.random() - Math.random()).slice(0, 5);
+		// presetQuestions 중에서 랜덤으로 뽑아서 interviewSessionStore에 저장
+		const questionsCount = interviewSessionStore.questionsCount;
+		const randomQuestions = presetQuestions.sort(() => Math.random() - Math.random()).slice(0, questionsCount);
 		setCurrentQuestion(randomQuestions[0]);
-		interviewSessionStore.setQuestions(randomQuestions.map((question) => ({ question, answer: '' , faceScore: 0, speechScore: 0})));
+		questionsRef.current = randomQuestions.map((question) => ({ question, answer: '', feedback: '', faceScore: 0, speechScore: 0}));
 	};
-
 	// Connection을 생성해주는 함수
 	// 면접 페이지에서는 따로 다인 세션을 생성하지 않으므로, 페이지 진입시 session 생성
 	const createConnection = async (sessionId: string) => {
@@ -126,15 +129,9 @@ export const InterviewPage = () => {
 
 		const mySession = ov.initSession();
 
-		//console.log("init");
 		mySession.on('streamCreated', (event) => {
 			const subscriber = mySession.subscribe(event.stream, undefined);
 			setSubscribers((prevSubscribers) => [ ...prevSubscribers, subscriber ]);
-		});
-
-		mySession.on('signal', (e) => {
-			console.log("signal litsen: ");
-			console.log(e);
 		});
 
 		mySession.on('streamDestroyed', (event) => {
@@ -189,11 +186,39 @@ export const InterviewPage = () => {
 
 		setOV(ov);
 
-		const testResp = await localAxios.post('interview/question', {
+		await localAxios.post('interview/question', {
 			interviewId: interviewSessionStore.interviewId,
 			sessionId: sessionId,
 			statementId: interviewSessionStore.statement!.id,
 			questionCnt: interviewSessionStore.questionsCount
+		});
+
+		mySession.on('signal', (e)=>{
+			console.log(e)
+			if(!e.data){
+				return;
+			}
+			if(e.type==="signal:question"){
+				const list = JSON.parse(e.data);
+				const cleanedList = list.map((item: string) => item.replace(/^\d+\.\s+/, '').replace(/\\n$/, ''));
+				const questions = [];
+				for(let index = 0; index <questionCursor.current+1; index++){
+					questions.push(questionsRef.current[index]);
+				}
+				for(let index = questionCursor.current+1; index < cleanedList.length; index++){
+					questions.push({question: cleanedList[index], answer: '', feedback: '', faceScore: 0, speechScore: 0});
+				}
+				console.log("디버그");
+				console.log(questions);
+				questionsRef.current = questions;
+
+				setCurrentQuestion(questionsRef.current[questionCursor.current].question);
+			}
+			if(e.type==="signal:feedback"){
+				const data = JSON.parse(e.data);
+				questionsRef.current[feedbackCursor.current].feedback = data.feedback;
+				feedbackCursor.current +=1;
+			}
 		});
 
 	}, [interviewSessionStore]);
@@ -373,7 +398,7 @@ export const InterviewPage = () => {
 	const [ stage, setStage ] = useState<string>();
 
 	const startQuestion = () => {
-		speech(interviewSessionStore.questions[questionCursor.current].question);
+		speech(questionsRef.current[questionCursor.current].question);
 		setStage('Question');
 		restartTimer(15, 10);
 	};
@@ -383,7 +408,7 @@ export const InterviewPage = () => {
 		interviewSessionStore.setRecordingId(response.data);
 		console.log("answer start");
 		setStage('Answer');
-		restartTimer(60, 50);
+		restartTimer(60, 55);
 		
 		startFaceAnalyze();
 	};
@@ -392,24 +417,24 @@ export const InterviewPage = () => {
 		stopFaceAnalyze();
 		const response = await localAxios.post('openvidu/recording/stop/' + interviewSessionStore.recordingId, {
 			interviewId: interviewSessionStore.interviewId,
-			question: interviewSessionStore.questions[questionCursor.current].question
+			question: questionsRef.current[questionCursor.current].question
 		})
 		console.log(response);
 		console.log("answer stop");
 
-		interviewSessionStore.questions[questionCursor.current].answer = response.data.text;
-		interviewSessionStore.questions[questionCursor.current].faceScore = Math.floor(scores.reduce((a, b) => a + b, 0) / scores.length);
-		interviewSessionStore.questions[questionCursor.current].speechScore = Math.floor(response.data.confidence * 100);
+		questionsRef.current[questionCursor.current].answer = response.data.text;
+		questionsRef.current[questionCursor.current].faceScore = Math.floor(scores.reduce((a, b) => a + b, 0) / scores.length);
+		questionsRef.current[questionCursor.current].speechScore = Math.floor(response.data.confidence * 100);
 
 		clearFaceAnalyze();
 
-		console.log(interviewSessionStore.questions)
+		console.log(questionsRef.current)
 		
 		questionCursor.current += 1;
-		if(questionCursor.current >= interviewSessionStore.questions.length) {
+		if(questionCursor.current >= questionsRef.current.length) {
 			setStage('End');
 		} else {
-			setCurrentQuestion(interviewSessionStore.questions[questionCursor.current].question);
+			setCurrentQuestion(questionsRef.current[questionCursor.current].question);
 			restartTimer(999, 999);
 			setStage('Wait')
 
@@ -418,13 +443,13 @@ export const InterviewPage = () => {
 
 	const moveToNextState= () => {
 		//setDisableNextButton(false);
-		if(stage=="Start" || stage=="Wait"){
+		if(stage==="Start" || stage==="Wait"){
 			return startQuestion();
 		}
-		if(stage=='Question'){
+		if(stage==='Question'){
 			return startAnswer();
 		}
-		if(stage=="Answer"){
+		if(stage==="Answer"){
 			return stopAnswer();
 		}
 	}
@@ -441,11 +466,11 @@ export const InterviewPage = () => {
 			</div>
 			<div className='session-title flex justify-center mt-6 text-3xl'>
 				{
-					stage=='Start' ? '면접 연습을 시작하려면 시작 버튼을 눌러주세요.' :
-					stage=='Wait' ? '다음 답변이 준비되셨으면 다음을 눌러주세요.' : 
-					stage=='Question' ? currentQuestion :
-					stage=='Answer' ? currentQuestion :
-					stage=='End' ? "종료" :
+					stage==='Start' ? '면접 연습을 시작하려면 시작 버튼을 눌러주세요.' :
+					stage==='Wait' ? '다음 답변이 준비되셨으면 다음을 눌러주세요.' : 
+					stage==='Question' ? currentQuestion :
+					stage==='Answer' ? currentQuestion :
+					stage==='End' ? "종료" :
 					'에러 발생'
 				}
 			</div>
@@ -454,23 +479,28 @@ export const InterviewPage = () => {
 					<div className='session-screen flex flex-col items-center justify-center'>
 						<div className='session-screen-container flex flex-col'>
 							<div className='session-screen-header flex justify-end py-3 gap-4'>
-								<div className='session-indicator-expression flex gap-2 items-center'>
-									<span className='text-xl font-semibold'>표정</span>
-									<span className='material-symbols-outlined text-yellow-400 text-5xl'>
-										{
-											lastEmotion.expression === 'happy' ? 'sentiment_very_satisfied' :
-											lastEmotion.expression === 'neutral' ? 'sentiment_neutral' :
-											lastEmotion.expression === 'sad' ? 'sentiment_sad' :
-											lastEmotion.expression === 'angry' ? 'sentiment_extremely_dissatisfied' :
-											lastEmotion.expression === 'fearful' ? 'sentiment_stressed' :
-											lastEmotion.expression === 'disgusted' ? 'sentiment_dissatisfied' :
-											lastEmotion.expression === 'surprised' ? 'sentiment_frustrated' :
-											""
-										}
-									</span>
-									<span className='text-xl font-semibold'>Score: </span>
-									<span className='text-xl font-semibold'>{scores[scores.length - 1]}</span>
-								</div>
+								{stage === "Answer" 
+									?
+									<div className='session-indicator-expression flex gap-2 items-center'>
+										<span className='text-xl font-semibold'>표정</span>
+										<span className='material-symbols-outlined text-yellow-400 text-5xl'>
+											{
+												lastEmotion.expression === 'happy' ? 'sentiment_very_satisfied' :
+												lastEmotion.expression === 'neutral' ? 'sentiment_neutral' :
+												lastEmotion.expression === 'sad' ? 'sentiment_sad' :
+												lastEmotion.expression === 'angry' ? 'sentiment_extremely_dissatisfied' :
+												lastEmotion.expression === 'fearful' ? 'sentiment_stressed' :
+												lastEmotion.expression === 'disgusted' ? 'sentiment_dissatisfied' :
+												lastEmotion.expression === 'surprised' ? 'sentiment_frustrated' :
+												""
+											}
+										</span>
+										<span className='text-xl font-semibold'>Score: </span>
+										<span className='text-xl font-semibold'>{scores[scores.length - 1]}</span>
+									</div> 
+									:
+									""
+								}
 							</div>
 							{
 								<video autoPlay={true} ref={videoRef} />
@@ -479,7 +509,7 @@ export const InterviewPage = () => {
 					</div>
 					<div className='session-ui'>
 						{
-							interviewSessionStore.questions.slice(0, questionCursor.current).map((question, index) => {
+							questionsRef.current.slice(0, questionCursor.current).map((question, index) => {
 								return (
 									<div key={index} className='mt-4'>
 										<div className='w-full flex justify-start border-b-2 border-gray-500'>
@@ -490,6 +520,11 @@ export const InterviewPage = () => {
 										<div className='w-full flex justify-end border-b-2 border-gray-500'>
 											<div className='session-answer flex justify-center items-center'>
 												{question.answer}
+											</div>
+										</div>
+										<div className='w-full flex justify-end border-b-2 border-gray-500'>
+											<div className='session-answer flex justify-center items-center'>
+												{question.feedback}
 											</div>
 										</div>
 										<div className='w-full flex justify-end border-b-2 border-gray-500'>
@@ -510,11 +545,11 @@ export const InterviewPage = () => {
 				<Button color='blue' onClick={toggleVideo}>카메라 토글</Button>
 				<Button color='blue' disabled={disableNextButton} onClick={moveToNextState}>
 					{
-						stage=='Start' ? "시작" :
-						stage=='Wait' ? "다음" :
-						stage=='Question' ? "답변 시작" :
-						stage=='Answer' ? "답변 종료" :
-						stage=='End' ? "나가기를 클릭해주세요." :
+						stage==='Start' ? "시작" :
+						stage==='Wait' ? "다음" :
+						stage==='Question' ? "답변 시작" :
+						stage==='Answer' ? "답변 종료" :
+						stage==='End' ? "나가기를 클릭해주세요." :
 						"에러 발생"
 					}
 				</Button>
