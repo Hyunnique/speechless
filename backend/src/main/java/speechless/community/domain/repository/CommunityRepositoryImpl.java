@@ -11,7 +11,10 @@ import speechless.community.domain.QCommunity;
 import speechless.member.domain.Member;
 
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class CommunityRepositoryImpl implements CustomCommunityRepository{
@@ -26,11 +29,11 @@ public class CommunityRepositoryImpl implements CustomCommunityRepository{
     }
 
     @Override
-    public List<Community> findCommunitiesWithCursor(Long cusor, int limit) {
+    public List<Community> findCommunitiesWithCursor(Long cursor, int limit) {
         QCommunity community = QCommunity.community;
         BooleanExpression predicate = community.id.gt(0);
-        if (cusor != null) {
-            predicate = predicate.and(community.id.lt(cusor));
+        if (cursor != null) {
+            predicate = predicate.and(community.id.lt(cursor));
         }
 
         return queryFactory.selectFrom(community)
@@ -40,10 +43,70 @@ public class CommunityRepositoryImpl implements CustomCommunityRepository{
                 .fetch();
     }
 
+    private BooleanExpression titleContains(String title) {
+        return Optional.ofNullable(title)
+                .filter(t -> !t.isEmpty())
+                .map(QCommunity.community.title::containsIgnoreCase)
+                .orElse(null);
+    }
+
+    private BooleanExpression writeEquals(String writerName) {
+        return Optional.ofNullable(writerName)
+                .map(QCommunity.community.writer.name::eq)
+                .orElse(null);
+    }
+
+    private BooleanExpression contentContains(String content) {
+        return Optional.ofNullable(content)
+                .filter(c -> !c.isEmpty())
+                .map(QCommunity.community.content::containsIgnoreCase)
+                .orElse(null);
+    }
+
+    private BooleanExpression categoryEquals(String category) {
+        return Optional.ofNullable(category)
+                .filter(c -> !c.isEmpty())
+                .map(QCommunity.community.category::eq)
+                .orElse(null);
+    }
+
+    private BooleanExpression isRecruiting() {
+        Date now = new Date();
+        QCommunity community = QCommunity.community;
+        return community.sessionStart.loe(now)
+                .and(community.deadline.goe(now));
+    }
+    private BooleanExpression maxParticipantsEquals(Integer maxParticipants) {
+        return Optional.ofNullable(maxParticipants)
+                .filter(max -> max > 0)
+                .map(QCommunity.community.maxParticipants::goe)
+                .orElse(null);
+    }
+
 
 
     @Override
-    public List<Community> searchCommunities(String title, Member writer, String content, String category, Boolean recruiting, Integer maxParticipants, Long cursor, int limit) {
-        return null;
+    public List<Community> searchCommunities(String title, String writerName, String content, String category, Boolean recruiting, Integer maxParticipants, Long cursor, int limit) {
+        QCommunity community = QCommunity.community;
+        BooleanExpression predicate = community.isDeleted.isFalse();
+
+        Optional.ofNullable(titleContains(title)).ifPresent(predicate::and);
+        Optional.ofNullable(writeEquals(writerName)).ifPresent(predicate::and);
+        Optional.ofNullable(contentContains(content)).ifPresent(predicate::and);
+        Optional.ofNullable(categoryEquals(category)).ifPresent(predicate::and);
+        predicate = predicate.and(isRecruiting());
+        Optional.ofNullable(maxParticipantsEquals(maxParticipants)).ifPresent(predicate::and);
+
+        predicate = community.id.gt(0);
+
+        if (cursor != null) {
+            predicate = predicate.and(community.id.lt(cursor));
+        }
+
+        return queryFactory.selectFrom(community)
+                .where(predicate)
+                .orderBy(community.id.desc())
+                .limit(limit + 1)
+                .fetch();
     }
 }

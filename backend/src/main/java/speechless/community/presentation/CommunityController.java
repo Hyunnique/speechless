@@ -2,6 +2,7 @@ package speechless.community.presentation;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class CommunityController {
 
     @PostMapping
     @Operation(summary = "글 작성", description = "함께 발표연습하기 글작성")
-    public ResponseEntity<PostCommunityResponse> createCommunity(@Auth AuthCredentials authCredentials, @RequestBody CreateCommunityRequest createCommunityRequest) {
+    public ResponseEntity<PostCommunityResponse> createCommunity(@Auth AuthCredentials authCredentials, @RequestBody @Valid CreateCommunityRequest createCommunityRequest) {
         Community community = communityService.createCommunity(authCredentials.id(), createCommunityRequest);
         return ResponseEntity.ok(new PostCommunityResponse(community.getId()));
     }
@@ -41,9 +42,15 @@ public class CommunityController {
     @GetMapping
     @Operation(summary = "모든 글 조회(커서기반 페이지네이션)", description = "등록된 모든 글의 정보를 조회")
     public ResponseEntity<GetCommunitiesResponse> getCommunityList(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String writerName,
+            @RequestParam(required = false) String content,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Boolean recruiting,
+            @RequestParam(required = false) Integer maxParticipants,
             @RequestParam(required = false) Long cursor,
             @RequestParam(defaultValue = "10") int limit) {
-        GetCommunitiesResponse response = communityService.getCommunityList(cursor, limit);
+        GetCommunitiesResponse response = communityService.getCommunityList(title, writerName, content, category, recruiting, maxParticipants, cursor, limit);
         return ResponseEntity.ok(response);
     }
 
