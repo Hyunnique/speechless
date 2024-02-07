@@ -23,6 +23,7 @@ import speechless.interview.domain.mapper.InterviewQuestionMapper;
 import speechless.interview.domain.repository.InterviewInfoRepository;
 import speechless.interview.utils.GptUtil;
 import speechless.session.openVidu.dto.Signal;
+import speechless.session.openVidu.dto.Signal.SignalType;
 import speechless.session.openVidu.utils.SignalUtil;
 import speechless.statement.domain.Statement;
 import speechless.statement.domain.StatementQuestion;
@@ -57,7 +58,8 @@ public class InterviewQuestionService {
             data.put("name", e.getClass().getSimpleName());
             data.put("message", e.getErrorCode().message());
 
-            signalUtil.sendSignal(new Signal(sessionId, objectMapper.writeValueAsString(data)));
+            signalUtil.sendSignal(
+                new Signal(sessionId, SignalType.ERROR, objectMapper.writeValueAsString(data)));
 
             throw e;
         }
@@ -93,7 +95,9 @@ public class InterviewQuestionService {
 
         // 질문 파싱
         List<String> data = parsingQuestion(gptResponse, request.questionCnt());
-        signalUtil.sendSignal(new Signal(request.sessionId(), objectMapper.writeValueAsString(data)));
+        signalUtil.sendSignal(
+            new Signal(request.sessionId(), SignalType.QUESTION,
+                objectMapper.writeValueAsString(data)));
     }
 
     // 질문 배경 질의 생성
@@ -175,8 +179,10 @@ public class InterviewQuestionService {
         interview.addQuestion(questionEntity);
         interviewInfoRepository.save(interview);
 
-        InterviewQuestionResponse data = InterviewQuestionMapper.INSTANCE.questionToResponse(questionEntity);
-        signalUtil.sendSignal(new Signal(sessionId, objectMapper.writeValueAsString(data)));
+        InterviewQuestionResponse data = InterviewQuestionMapper.INSTANCE.questionToResponse(
+            questionEntity);
+        signalUtil.sendSignal(
+            new Signal(sessionId, SignalType.FEEDBACK, objectMapper.writeValueAsString(data)));
 
     }
 
