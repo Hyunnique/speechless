@@ -72,7 +72,7 @@ export const InterviewPage = () => {
 		window.speechSynthesis.onvoiceschanged = setVoices; // 목소리 변경 시 이벤트 리스너 설정
 
 		//타이머 설정
-		restartTimer(999, 999);
+		stopTimer();
 
 		//전이 상태 Start로 설정
 		setStage('Start')
@@ -186,12 +186,12 @@ export const InterviewPage = () => {
 
 		setOV(ov);
 
-		await localAxios.post('interview/question', {
-			interviewId: interviewSessionStore.interviewId,
-			sessionId: sessionId,
-			statementId: interviewSessionStore.statement!.id,
-			questionCnt: interviewSessionStore.questionsCount
-		});
+		// await localAxios.post('interview/question', {
+		// 	interviewId: interviewSessionStore.interviewId,
+		// 	sessionId: sessionId,
+		// 	statementId: interviewSessionStore.statement!.id,
+		// 	questionCnt: interviewSessionStore.questionsCount
+		// });
 
 		mySession.on('signal', (e)=>{
 			console.log(e)
@@ -242,18 +242,19 @@ export const InterviewPage = () => {
 		});
 	}, [subscribers]);
 
-	const toggleVideo = useCallback(() => {
-		setVideoEnabled(!videoEnabled);
+	const toggleVideo = () => {
+		if (publisher) {
+			publisher.publishVideo(!videoEnabled);
+			setVideoEnabled(!videoEnabled);
+		}
+	};
 
-		console.log(mainStreamManager);
-		if (publisher) publisher.publishVideo(videoEnabled);
-	}, [videoEnabled]);
-
-	const toggleAudio = useCallback(() => {
-		setAudioEnabled(!audioEnabled);
-
-		if (publisher) publisher.publishAudio(audioEnabled);
-	}, [audioEnabled]);
+	const toggleAudio = () => {
+		if (publisher) {
+			publisher.publishAudio(!audioEnabled);
+			setAudioEnabled(!audioEnabled);
+		}
+	};
 
 
 	/*
@@ -348,14 +349,20 @@ export const InterviewPage = () => {
 	const [duration, setDuration] = useState<number>();
 	const [clickAllowTime, setClickAllowTime] = useState<number>();
 	const [remainingTime, setRemainingTime] = useState<number>();
+	const [timerOn, setTimerOn] = useState(false);
 	const [disableNextButton, setDisableNextButton] = useState(false);
+
+	const stopTimer = () => {
+		setTimerOn(false);
+		setDuration(999);
+		setClickAllowTime(999);
+	}
 
 	const restartTimer = (duration: number, clickAllowTime: number) => {
 		setDuration(duration);
 		setClickAllowTime(clickAllowTime);
 		console.log("타이머 리스타트")
-
-		// uniqueKey를 변경하여 타이머를 재시작합니다.
+		setTimerOn(true);
 		setUniqueKey(prevKey => prevKey + 1);
 	};
 
@@ -427,15 +434,13 @@ export const InterviewPage = () => {
 		questionsRef.current[questionCursor.current].speechScore = Math.floor(response.data.confidence * 100);
 
 		clearFaceAnalyze();
-
-		console.log(questionsRef.current)
 		
 		questionCursor.current += 1;
 		if(questionCursor.current >= questionsRef.current.length) {
 			setStage('End');
 		} else {
 			setCurrentQuestion(questionsRef.current[questionCursor.current].question);
-			restartTimer(999, 999);
+			stopTimer();
 			setStage('Wait')
 
 		}
@@ -502,9 +507,37 @@ export const InterviewPage = () => {
 									""
 								}
 							</div>
-							{
-								<video autoPlay={true} ref={videoRef} />
-							}
+							<video autoPlay={true} ref={videoRef} />
+							<div className='flex flex-row justify-center m-10 gap-16'>
+								{
+									audioEnabled ?
+									<Button className='rounded-full aspect-square bg-white border-2 border-black' onClick={toggleAudio}>
+										<span className='material-symbols-outlined text-black text-3xl'>
+											mic
+										</span>
+									</Button>
+									:
+									<Button className='rounded-full aspect-square bg-negative-500 border-2 border-black' onClick={toggleAudio}>
+											<span className='material-symbols-outlined text-white text-3xl'>
+												mic_off
+											</span>
+									</Button>
+								}
+								{
+									videoEnabled ?
+									<Button className='rounded-full aspect-square bg-white border-2 border-black' onClick={toggleVideo}>
+											<span className='material-symbols-outlined text-black text-3xl'>
+												screen_share
+											</span>
+									</Button>
+									:
+									<Button className='rounded-full aspect-square bg-negative-500 border-2 border-black' onClick={toggleVideo}>
+											<span className='material-symbols-outlined text-white text-3xl'>
+												stop_screen_share
+											</span>
+									</Button>
+								}
+							</div>
 						</div>
 					</div>
 					<div className='session-ui'>
@@ -536,36 +569,34 @@ export const InterviewPage = () => {
 								);
 							})
 						}
+						<div className='flex flex-col items-center'>
+							<div className='session-footer flex justify-center basis-3/4'>
+								<Button color='blue' disabled={disableNextButton} onClick={moveToNextState}>
+									{
+										stage==='Start' ? "시작" :
+										stage==='Wait' ? "다음" :
+										stage==='Question' ? "답변 시작" :
+										stage==='Answer' ? "답변 종료" :
+										stage==='End' ? "나가기를 클릭해주세요." :
+										"에러 발생"
+									}
+								</Button>
+							</div>
+							<div className='basis-1/4'>
+								<CountdownCircleTimer
+									key = {uniqueKey} // key prop으로 uniqueKey를 사용합니다.
+									isPlaying = {timerOn || false}
+									duration={duration || 999}
+									colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+									colorsTime={[60, 45, 20, 0]}
+									onUpdate={timerOnUpdate}
+									size={100}
+								>
+									{({ remainingTime }) => remainingTime}
+								</CountdownCircleTimer>
+							</div>	
+						</div>
 					</div>
-				</div>
-			</div>
-			<div className='flex flex-col items-center'>
-				<div className='session-footer flex justify-center basis-3/4'>
-				<Button color='blue' onClick={toggleAudio}>마이크 토글</Button>
-				<Button color='blue' onClick={toggleVideo}>카메라 토글</Button>
-				<Button color='blue' disabled={disableNextButton} onClick={moveToNextState}>
-					{
-						stage==='Start' ? "시작" :
-						stage==='Wait' ? "다음" :
-						stage==='Question' ? "답변 시작" :
-						stage==='Answer' ? "답변 종료" :
-						stage==='End' ? "나가기를 클릭해주세요." :
-						"에러 발생"
-					}
-				</Button>
-				</div>
-				<div className='basis-1/4'>
-					<CountdownCircleTimer
-						key={uniqueKey} // key prop으로 uniqueKey를 사용합니다.
-						isPlaying
-						duration={duration || 999}
-						colors={['#004777', '#F7B801', '#A30000', '#A30000']}
-						colorsTime={[60, 45, 20, 0]}
-						onUpdate={timerOnUpdate}
-						size={100}
-					>
-						{({ remainingTime }) => remainingTime}
-					</CountdownCircleTimer>
 				</div>
 			</div>
 		</div>
