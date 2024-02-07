@@ -185,13 +185,14 @@ export const InterviewPage = () => {
 		//console.log(_publisher);
 
 		setOV(ov);
-
-		// await localAxios.post('interview/question', {
-		// 	interviewId: interviewSessionStore.interviewId,
-		// 	sessionId: sessionId,
-		// 	statementId: interviewSessionStore.statement!.id,
-		// 	questionCnt: interviewSessionStore.questionsCount
-		// });
+		if(import.meta.env.VITE_USE_AI_API===true){
+			await localAxios.post('interview/question', {
+				interviewId: interviewSessionStore.interviewId,
+				sessionId: sessionId,
+				statementId: interviewSessionStore.statement!.id,
+				questionCnt: interviewSessionStore.questionsCount
+			});
+		}
 
 		mySession.on('signal', (e)=>{
 			console.log(e)
@@ -286,9 +287,19 @@ export const InterviewPage = () => {
 			.withFaceExpressions();
 
 			if (detections.length >= 1) {
-				const happyScore = detections[0].expressions.happy;
-				const intScore = Math.floor(happyScore*100);
-				setScores([...scores, intScore]);
+				const happyScore = Math.floor(detections[0].expressions.happy*50);
+				
+				let negativeScore = 0;
+				negativeScore += detections[0].expressions.sad;
+				negativeScore += detections[0].expressions.angry;
+				negativeScore += detections[0].expressions.fearful;
+				negativeScore += detections[0].expressions.disgusted;
+				negativeScore += detections[0].expressions.surprised;
+				negativeScore = Math.floor(negativeScore*50);
+
+				let score = 50 + happyScore - negativeScore;
+				
+				setScores([...scores, score]);
 				setLastEmotion(detections[0].expressions.asSortedArray()[0]);
 			}
 	
@@ -411,8 +422,10 @@ export const InterviewPage = () => {
 	};
 
 	const startAnswer = async () => {
-		const response = await localAxios.post('openvidu/recording/start/' + interviewSessionStore.sessionId)
-		interviewSessionStore.setRecordingId(response.data);
+		if(import.meta.env.VITE_USE_AI_API===true){
+			const response = await localAxios.post('openvidu/recording/start/' + interviewSessionStore.sessionId)
+			interviewSessionStore.setRecordingId(response.data);
+		}
 		console.log("answer start");
 		setStage('Answer');
 		restartTimer(60, 55);
@@ -422,16 +435,16 @@ export const InterviewPage = () => {
 
 	const stopAnswer = async () => {
 		stopFaceAnalyze();
-		const response = await localAxios.post('openvidu/recording/stop/' + interviewSessionStore.recordingId, {
-			interviewId: interviewSessionStore.interviewId,
-			question: questionsRef.current[questionCursor.current].question
-		})
-		console.log(response);
-		console.log("answer stop");
-
-		questionsRef.current[questionCursor.current].answer = response.data.text;
-		questionsRef.current[questionCursor.current].faceScore = Math.floor(scores.reduce((a, b) => a + b, 0) / scores.length);
-		questionsRef.current[questionCursor.current].speechScore = Math.floor(response.data.confidence * 100);
+		if(import.meta.env.VITE_USE_AI_API===true){
+			const response = await localAxios.post('openvidu/recording/stop/' + interviewSessionStore.recordingId, {
+				interviewId: interviewSessionStore.interviewId,
+				question: questionsRef.current[questionCursor.current].question
+			})
+	
+			questionsRef.current[questionCursor.current].answer = response.data.text;
+			questionsRef.current[questionCursor.current].faceScore = Math.floor(scores.reduce((a, b) => a + b, 0) / scores.length);
+			questionsRef.current[questionCursor.current].speechScore = Math.floor(response.data.confidence * 100);
+		}
 
 		clearFaceAnalyze();
 		
@@ -447,7 +460,6 @@ export const InterviewPage = () => {
 	};
 
 	const moveToNextState= () => {
-		//setDisableNextButton(false);
 		if(stage==="Start" || stage==="Wait"){
 			return startQuestion();
 		}
@@ -463,138 +475,158 @@ export const InterviewPage = () => {
 	*/
 
 	return (
-		<div className='p-10 w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col'>
-			<div className='session-header flex justify-end'>
-				<CustomButton size='lg' color='negative'>
-					면접 종료
-				</CustomButton>
-			</div>
-			<div className='session-title flex justify-center mt-6 text-3xl'>
-				{
-					stage==='Start' ? '면접 연습을 시작하려면 시작 버튼을 눌러주세요.' :
-					stage==='Wait' ? '다음 답변이 준비되셨으면 다음을 눌러주세요.' : 
-					stage==='Question' ? currentQuestion :
-					stage==='Answer' ? currentQuestion :
-					stage==='End' ? "종료" :
-					'에러 발생'
-				}
-			</div>
-			<div className='session-body flex-1 p-10'>
-				<div className='session-content grid grid-cols-2 flex-1'>
-					<div className='session-screen flex flex-col items-center justify-center'>
-						<div className='session-screen-container flex flex-col'>
-							<div className='session-screen-header flex justify-end py-3 gap-4'>
-								{stage === "Answer" 
-									?
-									<div className='session-indicator-expression flex gap-2 items-center'>
-										<span className='text-xl font-semibold'>표정</span>
-										<span className='material-symbols-outlined text-yellow-400 text-5xl'>
-											{
-												lastEmotion.expression === 'happy' ? 'sentiment_very_satisfied' :
-												lastEmotion.expression === 'neutral' ? 'sentiment_neutral' :
-												lastEmotion.expression === 'sad' ? 'sentiment_sad' :
-												lastEmotion.expression === 'angry' ? 'sentiment_extremely_dissatisfied' :
-												lastEmotion.expression === 'fearful' ? 'sentiment_stressed' :
-												lastEmotion.expression === 'disgusted' ? 'sentiment_dissatisfied' :
-												lastEmotion.expression === 'surprised' ? 'sentiment_frustrated' :
-												""
-											}
-										</span>
-										<span className='text-xl font-semibold'>Score: </span>
-										<span className='text-xl font-semibold'>{scores[scores.length - 1]}</span>
-									</div> 
+		<div className='p-10 w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col items-center'>
+			<div className='w-5/6'>
+				<div className='session-header flex justify-end'>
+					<CustomButton size='lg' color='negative'>
+						면접 종료
+					</CustomButton>
+				</div>
+				<div className='session-title flex justify-center mt-6 text-3xl'>
+					{
+						stage==='Start' ? '면접 연습을 시작하려면 시작 버튼을 눌러주세요.' :
+						stage==='Wait' ? '다음 답변이 준비되셨으면 다음을 눌러주세요.' : 
+						stage==='Question' ? currentQuestion :
+						stage==='Answer' ? currentQuestion :
+						stage==='End' ? "종료" :
+						'에러 발생'
+					}
+				</div>
+				<div className='session-body flex-1 p-10'>
+					<div className='session-content grid grid-cols-2 flex-1'>
+						<div className='session-screen flex flex-col items-center justify-center'>
+							<div className='session-screen-container flex flex-col'>
+								<div className='session-screen-header flex justify-end py-3 gap-4'>
+									{stage === "Answer" 
+										?
+										<div className='session-indicator-expression flex gap-2 items-center'>
+											<span className='text-5xl font-semibold'>표정</span>
+											<span className='material-symbols-outlined text-yellow-400 text-5xl'>
+												{
+													lastEmotion.expression === 'happy' ? 'sentiment_very_satisfied' :
+													lastEmotion.expression === 'neutral' ? 'sentiment_neutral' :
+													lastEmotion.expression === 'sad' ? 'sentiment_sad' :
+													lastEmotion.expression === 'angry' ? 'sentiment_extremely_dissatisfied' :
+													lastEmotion.expression === 'fearful' ? 'sentiment_stressed' :
+													lastEmotion.expression === 'disgusted' ? 'sentiment_dissatisfied' :
+													lastEmotion.expression === 'surprised' ? 'sentiment_frustrated' :
+													'sentiment_neutral'
+												}
+											</span>
+											<span className='text-3xl font-semibold'>Score: </span>
+											<span className='text-3xl font-semibold'>{scores.length > 0 ? scores[scores.length - 1].toFixed(0).padStart(2, ' ') : "  "}</span>
+										</div> 
+										:
+										<div className='session-indicator-expression flex gap-2 items-center'>
+											<span className='text-5xl invisible'>'</span>
+										</div>
+									}
+								</div>
+								<video autoPlay={true} ref={videoRef} />
+								<div className='flex flex-row justify-center m-10 gap-16'>
+									{
+										audioEnabled ?
+										<Button className='rounded-full aspect-square bg-white border-2 border-black' onClick={toggleAudio}>
+											<span className='material-symbols-outlined text-black text-3xl'>
+												mic
+											</span>
+										</Button>
+										:
+										<Button className='rounded-full aspect-square bg-negative-500 border-2 border-black' onClick={toggleAudio}>
+												<span className='material-symbols-outlined text-white text-3xl'>
+													mic_off
+												</span>
+										</Button>
+									}
+									{
+										videoEnabled ?
+										<Button className='rounded-full aspect-square bg-white border-2 border-black' onClick={toggleVideo}>
+												<span className='material-symbols-outlined text-black text-3xl'>
+													screen_share
+												</span>
+										</Button>
+										:
+										<Button className='rounded-full aspect-square bg-negative-500 border-2 border-black' onClick={toggleVideo}>
+												<span className='material-symbols-outlined text-white text-3xl'>
+													stop_screen_share
+												</span>
+										</Button>
+									}
+								</div>
+							</div>
+						</div>
+						<div className='session-ui flex flex-col'>
+							<div className='basis-5/6 gird grid-cols-1 items-center'>
+								{
+									stage==="Wait"? 
+										questionsRef.current.slice(0, questionCursor.current).map((question, index) => {
+											return (
+												<div key={index} className='mt-4'>
+													<div className='w-full flex justify-start border-b-2 border-gray-500'>
+														<div className='session-question flex justify-center items-center'>
+															{question.question}
+														</div>
+													</div>
+													<div className='w-full flex justify-end border-b-2 border-gray-500'>
+														<div className='session-answer flex justify-center items-center'>
+															{question.answer}
+														</div>
+													</div>
+													<div className='w-full flex justify-end border-b-2 border-gray-500'>
+														<div className='session-answer flex justify-center items-center'>
+															{question.feedback}
+														</div>
+													</div>
+													<div className='w-full flex justify-end border-b-2 border-gray-500'>
+														<div className='session-answer flex justify-center items-center'>
+															표정 점수: {question.faceScore} &nbsp; 발음 점수: {question.speechScore}
+														</div>
+													</div>
+												</div>
+											);
+										})
+			
 									:
+
+									stage==="Question"|| stage==="Answer"? 
+									<div className="flex justify-center items-center mt-16">
+										<CountdownCircleTimer
+											key={uniqueKey}
+											isPlaying={timerOn || false}
+											duration={duration || 999}
+											colors={['#004777', '#F7B801', '#A30000', '#A30000']}
+											colorsTime={[60, 45, 20, 0]}
+											onUpdate={timerOnUpdate}
+											strokeWidth={20}
+											size={480}
+										>
+											{({ remainingTime }) => (
+												<div className="text-5xl font-bold">
+													{remainingTime}
+												</div>
+											)}
+										</CountdownCircleTimer>
+									</div>
+
+									:
+
 									""
 								}
 							</div>
-							<video autoPlay={true} ref={videoRef} />
-							<div className='flex flex-row justify-center m-10 gap-16'>
-								{
-									audioEnabled ?
-									<Button className='rounded-full aspect-square bg-white border-2 border-black' onClick={toggleAudio}>
-										<span className='material-symbols-outlined text-black text-3xl'>
-											mic
-										</span>
+							<div className='basis-1/6'>
+								<div className='flex justify-end'>
+									<Button color='blue' disabled={disableNextButton} onClick={moveToNextState}>
+										{
+											stage==='Start' ? "시작" :
+											stage==='Wait' ? "다음" :
+											stage==='Question' ? "답변 시작" :
+											stage==='Answer' ? "답변 종료" :
+											stage==='End' ? "나가기를 클릭해주세요." :
+											"에러 발생"
+										}
 									</Button>
-									:
-									<Button className='rounded-full aspect-square bg-negative-500 border-2 border-black' onClick={toggleAudio}>
-											<span className='material-symbols-outlined text-white text-3xl'>
-												mic_off
-											</span>
-									</Button>
-								}
-								{
-									videoEnabled ?
-									<Button className='rounded-full aspect-square bg-white border-2 border-black' onClick={toggleVideo}>
-											<span className='material-symbols-outlined text-black text-3xl'>
-												screen_share
-											</span>
-									</Button>
-									:
-									<Button className='rounded-full aspect-square bg-negative-500 border-2 border-black' onClick={toggleVideo}>
-											<span className='material-symbols-outlined text-white text-3xl'>
-												stop_screen_share
-											</span>
-									</Button>
-								}
+								</div>
 							</div>
-						</div>
-					</div>
-					<div className='session-ui'>
-						{
-							questionsRef.current.slice(0, questionCursor.current).map((question, index) => {
-								return (
-									<div key={index} className='mt-4'>
-										<div className='w-full flex justify-start border-b-2 border-gray-500'>
-											<div className='session-question flex justify-center items-center'>
-												{question.question}
-											</div>
-										</div>
-										<div className='w-full flex justify-end border-b-2 border-gray-500'>
-											<div className='session-answer flex justify-center items-center'>
-												{question.answer}
-											</div>
-										</div>
-										<div className='w-full flex justify-end border-b-2 border-gray-500'>
-											<div className='session-answer flex justify-center items-center'>
-												{question.feedback}
-											</div>
-										</div>
-										<div className='w-full flex justify-end border-b-2 border-gray-500'>
-											<div className='session-answer flex justify-center items-center'>
-												표정 점수: {question.faceScore} &nbsp; 발음 점수: {question.speechScore}
-											</div>
-										</div>
-									</div>
-								);
-							})
-						}
-						<div className='flex flex-col items-center'>
-							<div className='session-footer flex justify-center basis-3/4'>
-								<Button color='blue' disabled={disableNextButton} onClick={moveToNextState}>
-									{
-										stage==='Start' ? "시작" :
-										stage==='Wait' ? "다음" :
-										stage==='Question' ? "답변 시작" :
-										stage==='Answer' ? "답변 종료" :
-										stage==='End' ? "나가기를 클릭해주세요." :
-										"에러 발생"
-									}
-								</Button>
-							</div>
-							<div className='basis-1/4'>
-								<CountdownCircleTimer
-									key = {uniqueKey} // key prop으로 uniqueKey를 사용합니다.
-									isPlaying = {timerOn || false}
-									duration={duration || 999}
-									colors={['#004777', '#F7B801', '#A30000', '#A30000']}
-									colorsTime={[60, 45, 20, 0]}
-									onUpdate={timerOnUpdate}
-									size={100}
-								>
-									{({ remainingTime }) => remainingTime}
-								</CountdownCircleTimer>
-							</div>	
 						</div>
 					</div>
 				</div>
