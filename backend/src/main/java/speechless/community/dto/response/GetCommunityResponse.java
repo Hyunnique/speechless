@@ -13,7 +13,7 @@ public record GetCommunityResponse(
         String content,
         Date sessionStart,
         Date deadline,
-        LocalDateTime createAt,
+        LocalDateTime createdAt,
         Integer maxParticipants,
         Long hit,
         Boolean isPrivate

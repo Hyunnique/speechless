@@ -48,7 +48,8 @@ public class Community extends BaseTimeEntity {
 
     private boolean isDeleted;
 
-    private Long hit;
+    @Column(nullable = false)
+    private Long hit = 0L;
 
     private int maxParticipants;
 
@@ -79,6 +80,9 @@ public class Community extends BaseTimeEntity {
         this.sessionStart = sessionStart;
     }
 
+    public void increaseHit() {
+        this.hit++;
+    }
     public void updatePrivate(boolean Private) {
         this.isPrivate = Private;
     }

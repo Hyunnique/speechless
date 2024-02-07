@@ -34,14 +34,17 @@ public class CommunityController {
     @Operation(summary = "특정 글 조회", description = "ID를 통해 특정 글 정보를 조회")
     public ResponseEntity<GetCommunityResponse> getCommunityById(@PathVariable Long id) {
         Community community = communityService.getCommunityById(id);
+        community.increaseHit();
         return ResponseEntity.ok(GetCommunityResponse.from(community));
     }
 
     @GetMapping
-    @Operation(summary = "모든 글 조회", description = "등록된 모든 글의 정보를 조회")
-    public ResponseEntity<GetCommunitiesResponse> getCommunityList() {
-        List<Community> communities = communityService.getCommunityList();
-        return ResponseEntity.ok(GetCommunitiesResponse.from(communities));
+    @Operation(summary = "모든 글 조회(커서기반 페이지네이션)", description = "등록된 모든 글의 정보를 조회")
+    public ResponseEntity<GetCommunitiesResponse> getCommunityList(
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "10") int limit) {
+        GetCommunitiesResponse response = communityService.getCommunityList(cursor, limit);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
