@@ -1,6 +1,10 @@
 package speechless.interview.domain.repository;
 
 import java.util.List;
+import java.util.Optional;
+import javax.swing.text.html.Option;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import speechless.interview.domain.InterviewInfo;
@@ -14,9 +18,12 @@ public interface InterviewInfoRepository extends JpaRepository<InterviewInfo, Lo
     @Query("SELECT i FROM InterviewInfo i "
         + "JOIN InterviewQuestion iq "
         + "ON i.id = :id "
+        + "AND i.isCompletion = true "
         + "AND i.member = :member "
         + "AND i = iq.interviewInfo")
-    InterviewInfo findByIdAndMember(Long id, Member member);
+    Optional<InterviewInfo> findByIdAndMember(Long id, Member member);
+
+    Page<InterviewInfo> findAllByMemberAndCompletionIsTrue(Member member, Pageable pageable);
 
     default InterviewInfo findByInterviewId(Long id) {
         return findById(id).orElseThrow(InterviewNotFoundException::new);

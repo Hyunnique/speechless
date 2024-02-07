@@ -22,6 +22,8 @@ public class InterviewInfoResponse {
 
     private Integer pronunciationScore;
 
+    private String pronunciationGraph;
+
     private Integer faceScore;
 
     private String faceGraph;
