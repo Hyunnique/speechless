@@ -55,7 +55,7 @@ export const StatementView: React.FC = () => {
     }
 
     return(
-        <ul className='mt-5 h-full flex flex-col gap-3 w-5/6 mx-auto'>
+        <ul className='mt-5 h-full flex flex-col gap-3 w-11/12 mx-auto'>
             {
                 statements.length > 0 ?
                     statements.map((statement) => (

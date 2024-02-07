@@ -1,20 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { Button, TextInput, Textarea } from 'flowbite-react';
+import React, {useEffect, useRef, useState} from 'react';
+import {Button, TextInput, Textarea, Breadcrumb, BreadcrumbItem, FloatingLabel, Card, Badge} from 'flowbite-react';
 import { Statement } from '../../types/Statement';
 import { useLocalAxios } from '../../utils/axios';
-import { useParams } from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+
+import { Editor } from '@toast-ui/react-editor';
+import {CustomButton} from "../../components/CustomButton.tsx";
+import {CustomBadge} from "../../components/CustomBadge.tsx";
 
 interface StatementForm extends Statement {
 	questions: { question: string; answer: string }[];
 }
 
-export const StatementWritePage: React.FC = () =>  {
+export const StatementWritePage: React.FC = () => {
 
 	const { id } = useParams();
 	
 	const localAxios = useLocalAxios(true);
-	
+
+	const editorRef = useRef<Editor | null>(null);
+
 	//내부적으로 사용하는 Statement 데이터. 만약 update 모드면 기존 데이터를 가져온다.
 	const [formData, setFormData] = useState<StatementForm>(
 		{
@@ -22,10 +28,14 @@ export const StatementWritePage: React.FC = () =>  {
 			title: '',
 			company: '',
 			position: '',
-			career: '',
+			career: '0',
 			questions: [{ question: '', answer: '' }],
 		}
 	);
+
+	const [ editorKey, setEditorKey ] = useState(0);
+
+	const [ questionCursor, setQuestionCursor ] = useState(1);
 
 	const navigate = useNavigate();
 
@@ -35,10 +45,15 @@ export const StatementWritePage: React.FC = () =>  {
 			localAxios.get(`statements/${id}`)
 			.then((res:{data:StatementForm}) => {
 				setFormData(res.data);
+				setEditorKey(editorKey + 1);
 			})
 			.catch((err) => {
 				console.log(err);
 			})
+		}
+
+		return () => {
+
 		}
 	}, [])
 	  
@@ -73,7 +88,6 @@ export const StatementWritePage: React.FC = () =>  {
 		if (career!=="" && isNaN(Number(career))) {
 			const numericCareer = career.replace(/\D/g, '');
 			setFormData(prev => ({ ...prev, career: numericCareer }));
-			alert("경력은 숫자를 입력해야 합니다.");
 		}
 		else if(Number(career) <0) {
 			alert("경력은 0 이상의 값만 입력 가능합니다.")
@@ -84,28 +98,52 @@ export const StatementWritePage: React.FC = () =>  {
 		
 	}
 
-	//questions에 항목을 추가하는 함수
+	const decreaseCursor = () => {
+		if (questionCursor > 1) {
+			setQuestionCursor(questionCursor - 1);
+			setEditorKey(editorKey + 1);
+		}
+	};
+
+	const increaseCursor = () => {
+		if (questionCursor < formData.questions.length) {
+			setQuestionCursor(questionCursor + 1);
+			setEditorKey(editorKey + 1);
+		}
+	};
+
 	const addQuestion = () => {
-		if(formData.questions.length >=5) {
+		if (formData.questions.length >= 5) {
 			alert("문항은 최대 5개 까지만 입력 가능합니다.");
 			return;
 		}
+
 		setFormData(prev => ({
 		  ...prev,
 		  questions: [...(prev.questions || []), { question: '', answer: '' }],
 		}));
+
+		setQuestionCursor(formData.questions.length + 1);
+
+		setEditorKey(editorKey + 1);
 	};
 
-	//questions의 특정 항목을 제거하는 함수
-	const removeQuestion = (index: number) => {
-		if(formData.questions.length <=1) {
+	const removeQuestion = () => {
+		if(formData.questions.length <= 1) {
 			alert("최소한 하나의 문항은 존재해야 합니다.");
 			return;
 		}
+
 		setFormData(prev => ({
 			...prev,
-			questions: prev.questions ? prev.questions.filter((_, i) => i !== index) : [],
+			questions: prev.questions ? prev.questions.filter((_, i) => i !== questionCursor - 1) : [],
 		}));
+
+		if (questionCursor >= formData.questions.length) {
+			setQuestionCursor(questionCursor - 1);
+		}
+
+		setEditorKey(editorKey + 1);
 	};
 
 	//post 메소드를 통해 벡엔드에 새로운 자기소개서 생성을 요청한다.
@@ -166,85 +204,107 @@ export const StatementWritePage: React.FC = () =>  {
 	}
 
 	return (
-		<div className='flex flex-col w-2/3 mx-auto'>
-			<h1 className="text-4xl font-bold leading-tight text-gray-900">자기소개서 {id?"수정":"생성"}</h1>
-			<div className='flex gap-3'>
-				<Button className='bg-negative-400 mt-5' onClick={() => navigate("/interview")}>뒤로 가기</Button>
-			</div>
-				<div className='mt-5'>
-					<div className='space-y-6'>
-						<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>제목</p>
-						<TextInput className='w-1/2' value={formData.title} onChange={(e) => changeTitle(e.target.value)}/>
-
-						<div className='grid grid-cols-3 gap-5 w-1/2'>
-							<div>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>기업 이름</p>
-								<TextInput value={formData.company} onChange={(e) => changeCompany(e.target.value)}/>
-							</div>
-							<div>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>지원 포지션</p>
-								<TextInput value={formData.position} onChange={(e) => changePosition(e.target.value)}/>
-							</div>
-							<div>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>경력</p>
-								<TextInput value={formData.career} onChange={(e) => changeCareer(e.target.value)}/>
-								
-							</div>
+		<>
+			<div className='content-header mb-10'>
+				<Breadcrumb className='pb-8'>
+					<BreadcrumbItem><Link to='/interview'>면접 연습하기</Link></BreadcrumbItem>
+					<BreadcrumbItem><Link to='/interview'>면접 사전 정보 관리</Link></BreadcrumbItem>
+					<BreadcrumbItem>면접 사전 정보 { id ? '수정' : '생성' }</BreadcrumbItem>
+				</Breadcrumb>
+				<div className='flex justify-between items-center'>
+					<h1 className='text-3xl font-semibold leading-tight text-gray-700'>
+						면접 사전 정보 { id ? '수정' : '생성' }
+					</h1>
+					<CustomButton bordered color='blue' onClick={() => { navigate('/interview'); }}>
+						<div className='flex items-center gap-2'>
+							<span className='material-symbols-outlined text-sm'>arrow_back</span>
+							<span>목록으로 이동</span>
 						</div>
-
-						<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>자기소개서</p>
-						{formData.questions.map((_, index) => (
-							<div key={index} className='p-3 bg-primary-50'>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>문항</p>
-								<TextInput
-									id={`question-${index}`}
-									value={formData.questions[index].question}
-										onChange={(e) => {
-											const newQuestions = formData.questions.map((q, idx) =>
-												idx === index ? { ...q, question: e.target.value } : q
-											);
-											setFormData({ ...formData, questions: newQuestions });
-										}}
+					</CustomButton>
+				</div>
+			</div>
+			<Card className='2xl:w-3/4 xl:w-4/5 w-full mx-auto p-10'>
+				<div className='flex flex-col space-y-10'>
+					<p className='text-black text-lg font-semibold'>기본 정보</p>
+					<div className='flex flex-col space-y-8'>
+						<FloatingLabel className='w-full pl-1' variant='standard' label='제목'
+									   value={formData.title} onChange={(e) => changeTitle(e.target.value)}
+						/>
+						<div className='grid xl:grid-cols-3 grid-cols-1 xl:gap-10 gap-5'>
+							<FloatingLabel variant='standard' label='기업 이름' className='pl-1'
+										   value={formData.company} onChange={(e) => changeCompany(e.target.value)}
+							/>
+							<FloatingLabel variant='standard' label='지원 포지션' className='pl-1'
+										   value={formData.position} onChange={(e) => changePosition(e.target.value)}
+							/>
+							<div className='flex items-center gap-4'>
+								<FloatingLabel variant='standard' label='경력' className='pl-1'
+											   value={formData.career} onChange={(e) => changeCareer(e.target.value)}
 								/>
-								<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>답변</p>
-								<Textarea
-									id={`answer-${index}`}
-									value={formData.questions[index].answer}
-									onChange={(e) => {
-										const newQuestions = formData.questions.map((q, idx) =>
-											idx === index ? { ...q, answer: e.target.value } : q
-										);
-										setFormData({ ...formData, questions: newQuestions });
-									}}
-									className='h-40 resize-none'
-									
-									maxLength={1000}
-								/>
-								<div className="text-sm text-gray-500 dark:text-gray-400">
-									{formData.questions[index].answer.length} / 1000
-								</div>
-								{formData.questions.length > 1 && (
-									<div className="flex jusfy-end">
-										<Button onClick={() => removeQuestion(index)} className='bg-negative-300 mt-2'>
-											삭제
-										</Button>
-									</div>
-								)}
+								년
 							</div>
-						))}
-						<div className="flex justify-end">
-							<Button className='bg-primary-300' onClick={addQuestion}>
-								문항 추가
-							</Button>
 						</div>
 					</div>
+					<p className='text-gray-700 text-lg font-semibold'>자기소개서 문답</p>
+					<div className='bg-gray-50 border-2 border-gray-200 rounded-md p-10 flex flex-col space-y-6'>
+						<p className='text-gray-700 text-md'>질문</p>
+						<div className='flex items-center gap-3'>
+							<CustomBadge color='purple' size='md' bordered>{questionCursor}</CustomBadge>
+							<TextInput className='w-full' color='white' placeholder='질문을 입력해주세요.'
+									   value={formData.questions[questionCursor - 1].question}
+									   onChange={(e) => {
+										   const newQuestions = formData.questions.map((q, idx) =>
+											   idx === questionCursor - 1 ? { ...q, question: e.target.value } : q
+										   );
+										   setFormData({ ...formData, questions: newQuestions });
+									   }}
+							/>
+						</div>
+						<p className='text-gray-700 text-md'>답변</p>
+						<Editor
+							key={editorKey}
+							initialValue={formData.questions[questionCursor - 1].answer}
+							placeholder="답변을 입력해주세요."
+							initialEditType="wysiwyg"
+							onChange={() => {
+								const newQuestions = formData.questions.map((q, idx) =>
+									idx === questionCursor - 1 ? { ...q, answer: editorRef.current?.getInstance().getMarkdown() } : q
+								);
+								setFormData({ ...formData, questions: newQuestions });
+							}}
+							ref={editorRef}
+							hideModeSwitch={true}
+							toolbarItems={[
+								['heading', 'bold', 'italic', 'strike'],
+								['hr', 'quote'],
+								['ul', 'ol', 'task', 'indent', 'outdent'],
+								['table', 'link']
+							]}
+						/>
+						<div className='flex items-center justify-center gap-2'>
+							<CustomButton color='blue' className='!py-3 !px-5' onClick={addQuestion}>
+								<div className='flex items-center gap-2'>
+									<span className='material-symbols-outlined text-sm'>add</span>
+									<span>문항 추가</span>
+								</div>
+							</CustomButton>
+							<CustomButton color='negative' className='!py-3 !px-5' onClick={removeQuestion}>
+								<div className='flex items-center gap-2'>
+									<span className='material-symbols-outlined text-sm'>delete</span>
+									<span>문항 삭제</span>
+								</div>
+							</CustomButton>
+						</div>
+						<span className='flex items-center justify-center gap-2 p-2 rounded-full bg-white w-fit mx-auto border-2'>
+							<button className='material-symbols-outlined' onClick={decreaseCursor}>chevron_left</button>
+							<span className='text-sm tracking-widest'>{ questionCursor } / { formData.questions.length }</span>
+							<button className='material-symbols-outlined' onClick={increaseCursor}>chevron_right</button>
+						</span>
+					</div>
 				</div>
-				
-			<div className="flex justify-end mt-10">
-				<Button className='bg-positive-300' onClick={id ? updateStatement: createStatement}>
-					저장
-				</Button>
-			</div>
-		</div>
+				<CustomButton className='w-1/3 mt-10 mx-auto' color='blue'
+							  onClick={ id ? updateStatement : createStatement }>{ id ? '수정' : '저장' }</CustomButton>
+			</Card>
+		</>
 	);
 };

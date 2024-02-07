@@ -89,7 +89,7 @@ export const InterviewEnterPage = () => {
 	}
 
 	return (
-		<div className='w-3/4 mx-auto'>
+		<div className='2xl:w-4/5 w-full mx-auto'>
 			<div className='flex w-full p-12 gap-32 border-2 rounded-xl shadow-md mb-10'>
 				<div className='w-1/3 h-full h-fit'>
 					<img src={TalkImg} alt='img' className='w-[320px] h-[320px] object-cover' />
