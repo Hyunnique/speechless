@@ -4,8 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import speechless.community.domain.Community;
-import speechless.community.domain.repository.CommnunityRepository;
+import speechless.community.domain.repository.CommunityRepository;
 import speechless.community.dto.request.CreateCommunityRequest;
+import speechless.community.dto.response.GetCommunitiesResponse;
 import speechless.community.exception.CommunityDeleteException;
 import speechless.community.exception.CommunityException;
 import speechless.community.exception.CommunityUpdateException;
@@ -19,7 +20,7 @@ import java.util.List;
 @Transactional
 public class CommunityService {
     private final MemberRepository memberRepository;
-    private final CommnunityRepository commnunityRepository;
+    private final CommunityRepository commnunityRepository;
 
     public Community createCommunity(Long memberId, CreateCommunityRequest request) {
         Member member = memberRepository.getById(memberId);
@@ -40,8 +41,15 @@ public class CommunityService {
         return commnunityRepository.findById(communityId).orElseThrow(() ->new CommunityException.NotFound(communityId));
     }
 
-    public List<Community> getCommunityList(){
-        return commnunityRepository.findAll();
+    public GetCommunitiesResponse getCommunityList(Long cursor, int limit){
+        List<Community> communities = commnunityRepository.findCommunitiesWithCursor(cursor, limit + 1);
+        Long nextCursor = null;
+
+        if(communities.size() > limit){
+            communities.remove(communities.size() - 1);
+            nextCursor = communities.get(communities.size() - 1).getId();
+        }
+        return GetCommunitiesResponse.from(communities, nextCursor);
     }
 
 

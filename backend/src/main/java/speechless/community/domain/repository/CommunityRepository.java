@@ -5,9 +5,10 @@ import speechless.community.domain.Community;
 import speechless.community.exception.CommunityException;
 import speechless.member.domain.Member;
 
+import java.util.List;
 import java.util.Optional;
 
-public interface CommnunityRepository extends JpaRepository<Community, Long> {
+public interface CommunityRepository extends JpaRepository<Community, Long>, CustomCommunityRepository {
     Optional<Community> findByTitle(String title);
     Optional<Community> findByWriter(Member writer);
 
@@ -15,4 +16,8 @@ public interface CommnunityRepository extends JpaRepository<Community, Long> {
         return findById(id)
                 .orElseThrow(() -> new CommunityException.NotFound(id));
     }
+}
+
+interface CustomCommunityRepository{
+    List<Community> findCommunitiesWithCursor(Long cursor, int limit);
 }
