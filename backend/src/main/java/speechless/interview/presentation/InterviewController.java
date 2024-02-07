@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,7 +50,7 @@ public class InterviewController {
     @PostMapping("/question")
     public ResponseEntity<String> createQuestion(
         @Parameter(hidden = true) @Auth AuthCredentials authCredentials,
-        @RequestBody QuestionRequest request
+        @RequestBody @Validated QuestionRequest request
     ) throws Exception {
         questionService.asyncCreateQuestion(authCredentials.id(), request);
         return new ResponseEntity<>("OK", HttpStatus.CREATED);
