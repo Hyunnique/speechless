@@ -6,7 +6,7 @@ export const DefaultLayout = () => {
 	return (
 		<>
 			<Header />
-			<div className='w-full max-w-[1400px] mx-auto my-8'>
+			<div className='w-full max-w-[1200px] mx-auto my-10'>
 				<Outlet />
 			</div>
 			<Footer />
