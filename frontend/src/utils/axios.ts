@@ -1,5 +1,6 @@
 import Axios, {AxiosInstance, InternalAxiosRequestConfig} from 'axios';
 import { useAuthStore } from "../stores/auth.ts";
+import {useNavigate} from "react-router-dom";
 
 // Local Axios Custom Hook
 // 파라미터로 isAuth: boolean을 받으며, 기본값은 true
@@ -9,6 +10,7 @@ import { useAuthStore } from "../stores/auth.ts";
 const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 	const authenticated: boolean = isAuth !== undefined ? isAuth : true;
 	const authStore = useAuthStore();
+	const navigate = useNavigate();
 
 	const instance = Axios.create({
 		baseURL: import.meta.env.VITE_API_BASE_URL
@@ -37,8 +39,21 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 					}
 
 					const refreshAxios = Axios.create({
-						baseURL: import.meta.env.VITE_API_BASE_URL,
-					})
+						baseURL: import.meta.env.VITE_API_BASE_URL
+					});
+
+					refreshAxios.interceptors.response.use(
+						(response) => response,
+						async (error) => {
+							if (error.config.url === '/auth/refresh' && error.response.status === 404) {
+								// refresh token이 만료되었을 경우
+								authStore.clearAuth();
+								navigate('/');
+							}
+
+							return Promise.reject(error);
+						},
+					);
 
 					const refreshResponse = await refreshAxios.get('/auth/refresh', {
 						headers: {
