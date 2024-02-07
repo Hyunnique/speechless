@@ -44,7 +44,6 @@ public class Community extends BaseTimeEntity {
 
     private boolean isInvisible;
 
-    private boolean isPrivate;
 
     private boolean isDeleted;
 
@@ -56,7 +55,6 @@ public class Community extends BaseTimeEntity {
     @PrePersist
     public void prePersist(){
         isInvisible = false;
-        isPrivate = false;
         isDeleted = false;
     }
 
@@ -83,9 +81,6 @@ public class Community extends BaseTimeEntity {
     public void increaseHit() {
         this.hit++;
     }
-    public void updatePrivate(boolean Private) {
-        this.isPrivate = Private;
-    }
 
     public void updateMaxParticipants(int maxParticipants) {
         this.maxParticipants = maxParticipants;
@@ -94,7 +89,6 @@ public class Community extends BaseTimeEntity {
     public void updateCommunity(CreateCommunityRequest request) {
         this.title = request.title();
         this.content = request.content();
-        this.isPrivate = request.isPrivate();
         this.deadline = request.deadline();
         this.sessionStart = request.sessionStart();
         this.category = request.category();
