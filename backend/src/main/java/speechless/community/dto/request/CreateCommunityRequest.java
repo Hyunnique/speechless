@@ -16,9 +16,6 @@ public record CreateCommunityRequest(
         @Size(max = 1000, message = "1000자 미만의 값을 입력해주세요.")
         String content,
 
-        @NotNull(message = "Null 값이 올 수 없습니다. 올바른 값인지 확인해주세요")
-        Boolean isPrivate,
-
         Date sessionStart,
 
         Date deadline,
@@ -34,7 +31,6 @@ public record CreateCommunityRequest(
                 .builder()
                 .title(title)
                 .content(content)
-                .isPrivate(isPrivate)
                 .sessionStart(sessionStart)
                 .deadline(deadline)
                 .category(category)
