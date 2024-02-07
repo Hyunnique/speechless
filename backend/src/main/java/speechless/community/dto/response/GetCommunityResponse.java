@@ -15,8 +15,7 @@ public record GetCommunityResponse(
         Date deadline,
         LocalDateTime createdAt,
         Integer maxParticipants,
-        Long hit,
-        Boolean isPrivate
+        Long hit
 ) {
     public static GetCommunityResponse from(Community community) {
         return new GetCommunityResponse(
@@ -29,8 +28,7 @@ public record GetCommunityResponse(
                 community.getDeadline(),
                 community.getCreatedAt(),
                 community.getMaxParticipants(),
-                community.getHit(),
-                community.isPrivate()
+                community.getHit()
         );
     }
 }
