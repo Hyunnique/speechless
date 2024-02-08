@@ -24,4 +24,6 @@ interface CustomCommunityRepository{
     List<Community> searchCommunities(String title, String writerName, String content,
                                       String category, Boolean recruiting, Integer maxParticipants,
                                       Long cursor, int limit);
+
+    List<Community> findPopularCommunitiesWithCursor(Long cursorHit, Long cursor, int limit);
 }

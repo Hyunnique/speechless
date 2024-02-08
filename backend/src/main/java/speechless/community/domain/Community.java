@@ -33,7 +33,7 @@ public class Community extends BaseTimeEntity {
     @Column(length = 50, nullable = false)
     private String title;
 
-    @Column(length = 1000)
+    @Column(length = 1000, nullable = false)
     private String content;
 
     @Temporal(TemporalType.TIMESTAMP)

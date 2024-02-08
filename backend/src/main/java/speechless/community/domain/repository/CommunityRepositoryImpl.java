@@ -109,4 +109,21 @@ public class CommunityRepositoryImpl implements CustomCommunityRepository{
                 .limit(limit + 1)
                 .fetch();
     }
+
+    public List<Community> findPopularCommunitiesWithCursor(Long cursorHit, Long cursorId, int limit) {
+        QCommunity community = QCommunity.community;
+        BooleanExpression predicate = community.isDeleted.isFalse();
+
+        if (cursorHit != null && cursorId != null) {
+            BooleanExpression sameHitButLowerId = community.hit.eq(cursorHit).and(community.id.lt(cursorId));
+            BooleanExpression lowerHit = community.hit.lt(cursorHit);
+            predicate = predicate.and(sameHitButLowerId.or(lowerHit));
+        }
+
+        return queryFactory.selectFrom(community)
+                .where(predicate)
+                .orderBy(community.hit.desc(), community.id.desc())
+                .limit(limit + 1)
+                .fetch();
+    }
 }

@@ -1,6 +1,7 @@
 package speechless.community.presentation;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public class CommunityController {
 
     @PostMapping
     @Operation(summary = "글 작성", description = "함께 발표연습하기 글작성")
-    public ResponseEntity<PostCommunityResponse> createCommunity(@Auth AuthCredentials authCredentials, @RequestBody @Valid CreateCommunityRequest createCommunityRequest) {
+    public ResponseEntity<PostCommunityResponse> createCommunity(@Parameter(hidden = true) @Auth AuthCredentials authCredentials, @RequestBody @Valid CreateCommunityRequest createCommunityRequest) {
         Community community = communityService.createCommunity(authCredentials.id(), createCommunityRequest);
         return ResponseEntity.ok(new PostCommunityResponse(community.getId()));
     }
@@ -35,7 +36,6 @@ public class CommunityController {
     @Operation(summary = "특정 글 조회", description = "ID를 통해 특정 글 정보를 조회")
     public ResponseEntity<GetCommunityResponse> getCommunityById(@PathVariable Long id) {
         Community community = communityService.getCommunityById(id);
-        community.increaseHit();
         return ResponseEntity.ok(GetCommunityResponse.from(community));
     }
 
@@ -53,6 +53,17 @@ public class CommunityController {
         GetCommunitiesResponse response = communityService.getCommunityList(title, writerName, content, category, recruiting, maxParticipants, cursor, limit);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/popular")
+    @Operation(summary = "인기 글 목록 조회", description = "조회수를 기반으로 인기 글 목록을 조회")
+    public ResponseEntity<GetCommunitiesResponse> getPopularCommunities(
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        GetCommunitiesResponse response = communityService.getPopularCommunities(cursor, limit);
+        return ResponseEntity.ok(response);
+    }
+
 
     @PutMapping("/{id}")
     @Operation(summary = "글 업데이트", description = "특정 글을 업데이트합니다.")

@@ -38,22 +38,25 @@ public class CommunityService {
     }
 
     public Community getCommunityById(Long communityId) {
-        return commnunityRepository.findById(communityId).orElseThrow(() ->new CommunityException.NotFound(communityId));
+        Community community = commnunityRepository.findById(communityId)
+                .orElseThrow(() -> new CommunityException.NotFound(communityId));
+        community.increaseHit();
+        commnunityRepository.save(community);
+        return community;
     }
 
     public GetCommunitiesResponse getCommunityList(String title, String writerName, String content,
                                                    String category, Boolean recruiting, Integer maxParticipants,
                                                    Long cursor, int limit){
         List<Community> communities = commnunityRepository.searchCommunities(title, writerName, content, category, recruiting, maxParticipants, cursor, limit + 1);
-        Long nextCursor = null;
 
-        if(communities.size() > limit){
-            communities.remove(communities.size() - 1);
-            nextCursor = communities.get(communities.size() - 1).getId();
-        }
-        return GetCommunitiesResponse.from(communities, nextCursor);
+        return prepareResponseWithPagination(communities, limit);
     }
 
+    public GetCommunitiesResponse getPopularCommunities(Long cursor, int limit) {
+        List<Community> communities = commnunityRepository.findCommunitiesWithCursor(cursor, limit + 1);
+        return prepareResponseWithPagination(communities, limit);
+    }
 
     public void deleteCommunity(Long memberId, Long communityId) {
         Community community = commnunityRepository.findById(communityId).orElseThrow(RuntimeException::new);
@@ -63,4 +66,15 @@ public class CommunityService {
         commnunityRepository.deleteById(communityId);
     }
 
+
+    private GetCommunitiesResponse prepareResponseWithPagination(List<Community> communities, int limit) {
+        Long nextCursor = null;
+
+        if (communities.size() > limit) {
+            communities.remove(communities.size() - 1);
+            nextCursor = communities.get(communities.size() - 1).getId();
+        }
+
+        return GetCommunitiesResponse.from(communities, nextCursor);
+    }
 }
