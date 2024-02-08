@@ -15,18 +15,13 @@ export const InterviewReportView: React.FC = () => {
     }, []);
 
     const getReports = () => {
-        localAxios.get("interview-reports")
-        .then((res) => {
-            setReports(res.data.reports);
-        })
-        .catch((err) => {
-            console.log(err);
-            setReports([
-                {id:0, userId:0, topic: "삼성 상반기 임원 면접 연습"},
-                {id:1, userId:1, topic: "삼성 상반기 임원 면접 연습"},
-                {id:2, userId:2, topic: "삼성 상반기 임원 면접 연습"},
-            ])
-        })
+        // localAxios.get("interview-reports")
+        // .then((res) => {
+        //     setReports(res.data.reports);
+        // })
+        // .catch((err) => {
+        //     console.log(err);
+        // })
     }
 
     const deleteReport = (index: number) => {
@@ -44,18 +39,34 @@ export const InterviewReportView: React.FC = () => {
 
     return(
         <>
-            <ul className='flex flex-col gap-3 w-5/6 mx-auto'>
-                {reports.map((report) => (
-                    <li key={report.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2' >
-                        <div className='basis-3/4 flex flex-col justify-center'>
-                            <p className='text-lg font-semibold tracking-tight text-gray-900 dark:text-white w-full'>{report.topic}</p>
-                        </div>
-                        <div className='basis-1/4 flex flex-col items-end'>
-                            <Button className='w-1/2 bg-primary-400'>다운로드</Button>
-                            <Button className='w-1/2 bg-negative-400'>삭제</Button>
-                        </div>
-                    </li>
-                ))}
+            <ul className='mt-5 h-full flex flex-col gap-3 w-11/12 mx-auto'>
+                {
+                    reports.length > 0 ?
+                    reports.map((report) => (
+                        <li key={report.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2' >
+                            <div className='basis-3/4 flex flex-col justify-center'>
+                                <p className='text-lg font-semibold tracking-tight text-gray-900 dark:text-white w-full'>{report.topic}</p>
+                            </div>
+                            <div className='basis-1/4 flex flex-col items-end'>
+                                <Button className='w-1/2 bg-primary-400'>다운로드</Button>
+                                <Button className='w-1/2 bg-negative-400' onClick={() => deleteReport(report.id)}>삭제</Button>
+                            </div>
+                        </li>
+                    ))
+                    :
+                    <p className='h-full flex justify-center items-center'>현재 저장된 면접 리포트가 없습니다.</p>
+                }
+                {/*{reports.map((report) => (*/}
+                {/*    <li key={report.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2' >*/}
+                {/*        <div className='basis-3/4 flex flex-col justify-center'>*/}
+                {/*            <p className='text-lg font-semibold tracking-tight text-gray-900 dark:text-white w-full'>{report.topic}</p>*/}
+                {/*        </div>*/}
+                {/*        <div className='basis-1/4 flex flex-col items-end'>*/}
+                {/*            <Button className='w-1/2 bg-primary-400'>다운로드</Button>*/}
+                {/*            <Button className='w-1/2 bg-negative-400'>삭제</Button>*/}
+                {/*        </div>*/}
+                {/*    </li>*/}
+                {/*))}*/}
             </ul>
         </>
     );
