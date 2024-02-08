@@ -35,7 +35,7 @@ export const InterviewEnterPage = () => {
 	const [formData, setFormData] = useState({
 		title: '',
 		statement: {} as StatementForm,
-		questionsNum: 10
+		questionsNum: 3
 	})
 
 	const navigate = useNavigate();
@@ -84,6 +84,14 @@ export const InterviewEnterPage = () => {
 		formData.statement = statement;
 	};
 
+	const openEnterModal = () => {
+		if (statements.length === 0) {
+			alert('자기소개서를 먼저 추가해주세요.');
+			return;
+		}
+
+		setOpenModal(true);
+	}
 	const writeStatement = () => {
 		navigate('/statement/write');
 	}
@@ -102,7 +110,7 @@ export const InterviewEnterPage = () => {
 						{ authStore.name ? authStore.name : '사용자' }님에게 맞는 면접 연습을 시작하세요!
 					</p>
 					<div className='text-right'>
-						<CustomButton className='w-1/4 text-lg' size='md' color='positive' onClick={() => setOpenModal(true)}>연습 시작</CustomButton>
+						<CustomButton className='w-1/4 text-lg' size='md' color='positive' onClick={openEnterModal}>연습 시작</CustomButton>
 					</div>
 				</div>
 			</div>
@@ -139,7 +147,13 @@ export const InterviewEnterPage = () => {
 					<p className="text-md text-gray-600 font-semibold">
 						맞춤 질문을 몇개 생성할지 정해 주세요.
 					</p>
-					<TextInput type='number' value={formData.questionsNum} onChange={(e) => setFormData({...formData, questionsNum: Number(e.target.value)})}></TextInput>
+					<Dropdown color='teal' label={formData.questionsNum + '개'}>
+						<Dropdown.Item onClick={() => setFormData({...formData, questionsNum: 1})}>1개</Dropdown.Item>
+						<Dropdown.Item onClick={() => setFormData({...formData, questionsNum: 2})}>2개</Dropdown.Item>
+						<Dropdown.Item onClick={() => setFormData({...formData, questionsNum: 3})}>3개</Dropdown.Item>
+						<Dropdown.Item onClick={() => setFormData({...formData, questionsNum: 4})}>4개</Dropdown.Item>
+						<Dropdown.Item onClick={() => setFormData({...formData, questionsNum: 5})}>5개</Dropdown.Item>
+					</Dropdown>
 				</Modal.Body>
 				<Modal.Footer>
 					<div className='flex justify-end w-full gap-4'>

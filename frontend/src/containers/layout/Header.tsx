@@ -50,7 +50,6 @@ export const Header = () => {
 								<span className='block text-sm'>{authStore.name}</span>
 								<span className='block truncate text-sm font-medium'>{authStore.email}</span>
 							</Dropdown.Header>
-							<Dropdown.Item>쪽지</Dropdown.Item>
 							<Dropdown.Item onClick={doLogout}>로그아웃</Dropdown.Item>
 						</Dropdown>
 					)}
