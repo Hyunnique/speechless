@@ -110,6 +110,7 @@ export const InterviewPage = () => {
 		const randomQuestions = presetQuestions.sort(() => Math.random() - Math.random()).slice(0, questionsCount);
 		setCurrentQuestion(randomQuestions[0]);
 		questionsRef.current = randomQuestions.map((question) => ({ question, answer: '', feedback: '', faceScore: 0, speechScore: 0}));
+		interviewSessionStore.setQuestions(questionsRef.current);
 	};
 	// Connection을 생성해주는 함수
 	// 면접 페이지에서는 따로 다인 세션을 생성하지 않으므로, 페이지 진입시 session 생성
@@ -185,14 +186,14 @@ export const InterviewPage = () => {
 		//console.log(_publisher);
 
 		setOV(ov);
-		if(import.meta.env.VITE_USE_AI_API===true){
+		//if(import.meta.env.VITE_USE_AI_API==="true"){
 			await localAxios.post('interview/question', {
 				interviewId: interviewSessionStore.interviewId,
 				sessionId: sessionId,
 				statementId: interviewSessionStore.statement!.id,
 				questionCnt: interviewSessionStore.questionsCount
 			});
-		}
+		//}
 
 		mySession.on('signal', (e)=>{
 			console.log(e)
@@ -212,12 +213,14 @@ export const InterviewPage = () => {
 				console.log("디버그");
 				console.log(questions);
 				questionsRef.current = questions;
-
+				interviewSessionStore.setQuestions(questionsRef.current);
 				setCurrentQuestion(questionsRef.current[questionCursor.current].question);
 			}
 			if(e.type==="signal:feedback"){
 				const data = JSON.parse(e.data);
+				console.log(feedbackCursor.current +"   ..   " + data.feedback);
 				questionsRef.current[feedbackCursor.current].feedback = data.feedback;
+				interviewSessionStore.setQuestions(questionsRef.current);
 				feedbackCursor.current +=1;
 			}
 		});
@@ -422,10 +425,10 @@ export const InterviewPage = () => {
 	};
 
 	const startAnswer = async () => {
-		if(import.meta.env.VITE_USE_AI_API===true){
+		//if(import.meta.env.VITE_USE_AI_API==="true"){
 			const response = await localAxios.post('openvidu/recording/start/' + interviewSessionStore.sessionId)
 			interviewSessionStore.setRecordingId(response.data);
-		}
+		//}
 		console.log("answer start");
 		setStage('Answer');
 		restartTimer(60, 55);
@@ -435,7 +438,7 @@ export const InterviewPage = () => {
 
 	const stopAnswer = async () => {
 		stopFaceAnalyze();
-		if(import.meta.env.VITE_USE_AI_API===true){
+		//if(import.meta.env.VITE_USE_AI_API==="true"){
 			const response = await localAxios.post('openvidu/recording/stop/' + interviewSessionStore.recordingId, {
 				interviewId: interviewSessionStore.interviewId,
 				question: questionsRef.current[questionCursor.current].question
@@ -444,33 +447,34 @@ export const InterviewPage = () => {
 			questionsRef.current[questionCursor.current].answer = response.data.text;
 			questionsRef.current[questionCursor.current].faceScore = Math.floor(scores.reduce((a, b) => a + b, 0) / scores.length);
 			questionsRef.current[questionCursor.current].speechScore = Math.floor(response.data.confidence * 100);
-		}
-		else{
-			questionsRef.current[questionCursor.current].answer = 
-			`
-			저는 프론트엔드 개발자로 지원하게 된 이유는 제 관심과 열정이 웹 개발 분야에 깊게 뿌리를 두고 있기 때문입니다. 여러 가지 이유로 프론트엔드 개발에 대한 열정을 키워왔습니다.
-			우선적으로, 저는 사용자 경험을 개선하고 사용자들에게 가치를 제공하는 기술을 만들기에 흥미를 느낍니다. 프론트엔드 개발은 이를 달성하는 데 중요한 역할을 합니다. 웹 사이트나 애플리케이션의 디자인과 사용자 인터페이스를 개선함으로써 사용자들이 보다 쉽고 효과적으로 목적을 달성할 수 있도록 돕는 것이 목표입니다.
-			또한, 프론트엔드 개발은 창의성과 문제 해결 능력을 요구하는 분야입니다. 디자인과 기술적인 요소를 결합하여 사용자들에게 매력적인 경험을 제공하기 위해 새로운 아이디어를 고안하고 구현하는 과정에서 큰 만족감을 느낍니다. 또한, 프론트엔드 개발에서 발생하는 다양한 문제들을 해결하는 과정에서 끊임없는 학습과 성장이 가능하다고 생각합니다.
-			또한, 현재의 프론트엔드 기술은 계속해서 발전하고 있습니다. 새로운 프레임워크, 라이브러리, 도구들이 등장함에 따라 개발자로서 항상 새로운 것을 배우고 적용하는 것이 필요합니다. 이러한 도전과 성장의 기회를 통해 더 나은 개발자로 성장할 수 있다고 믿습니다.
-			마지막으로, 프론트엔드 개발은 협업과 소통이 중요한 분야입니다. 디자이너, 백엔드 개발자, 프로젝트 매니저 등과의 원활한 커뮤니케이션을 통해 팀으로서의 목표를 달성하는 과정에서 제 역량을 발휘하고 싶습니다.
-			이러한 이유들로 인해 저는 프론트엔드 개발자로 지원하게 되었으며, 이 직무에서 제 역량을 발휘하여 회사의 성공에 기여하고 싶습니다.
-			`
+			interviewSessionStore.setQuestions(questionsRef.current);
+		//}
+		// else{
+		// 	questionsRef.current[questionCursor.current].answer = 
+		// 	`
+		// 	저는 프론트엔드 개발자로 지원하게 된 이유는 제 관심과 열정이 웹 개발 분야에 깊게 뿌리를 두고 있기 때문입니다. 여러 가지 이유로 프론트엔드 개발에 대한 열정을 키워왔습니다.
+		// 	우선적으로, 저는 사용자 경험을 개선하고 사용자들에게 가치를 제공하는 기술을 만들기에 흥미를 느낍니다. 프론트엔드 개발은 이를 달성하는 데 중요한 역할을 합니다. 웹 사이트나 애플리케이션의 디자인과 사용자 인터페이스를 개선함으로써 사용자들이 보다 쉽고 효과적으로 목적을 달성할 수 있도록 돕는 것이 목표입니다.
+		// 	또한, 프론트엔드 개발은 창의성과 문제 해결 능력을 요구하는 분야입니다. 디자인과 기술적인 요소를 결합하여 사용자들에게 매력적인 경험을 제공하기 위해 새로운 아이디어를 고안하고 구현하는 과정에서 큰 만족감을 느낍니다. 또한, 프론트엔드 개발에서 발생하는 다양한 문제들을 해결하는 과정에서 끊임없는 학습과 성장이 가능하다고 생각합니다.
+		// 	또한, 현재의 프론트엔드 기술은 계속해서 발전하고 있습니다. 새로운 프레임워크, 라이브러리, 도구들이 등장함에 따라 개발자로서 항상 새로운 것을 배우고 적용하는 것이 필요합니다. 이러한 도전과 성장의 기회를 통해 더 나은 개발자로 성장할 수 있다고 믿습니다.
+		// 	마지막으로, 프론트엔드 개발은 협업과 소통이 중요한 분야입니다. 디자이너, 백엔드 개발자, 프로젝트 매니저 등과의 원활한 커뮤니케이션을 통해 팀으로서의 목표를 달성하는 과정에서 제 역량을 발휘하고 싶습니다.
+		// 	이러한 이유들로 인해 저는 프론트엔드 개발자로 지원하게 되었으며, 이 직무에서 제 역량을 발휘하여 회사의 성공에 기여하고 싶습니다.
+		// 	`
 
-			questionsRef.current[feedbackCursor.current].feedback = 
-			`
-			이 답변은 프론트엔드 개발자로의 지원 동기를 명확하게 전달하고 있습니다. 지원자는 자신의 관심과 열정이 웹 개발 분야에 깊게 뿌리를 두고 있다고 설명하며, 프론트엔드 개발이 사용자 경험을 개선하고 가치를 제공하는 기술을 만드는 과정에 흥미를 느끼고 있다고 강조하고 있습니다.
-			특히, 사용자 중심의 접근 방식과 창의성, 문제 해결 능력이 프론트엔드 개발에서 요구되는 요소라고 잘 제시하였습니다. 또한, 기술의 지속적인 발전과 이에 대한 학습에 대한 의지와 협업과 소통이 중요하다는 것을 강조하여 자신의 성장과 회사의 성공에 기여하고자 하는 의지를 잘 드러내었습니다.
-			답변은 구체적이고 직접적으로 이유를 제시하여 설득력을 높이고 있으며, 프론트엔드 개발자로의 역량과 기여에 대한 자신감을 잘 전달하고 있습니다. 전반적으로 훌륭한 지원 동기를 나타내는 답변입니다.
-			이 답변을 더욱 강화하고 개선하기 위해 몇 가지 아이디어가 있습니다.
-			구체적인 예시 추가: 프론트엔드 개발에 흥미를 갖게 된 구체적인 경험 또는 프로젝트에 대한 언급을 추가하여, 지원자가 어떻게 이러한 열정을 발전시켰는지를 더 잘 보여줄 수 있습니다.
-			회사와의 연결: 회사의 제품 또는 서비스와 관련하여 언급하면 더 맞춤화된 지원 동기를 제시할 수 있습니다. 회사의 가치관이나 제품에 대한 관심을 나타내면 지원자의 적합성을 강조할 수 있습니다.
-			미래 비전 포함: 프론트엔드 개발자로서의 미래 비전이나 목표를 논의하여, 회사와의 장기적인 일치를 강조할 수 있습니다. 이는 회사에 대한 더 깊은 관심과 심각성을 나타내며, 장기적인 협력 가능성을 보여줄 수 있습니다.
-			간결함과 명확함: 답변을 더 간결하고 명확하게 만들어 지원 동기를 더 직관적으로 전달할 수 있습니다. 불필요한 구절이나 중복된 내용을 줄이고, 핵심 아이디어를 강조합니다.
-			자기개발에 대한 계획: 프론트엔드 개발 분야에서의 자기개발 계획이나 관련 교육, 자격증 취득 등에 대한 계획을 언급하여, 지원자가 지속적인 성장에 대한 의지를 강조할 수 있습니다.
-			이러한 방법을 사용하여 답변을 더욱 강화하고 지원 동기를 뚜렷하게 전달할 수 있을 것입니다.
-			`
-			feedbackCursor.current+=1;
-		}
+		// 	questionsRef.current[feedbackCursor.current].feedback = 
+		// 	`
+		// 	이 답변은 프론트엔드 개발자로의 지원 동기를 명확하게 전달하고 있습니다. 지원자는 자신의 관심과 열정이 웹 개발 분야에 깊게 뿌리를 두고 있다고 설명하며, 프론트엔드 개발이 사용자 경험을 개선하고 가치를 제공하는 기술을 만드는 과정에 흥미를 느끼고 있다고 강조하고 있습니다.
+		// 	특히, 사용자 중심의 접근 방식과 창의성, 문제 해결 능력이 프론트엔드 개발에서 요구되는 요소라고 잘 제시하였습니다. 또한, 기술의 지속적인 발전과 이에 대한 학습에 대한 의지와 협업과 소통이 중요하다는 것을 강조하여 자신의 성장과 회사의 성공에 기여하고자 하는 의지를 잘 드러내었습니다.
+		// 	답변은 구체적이고 직접적으로 이유를 제시하여 설득력을 높이고 있으며, 프론트엔드 개발자로의 역량과 기여에 대한 자신감을 잘 전달하고 있습니다. 전반적으로 훌륭한 지원 동기를 나타내는 답변입니다.
+		// 	이 답변을 더욱 강화하고 개선하기 위해 몇 가지 아이디어가 있습니다.
+		// 	구체적인 예시 추가: 프론트엔드 개발에 흥미를 갖게 된 구체적인 경험 또는 프로젝트에 대한 언급을 추가하여, 지원자가 어떻게 이러한 열정을 발전시켰는지를 더 잘 보여줄 수 있습니다.
+		// 	회사와의 연결: 회사의 제품 또는 서비스와 관련하여 언급하면 더 맞춤화된 지원 동기를 제시할 수 있습니다. 회사의 가치관이나 제품에 대한 관심을 나타내면 지원자의 적합성을 강조할 수 있습니다.
+		// 	미래 비전 포함: 프론트엔드 개발자로서의 미래 비전이나 목표를 논의하여, 회사와의 장기적인 일치를 강조할 수 있습니다. 이는 회사에 대한 더 깊은 관심과 심각성을 나타내며, 장기적인 협력 가능성을 보여줄 수 있습니다.
+		// 	간결함과 명확함: 답변을 더 간결하고 명확하게 만들어 지원 동기를 더 직관적으로 전달할 수 있습니다. 불필요한 구절이나 중복된 내용을 줄이고, 핵심 아이디어를 강조합니다.
+		// 	자기개발에 대한 계획: 프론트엔드 개발 분야에서의 자기개발 계획이나 관련 교육, 자격증 취득 등에 대한 계획을 언급하여, 지원자가 지속적인 성장에 대한 의지를 강조할 수 있습니다.
+		// 	이러한 방법을 사용하여 답변을 더욱 강화하고 지원 동기를 뚜렷하게 전달할 수 있을 것입니다.
+		// 	`
+		// 	feedbackCursor.current+=1;
+		// }
 
 		clearFaceAnalyze();
 		
@@ -504,7 +508,7 @@ export const InterviewPage = () => {
 		<div className='w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col items-center'>
 			<div className='p-10 w-[90vw] h-[80vh]'>
 				<div className='session-header flex justify-end'>
-					<CustomButton size='sm' color='negative' className='mr-12'>
+					<CustomButton onClick={()=>{navigate('/interview')}} size='sm' color='negative' className='mr-12'>
 						면접 종료
 					</CustomButton>
 				</div>
@@ -585,7 +589,7 @@ export const InterviewPage = () => {
 							<div className='h-[65vh] mr-12 mt-20 gird grid-cols-1 items-center overflow-auto'>
 								{
 									stage==="Wait"? 
-										questionsRef.current.slice(0, questionCursor.current).map((question, index) => {
+										interviewSessionStore.questions.slice(0, questionCursor.current).map((question, index) => {
 											return (
 												<div key={index} className='mt-4'>
 													<div className='w-full flex justify-start border-b-2 border-gray-500'>
