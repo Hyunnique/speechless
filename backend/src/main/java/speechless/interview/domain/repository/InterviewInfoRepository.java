@@ -16,14 +16,13 @@ public interface InterviewInfoRepository extends JpaRepository<InterviewInfo, Lo
     List<InterviewInfo> findAllByMember(Member member);
 
     @Query("SELECT i FROM InterviewInfo i "
-        + "JOIN InterviewQuestion iq "
-        + "ON i.id = :id "
+        + "LEFT JOIN i.questions "
+        + "WHERE i.id = :id "
         + "AND i.isCompletion = true "
-        + "AND i.member = :member "
-        + "AND i = iq.interviewInfo")
+        + "AND i.member = :member ")
     Optional<InterviewInfo> findByIdAndMember(Long id, Member member);
 
-    Page<InterviewInfo> findAllByMemberAndCompletionIsTrue(Member member, Pageable pageable);
+    Page<InterviewInfo> findAllByMemberAndIsCompletionIsTrue(Member member, Pageable pageable);
 
     default InterviewInfo findByInterviewId(Long id) {
         return findById(id).orElseThrow(InterviewNotFoundException::new);

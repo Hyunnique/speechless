@@ -73,8 +73,8 @@ public class InterviewInfoService {
         Member loginMember = memberRepository.findById(authCredentials.id())
             .orElseThrow(MemberNotFoundException::new);
 
-        Page<InterviewInfo> interviewInfos = interviewRepository.findAllByMemberAndCompletionIsTrue(
-            loginMember, PageRequest.of(pageNum, pageSize, Sort.by("id").descending()));
+        Page<InterviewInfo> interviewInfos = interviewRepository.findAllByMemberAndIsCompletionIsTrue(
+            loginMember, PageRequest.of(pageNum - 1, pageSize, Sort.by("id").descending()));
 
         Page<InterviewInfoResponse> responsePage = interviewInfos.map(
             InterviewInfoMapper.INSTANCE::toResponse);
