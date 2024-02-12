@@ -29,7 +29,10 @@ public class InterviewInfoService {
     public Long createInterviewInfo(AuthCredentials authCredentials, String topic)
         throws Exception {
 
+        Member loginMember = memberRepository.getById(authCredentials.id());
+
         InterviewInfo interviewInfo = InterviewInfo.builder()
+            .member(loginMember)
             .startTime(LocalDateTime.now())
             .topic(topic).build();
 
