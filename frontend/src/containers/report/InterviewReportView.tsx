@@ -1,40 +1,55 @@
 import { useEffect, useState } from 'react';
-import { List, Button } from 'flowbite-react';
+import { Button, Pagination } from 'flowbite-react';
 import { InterviewReport } from '../../types/Report';
 import { useLocalAxios } from '../../utils/axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../stores/auth';
+import { CustomButton } from '../../components/CustomButton';
 
 
 export const InterviewReportView: React.FC = () => {
     const [reports, setReports] = useState<InterviewReport[]>([]);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const onPageChange = (page: number) => setCurrentPage(page);
+    const amountPerPage = 3;
+
     const localAxios = useLocalAxios(true);
+
     const navigate = useNavigate();
     
     useEffect(() => {
         getReports();
-    }, []);
+    }, [currentPage]);
 
     const getReports = () => {
-        // localAxios.get("interview-reports")
-        // .then((res) => {
-        //     setReports(res.data.reports);
-        // })
-        // .catch((err) => {
-        //     console.log(err);
-        // })
+        localAxios.get("interview", {params: {pageSize: amountPerPage, pageNum: currentPage}})
+        .then((res) => {
+
+            setCurrentPage(res.data.currentPage);
+            setTotalPages(res.data.totalPage);
+
+            setReports(res.data.interviewInfos);
+            console.log(res.data);
+            console.log("current: "+ currentPage + "/// totalPage: " + res.data.totalPage);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
     }
 
     const deleteReport = (index: number) => {
-        if (confirm("정말로 삭제하시겠습니까?")){
-            localAxios.delete(`interview-reports/${index}`)
-            .then((res) => {
-                getReports();
-                console.log(res);
-            })
-            .catch((err) => {
-                console.log(err);
-            })
-        }
+        // if (confirm("정말로 삭제하시겠습니까?")){
+        //     localAxios.delete(`interview-reports/${index}`)
+        //     .then((res) => {
+        //         getReports();
+        //         console.log(res);
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //     })
+        // }
     }
 
     return(
@@ -43,30 +58,35 @@ export const InterviewReportView: React.FC = () => {
                 {
                     reports.length > 0 ?
                     reports.map((report) => (
-                        <li key={report.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2' >
-                            <div className='basis-3/4 flex flex-col justify-center'>
+                        <li key={report.id} className='px-8 py-4 flex border-b-2 hover:bg-gradient-to-l from-white to-gray-50 cursor-pointer' onClick={() => navigate('/interview/report/' + report.id)}>
+                            <div className='flex-1 flex flex-col justify-center'>
                                 <p className='text-lg font-semibold tracking-tight text-gray-900 dark:text-white w-full'>{report.topic}</p>
                             </div>
-                            <div className='basis-1/4 flex flex-col items-end'>
-                                <Button className='w-1/2 bg-primary-400'>다운로드</Button>
-                                <Button className='w-1/2 bg-negative-400' onClick={() => deleteReport(report.id)}>삭제</Button>
+                            <div className='flex flex-row items-end gap-2'>
+                                <CustomButton color='negative' size='md' className='flex items-center gap-2' onClick={
+                                    (e) => {
+                                        e.stopPropagation();
+                                        //deleteStatement(report.id);
+                                    }
+                                }>
+                                    <span className="material-symbols-outlined text-sm">delete</span>
+                                    <span>삭제</span>
+                                </CustomButton>
                             </div>
                         </li>
                     ))
                     :
                     <p className='h-full flex justify-center items-center'>현재 저장된 면접 리포트가 없습니다.</p>
                 }
-                {/*{reports.map((report) => (*/}
-                {/*    <li key={report.id} className='mb-4 px-4 py-2 flex shadow-sm border-b-2' >*/}
-                {/*        <div className='basis-3/4 flex flex-col justify-center'>*/}
-                {/*            <p className='text-lg font-semibold tracking-tight text-gray-900 dark:text-white w-full'>{report.topic}</p>*/}
-                {/*        </div>*/}
-                {/*        <div className='basis-1/4 flex flex-col items-end'>*/}
-                {/*            <Button className='w-1/2 bg-primary-400'>다운로드</Button>*/}
-                {/*            <Button className='w-1/2 bg-negative-400'>삭제</Button>*/}
-                {/*        </div>*/}
-                {/*    </li>*/}
-                {/*))}*/}
+                {
+                totalPages > 1 ?
+                    <div className="flex overflow-x-auto sm:justify-center">
+                        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange}
+                                    nextLabel='다음' previousLabel='이전'/>
+                    </div>
+                    :
+                    <></>
+                }
             </ul>
         </>
     );

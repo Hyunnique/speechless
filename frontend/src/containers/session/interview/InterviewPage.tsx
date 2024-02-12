@@ -16,6 +16,7 @@ import * as faceapi from 'face-api.js';
 
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import { InterviewQuestion } from '../../../types/Interview.ts';
+import { InterviewReport } from '../../../types/Report.ts';
 
 export const InterviewPage = () => {
 
@@ -105,7 +106,7 @@ export const InterviewPage = () => {
 			const questionsCount = interviewSessionStore.questionsCount;
 			const randomQuestions = presetQuestions.sort(() => Math.random() - Math.random()).slice(0, questionsCount);
 			setCurrentQuestion(randomQuestions[0]);
-			questionsRef.current = randomQuestions.map((question) => ({ question, answer: '', feedback: '', faceScore: 0, speechScore: 0}));
+			questionsRef.current = randomQuestions.map((question) => ({ question, answer: '', feedback: '', faceScoreList: [], faceScore: 0, speechScore: 0}));
 			interviewSessionStore.setQuestions(questionsRef.current);
 		}
 		else{
@@ -200,7 +201,7 @@ export const InterviewPage = () => {
 					questions.push(questionsRef.current[index]);
 				}
 				for(let index = questionCursor.current+1; index < cleanedList.length; index++){
-					questions.push({question: cleanedList[index], answer: '', feedback: '', faceScore: 0, speechScore: 0});
+					questions.push({question: cleanedList[index], answer: '', feedback: '', faceScoreList: [], faceScore: 0, speechScore: 0});
 				}
 				console.log("디버그");
 				console.log(questions);
@@ -267,8 +268,9 @@ export const InterviewPage = () => {
 	/*
 	* face-api 기능 --------------------------------------------------
 	*/
-	const [lastEmotion, setLastEmotion] = useState({expression: '', probability: -1}); 
-	const [scores, setScores] = useState([] as number[]);
+	const [lastEmotion, setLastEmotion] = useState({expression: '', probability: -1});
+	const [lastScore, setLastScore] = useState(0);
+	const scoresRef = useRef([] as number[]);
 	const intervalId = useRef<number | null>(null);
 	const modelUrl = '/models';
 
@@ -292,6 +294,15 @@ export const InterviewPage = () => {
 			.withFaceLandmarks()
 			.withFaceExpressions();
 
+			if(!detections || detections.length === 0){
+				if(scoresRef.current.length === 0){
+					scoresRef.current = [0]
+				}
+				else{
+					scoresRef.current.push(scoresRef.current[scoresRef.current.length-1]);
+				}
+				return;
+			}
 			if (detections.length >= 1) {
 				const happyScore = Math.floor(detections[0].expressions.happy*50);
 				
@@ -303,10 +314,10 @@ export const InterviewPage = () => {
 				negativeScore += detections[0].expressions.surprised;
 				negativeScore = Math.floor(negativeScore*50);
 
-				let score = 50 + happyScore - negativeScore;
-				
-				setScores([...scores, score]);
+				const score = 50 + happyScore - negativeScore;
+				scoresRef.current.push(score);
 				setLastEmotion(detections[0].expressions.asSortedArray()[0]);
+				setLastScore(score);
 			}
 	
 		}, 1000);
@@ -320,7 +331,7 @@ export const InterviewPage = () => {
 
 	const clearFaceAnalyze = () => {
 		stopFaceAnalyze();
-		setScores([]);
+		scoresRef.current = [];
 	}
 	/*
 	* face-api 기능 끝 --------------------------------------------------
@@ -447,7 +458,9 @@ export const InterviewPage = () => {
 			})
 	
 			questionsRef.current[questionCursor.current].answer = response.data.text;
-			questionsRef.current[questionCursor.current].faceScore = Math.floor(scores.reduce((a, b) => a + b, 0) / scores.length);
+			questionsRef.current[questionCursor.current].faceScoreList = [... scoresRef.current];
+			
+			questionsRef.current[questionCursor.current].faceScore = Math.floor(scoresRef.current.reduce((a, b) => a + b, 0) / scoresRef.current.length);
 			questionsRef.current[questionCursor.current].speechScore = Math.floor(response.data.confidence * 100);
 			interviewSessionStore.setQuestions(questionsRef.current);
 		}
@@ -469,14 +482,13 @@ export const InterviewPage = () => {
 			답변은 구체적이고 직접적으로 이유를 제시하여 설득력을 높이고 있으며, 프론트엔드 개발자로의 역량과 기여에 대한 자신감을 잘 전달하고 있습니다. 전반적으로 훌륭한 지원 동기를 나타내는 답변입니다.
 			이 답변을 더욱 강화하고 개선하기 위해 몇 가지 아이디어가 있습니다.
 			구체적인 예시 추가: 프론트엔드 개발에 흥미를 갖게 된 구체적인 경험 또는 프로젝트에 대한 언급을 추가하여, 지원자가 어떻게 이러한 열정을 발전시켰는지를 더 잘 보여줄 수 있습니다.
-			회사와의 연결: 회사의 제품 또는 서비스와 관련하여 언급하면 더 맞춤화된 지원 동기를 제시할 수 있습니다. 회사의 가치관이나 제품에 대한 관심을 나타내면 지원자의 적합성을 강조할 수 있습니다.
-			미래 비전 포함: 프론트엔드 개발자로서의 미래 비전이나 목표를 논의하여, 회사와의 장기적인 일치를 강조할 수 있습니다. 이는 회사에 대한 더 깊은 관심과 심각성을 나타내며, 장기적인 협력 가능성을 보여줄 수 있습니다.
+			회사와의 연결: 회사의 제품 또는 서비스와 관련하여 언급하면 더 맞춤화된 지원 동기를 제시할 수 있습니다.
 			간결함과 명확함: 답변을 더 간결하고 명확하게 만들어 지원 동기를 더 직관적으로 전달할 수 있습니다. 불필요한 구절이나 중복된 내용을 줄이고, 핵심 아이디어를 강조합니다.
 			자기개발에 대한 계획: 프론트엔드 개발 분야에서의 자기개발 계획이나 관련 교육, 자격증 취득 등에 대한 계획을 언급하여, 지원자가 지속적인 성장에 대한 의지를 강조할 수 있습니다.
-			이러한 방법을 사용하여 답변을 더욱 강화하고 지원 동기를 뚜렷하게 전달할 수 있을 것입니다.
 			`
 			feedbackCursor.current+=1;
 
+			questionsRef.current[questionCursor.current].faceScoreList = [48, 49, 50, 51, 52];
 			questionsRef.current[questionCursor.current].faceScore = 50;
 			questionsRef.current[questionCursor.current].speechScore = 50;
 			interviewSessionStore.setQuestions(questionsRef.current);
@@ -497,6 +509,37 @@ export const InterviewPage = () => {
 		}
 	};
 
+	const endInterview = () => {
+		if(questionCursor.current !== feedbackCursor.current){
+			alert('피드백이 끝날때까지 잠시 기다려 주세요.');
+			return;
+		}
+		const qc = questionsRef.current.length;
+		const interviewResult = {
+			interviewId: interviewSessionStore.interviewId,
+			pronunciationScore: questionsRef.current.slice(0, qc).reduce((acc, question) => acc + question.speechScore, 0) / qc,
+			faceScore: questionsRef.current.slice(0, qc).reduce((acc, question) => acc + question.faceScore, 0) / qc,
+			faceGraph: JSON.stringify(questionsRef.current.slice(0, qc).map(question => question.faceScoreList)),
+			pronunciationGraph: JSON.stringify(questionsRef.current.slice(0, qc).map(question => question.speechScore)),
+		}
+
+		console.log("표정 점수 저장 테스트")
+		console.log(questionsRef.current)
+		console.log(interviewResult)
+
+		localAxios.delete('/openvidu/sessions/'+interviewSessionStore.sessionId,
+		{
+			data: interviewResult
+		},
+		)
+		.then(() => {
+			navigate('/interview');
+		})
+		.catch((error) => {
+			console.log(error);
+		})
+	}
+
 	const moveToNextState= () => {
 		if(interviewSessionStore.stage==="Start" || interviewSessionStore.stage==="Wait"){
 			return startQuestion();
@@ -507,6 +550,10 @@ export const InterviewPage = () => {
 		if(interviewSessionStore.stage==="Answer"){
 			return stopAnswer();
 		}
+		if(interviewSessionStore.stage==="End"){
+			return endInterview();
+		}
+		
 	}
 	/*
 	* 상태 전이 기능 끝 --------------------------------------------------
@@ -526,7 +573,7 @@ export const InterviewPage = () => {
 						interviewSessionStore.stage==='Wait' ? '준비되셨으면 다음을 눌러주세요.' : 
 						interviewSessionStore.stage==='Question' ? currentQuestion :
 						interviewSessionStore.stage==='Answer' ? currentQuestion :
-						interviewSessionStore.stage==='End' ? "종료" :
+						interviewSessionStore.stage==='End' ? "완료 버튼을 눌러주세요." :
 						'에러 발생'
 					}
 				</div>
@@ -552,7 +599,7 @@ export const InterviewPage = () => {
 												}
 											</span>
 											<span className='text-2xl font-semibold'>Score: </span>
-											<span className='text-2xl font-semibold'>{scores.length > 0 ? scores[scores.length - 1].toFixed(0).padStart(2, ' ') : "  "}</span>
+											<span className='text-2xl font-semibold'>{lastScore}</span>
 										</div> 
 										:
 										<div className='session-indicator-expression flex gap-2 items-center'>
@@ -596,16 +643,16 @@ export const InterviewPage = () => {
 						<div className='session-ui flex flex-col'>
 							<div className='h-[65vh] mr-12 mt-20 gird grid-cols-1 items-center overflow-auto'>
 								{
-									interviewSessionStore.stage==="Wait"? 
+									interviewSessionStore.stage==="Wait" || interviewSessionStore.stage==="End" ? 
 										interviewSessionStore.questions.slice(0, questionCursor.current).map((question, index) => {
 											return (
-												<div key={index} className='mt-4'>
+												<div key={index} className='mt-10'>
 													<div className='w-full flex justify-start border-b-2 border-gray-500'>
-														<div className='session-question flex justify-center items-cente1r'>
+														<div className='session-question flex justify-center items-cente1r text-2xl'>
 															{question.question}
 														</div>
 													</div>
-													<div className='w-full flex justify-end border-b-2 border-gray-500'>
+													<div className='w-full flex justify-end border-b-2 border-gray-500 bg-primary-50'>
 														<div className='session-answer flex justify-center items-center'>
 															{question.answer}
 														</div>
@@ -659,7 +706,7 @@ export const InterviewPage = () => {
 											interviewSessionStore.stage==='Wait' ? "다음" :
 											interviewSessionStore.stage==='Question' ? "답변 시작" :
 											interviewSessionStore.stage==='Answer' ? "답변 종료" :
-											interviewSessionStore.stage==='End' ? "나가기를 클릭해주세요." :
+											interviewSessionStore.stage==='End' ? "완료" :
 											"에러 발생"
 										}
 									</Button>

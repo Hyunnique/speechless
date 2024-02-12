@@ -1,13 +1,12 @@
+import { InterviewQuestion } from "./Interview";
+
+
 export interface InterviewReport {
-    id: number;
-    userId: number;
-    topic: string;
-    pronunciationScore?: number;
-    faceScore?: number;
-    faceGraph?: string;
-    startTime?: Date;
-    endTime?: Date;
-    report?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    id: number,
+    topic : string,
+    pronunciationScore : number,
+    pronunciationGraph : string,
+    faceScore: number,
+    faceGraph: string,
+    questions: InterviewQuestion[]
 }

@@ -17,6 +17,7 @@ import { StatementDetailPage } from './containers/statement/StatementDetailPage.
 import {SpeechCreatePage} from "./containers/speech/SpeechCreatePage.tsx";
 import { PrivateRoute } from './containers/layout/PrivateRoute.tsx';
 import { AuthRoute } from './containers/layout/AuthRoute.tsx';
+import { InterviewReportDetailPage } from './containers/report/InterviewReportDetailPage.tsx';
 export default function App() {
 	return (
 		<>
@@ -33,6 +34,7 @@ export default function App() {
 							<Route path='/statement/write/:id?' element={<StatementWritePage />} />
 							<Route path='/statement/detail/:id' element={<StatementDetailPage />} />
 							<Route path='/interview' element={<InterviewEnterPage />} />
+							<Route path='/interview/report/:id' element={<InterviewReportDetailPage />} />
 						</Route>
 					</Route>
 
