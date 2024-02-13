@@ -47,7 +47,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 						: color === 'yellow'
 							? 'bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50'
 							: color === 'green'
-								? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-50'
+								? 'bg-green-300 text-black border-green-500 hover:bg-green-400'
 								: color === 'blue' // fixed
 									? 'bg-blue-700 text-white border-blue-300 hover:bg-blue-800'
 									: color === 'indigo'

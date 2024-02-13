@@ -1,8 +1,15 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import {useLocalAxios} from "../utils/axios.ts";
 
 export const Calendar: React.FC = () => {
+	const localAxios = useLocalAxios();
+
+	useEffect(() => {
+
+	}, []);
+
 	return (
 		<>
 			<FullCalendar
