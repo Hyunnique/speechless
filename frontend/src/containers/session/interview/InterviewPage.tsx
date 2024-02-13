@@ -375,20 +375,20 @@ export const InterviewPage = () => {
 	*/
 	const [uniqueKey, setUniqueKey] = useState(-1);
 	const [duration, setDuration] = useState<number>();
-	const [clickAllowTime, setClickAllowTime] = useState<number>();
+	// const [clickAllowTime, setClickAllowTime] = useState<number>();
 	const [remainingTime, setRemainingTime] = useState<number>();
 	const [timerOn, setTimerOn] = useState(false);
-	const [disableNextButton, setDisableNextButton] = useState(false);
+	// const [disableNextButton, setDisableNextButton] = useState(false);
 
 	const stopTimer = () => {
 		setTimerOn(false);
 		setDuration(999);
-		setClickAllowTime(999);
+		//setClickAllowTime(999);
 	}
 
 	const restartTimer = (duration: number, clickAllowTime: number) => {
 		setDuration(duration);
-		setClickAllowTime(clickAllowTime);
+		//setClickAllowTime(clickAllowTime);
 		console.log("타이머 리스타트")
 		setTimerOn(true);
 		setUniqueKey(prevKey => prevKey + 1);
@@ -398,30 +398,30 @@ export const InterviewPage = () => {
 		setRemainingTime(remainingTime)
 	}
 
-	useEffect(() => {
-		refreshButtonClickState();
-	}, [duration])
+	// useEffect(() => {
+	// 	refreshButtonClickState();
+	// }, [duration, clickAllowTime])
 	
 	useEffect(() => {
-		refreshButtonClickState();
+		//refreshButtonClickState();
 		if(remainingTime === 0) {
 			moveToNextState();
 		}
 
 	}, [remainingTime]);
 
-	const refreshButtonClickState = () => {
-		if(!remainingTime || !clickAllowTime) {
-			return;
-		}
+	// const refreshButtonClickState = () => {
+	// 	if(!remainingTime || !clickAllowTime) {
+	// 		return;
+	// 	}
 
-		if (remainingTime > clickAllowTime) {
-			setDisableNextButton(true);
-		} 
-		else {
-			setDisableNextButton(false);
-		}
-	}
+	// 	if (remainingTime > clickAllowTime) {
+	// 		setDisableNextButton(true);
+	// 	} 
+	// 	else {
+	// 		setDisableNextButton(false);
+	// 	}
+	// }
 	/*
 	* 타이머 기능 끝 --------------------------------------------------
 	*/
@@ -434,7 +434,7 @@ export const InterviewPage = () => {
 	const startQuestion = () => {
 		speech(questionsRef.current[questionCursor.current].question);
 		interviewSessionStore.setStage('Question');
-		restartTimer(15, 10);
+		stopTimer();
 	};
 
 	const startAnswer = async () => {
@@ -510,10 +510,6 @@ export const InterviewPage = () => {
 	};
 
 	const endInterview = () => {
-		if(questionCursor.current !== feedbackCursor.current){
-			alert('피드백이 끝날때까지 잠시 기다려 주세요.');
-			return;
-		}
 		const qc = questionsRef.current.length;
 		const interviewResult = {
 			interviewId: interviewSessionStore.interviewId,
@@ -533,6 +529,12 @@ export const InterviewPage = () => {
 		},
 		)
 		.then(() => {
+			session?.disconnect();
+			setSession(null);
+			setMainStreamManager(null);
+			setPublisher(null);
+			setSubscribers([]);
+			interviewSessionStore.clearSession();
 			navigate('/interview');
 		})
 		.catch((error) => {
@@ -563,7 +565,7 @@ export const InterviewPage = () => {
 		<div className='w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col items-center'>
 			<div className='p-10 w-[90vw] h-[80vh]'>
 				<div className='session-header flex justify-end'>
-					<CustomButton onClick={()=>{navigate('/interview')}} size='sm' color='negative' className='mr-12'>
+					<CustomButton onClick={()=>{navigate('/interview')}} size='lg' color='negative' className='mr-12'>
 						면접 종료
 					</CustomButton>
 				</div>
@@ -641,7 +643,7 @@ export const InterviewPage = () => {
 							</div>
 						</div>
 						<div className='session-ui flex flex-col'>
-							<div className='h-[65vh] mr-12 mt-20 gird grid-cols-1 items-center overflow-auto'>
+							<div className='h-[65vh] mr-12 mt-10 gird grid-cols-1 items-center overflow-auto'>
 								{
 									interviewSessionStore.stage==="Wait" || interviewSessionStore.stage==="End" ? 
 										interviewSessionStore.questions.slice(0, questionCursor.current).map((question, index) => {
@@ -673,8 +675,8 @@ export const InterviewPage = () => {
 			
 									:
 
-									interviewSessionStore.stage==="Question"|| interviewSessionStore.stage==="Answer"? 
-									<div className="flex justify-center items-center">
+									interviewSessionStore.stage==="Answer"? 
+									<div className="flex justify-center items-center h-full">
 										<CountdownCircleTimer
 											key={uniqueKey}
 											isPlaying={timerOn || false}
@@ -683,7 +685,7 @@ export const InterviewPage = () => {
 											colorsTime={[60, 45, 20, 0]}
 											onUpdate={timerOnUpdate}
 											strokeWidth={20}
-											size={460}
+											size={400}
 										>
 											{({ remainingTime }) => (
 												<div className="text-5xl font-bold">
@@ -695,12 +697,22 @@ export const InterviewPage = () => {
 
 									:
 
+									interviewSessionStore.stage==="Question"?
+
+								<div className="flex justify-center items-center h-full">
+										<span className='text-2xl'>
+											질문에 대한 답이 준비되면 다음을 클릭해 주세요.
+										</span>
+									</div>
+
+									:
+
 									""
 								}
 							</div>
 							<div className='basis-1/6 mt-5'>
 								<div className='flex justify-end'>
-									<Button color='blue' disabled={disableNextButton} onClick={moveToNextState} className='mr-12'>
+									<CustomButton size='lg' color='blue' onClick={moveToNextState} className='mr-12'>
 										{
 											interviewSessionStore.stage==='Start' ? "시작" :
 											interviewSessionStore.stage==='Wait' ? "다음" :
@@ -709,7 +721,7 @@ export const InterviewPage = () => {
 											interviewSessionStore.stage==='End' ? "완료" :
 											"에러 발생"
 										}
-									</Button>
+									</CustomButton>
 								</div>
 							</div>
 						</div>
