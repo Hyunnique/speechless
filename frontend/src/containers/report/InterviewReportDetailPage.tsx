@@ -11,6 +11,7 @@ import {
 	CategoryScale,
 	LinearScale,
 	BarElement,
+	LineElement,
 	Title,
 	Tooltip,
 	Legend,
@@ -20,12 +21,13 @@ ChartJS.register(
 	CategoryScale,
 	LinearScale,
 	BarElement,
+	LineElement,
 	Title,
 	Tooltip,
 	Legend
 );
   
-import { Bar } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
 import { useAuthStore } from '../../stores/auth.ts';
 
 export const InterviewReportDetailPage: React.FC = () =>  {
@@ -40,7 +42,7 @@ export const InterviewReportDetailPage: React.FC = () =>  {
 		labels: [],
 		datasets: [
 			{
-			label: 'test',
+			//label: 'test',
 			data: [],
 			backgroundColor: 'rgba(53, 162, 235, 0.5)',
 			},
@@ -52,7 +54,6 @@ export const InterviewReportDetailPage: React.FC = () =>  {
 			labels: [],
 			datasets: [
 				{
-				type: 'line',
 				//label: 'test',
 				data: [],
 				backgroundColor: 'rgba(53, 162, 235, 0.5)',
@@ -83,7 +84,7 @@ export const InterviewReportDetailPage: React.FC = () =>  {
 		if(formData){
 			let list = JSON.parse(formData.pronunciationGraph);
 			let data = {
-				labels: list.map((_: any, index: number) => `${index + 1}번 문답`),
+				labels: list.map((_: unknown, index: number) => `${index + 1}번 문답`),
 				datasets: [
 				  {
 					label: '발음 점수',
@@ -111,11 +112,10 @@ export const InterviewReportDetailPage: React.FC = () =>  {
 						return (current.length > prev.length) ? current : prev;
 				  	}, []),
 				datasets: ylists.map((ylist, index) => ({
-					type: 'line',
 					label: `${index + 1}번 문답`, // 데이터셋의 라벨
 					data: ylist.map((y, i) => ({ x: xlists[index][i], y: y })), // x, y 좌표를 매핑
 					fill: false, // 선 아래를 채우지 않음
-					borderColor: getRandomColor(), // 선 색상
+					backgroundColor: getRandomColor(), // 선 색상
 				}))
 			}
 
@@ -153,7 +153,7 @@ export const InterviewReportDetailPage: React.FC = () =>  {
 							<p className=' text-gray-500 dark:text-gray-400'>표정 점수 평균</p>
 							<p className=' text-gray-700 dark:text-gray-400 ml-5'> {formData?.faceScore} </p>
 						</div>
-						<Bar data={faceGraphData} />
+						<Line data={faceGraphData} />
 						<div className='flex flex-justify-between mt-7'>
 							<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>발음 점수 평균</p>
 							<p className=' text-gray-700 dark:text-gray-400 ml-5'> {formData?.pronunciationScore} </p>
