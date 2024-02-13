@@ -11,7 +11,7 @@ import speechless.community.domain.Community;
 import speechless.community.domain.Participant;
 import speechless.member.domain.Member;
 
-public interface ParticipantRepository extends JpaRepository<Participant, Long> {
+public interface ParticipantRepository extends JpaRepository<Participant, Long>, CustomParticipantRepository  {
 
     Optional<Participant> findByMemberAndCommunity(Member member, Community community);
     @Query(value = "SELECT c FROM Participant p "
@@ -40,4 +40,5 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
         + "ON MONTH(c.sessionStart) = MONTH(current_date) "
         + "AND p.community = c")
     Optional<List<Community>> findCurrentByMember(Member member);
+
 }

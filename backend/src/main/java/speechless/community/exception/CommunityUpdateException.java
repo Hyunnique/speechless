@@ -7,6 +7,6 @@ import speechless.common.error.SpeechlessException;
 public class CommunityUpdateException extends SpeechlessException {
 
     public CommunityUpdateException(){
-        super(new ErrorCode(HttpStatus.UNAUTHORIZED, "자신이 작성한 글만 수정할 수 있습니다."));
+        super(new ErrorCode(HttpStatus.FORBIDDEN, "자신이 작성한 글만 수정할 수 있습니다."));
     }
 }

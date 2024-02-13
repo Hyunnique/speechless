@@ -16,6 +16,7 @@ import speechless.community.domain.repository.ParticipantRepository;
 import speechless.community.dto.response.ParticipantCommunityResponse;
 import speechless.community.exception.CommunityNotFoundException;
 import speechless.community.exception.NotAllowedParticipantException;
+import speechless.community.exception.ParticipantExistException;
 import speechless.community.exception.ParticipantNotFoundException;
 import speechless.member.domain.Member;
 import speechless.member.domain.repository.MemberRepository;
@@ -34,6 +35,9 @@ public class ParticipantService {
         throws SpeechlessException {
         Member loginMember = getMember(authCredentials);
         Community participantCommunity = getCommunity(communityId);
+        if (participantRepository.existsByCommunityIdAndMemberId(communityId, loginMember.getId())) {
+            throw new ParticipantExistException();
+        }
         Participant participant = Participant.builder()
             .member(loginMember)
             .community(participantCommunity)

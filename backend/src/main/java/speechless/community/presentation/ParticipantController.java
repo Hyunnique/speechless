@@ -33,12 +33,12 @@ public class ParticipantController {
     }
 
     @DeleteMapping("/{community_id}")
-    public ResponseEntity deleteParticipant(
+    public ResponseEntity<?> deleteParticipant(
         @Parameter(hidden = true) @Auth AuthCredentials authCredentials,
         @PathVariable("community_id") Long communityId
     ) {
         participantService.deleteParticipant(authCredentials, communityId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/reserved")
