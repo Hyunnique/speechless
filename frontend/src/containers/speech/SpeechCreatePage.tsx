@@ -21,8 +21,6 @@ export const SpeechCreatePage = () => {
 		'교육',
 		'의예',
 		'예체능',
-		'오락',
-		'기타',
 	];
 
 	const [formData, setFormData] = useState({

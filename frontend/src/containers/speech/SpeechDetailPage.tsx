@@ -3,6 +3,8 @@ import { type CommunityResponse, CommunityView } from '../../types/Community.ts'
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLocalAxios } from '../../utils/axios';
 import { Breadcrumb, BreadcrumbItem } from 'flowbite-react';
+import {useAuthStore} from "../../stores/auth.ts";
+import { AxiosError } from 'axios';
 
 export const SpeechDetailPage = () => {
 	const [speechDetail, setSpeechDetail] = useState<CommunityView | null>(null);
@@ -10,54 +12,65 @@ export const SpeechDetailPage = () => {
 	const localAxiosWithAuth = useLocalAxios();
 	const navigate = useNavigate();
 
-	const updateSpeech = async () => {
-		navigate(`/speech/write/${id}`);
-	};
+  const { name: userName } = useAuthStore(state => ({
+    name: state.name,
+  }));
 
-	//형 변환 할 것들(date...)
-	useEffect(() => {
-		const fetchData = async () => {
-			if (id) {
-				try {
-					const res = await localAxiosWithAuth.get(`/community/${id}`);
-					const communityData: CommunityView = {
-						...res.data,
-						sessionStart: new Date(res.data.sessionStart),
-						deadline: new Date(res.data.deadline),
-						createdAt: new Date(res.data.createdAt),
-					};
-					setSpeechDetail(communityData);
-				} catch (error) {
-					console.error('Error :', error);
-				}
-			}
-		};
+  const updateSpeech = async () => {
+    navigate(`/speech/write/${id}`);
+  };
+  const isOwner = userName === speechDetail?.writer;
+  //형 변환 할 것들(date...)
+  useEffect(() => {
+    const fetchData = async () => {
+      if (id) {
+        try {
+          const res = await localAxiosWithAuth.get(`/community/${id}`);
+          const communityData: CommunityView = {
+              ...res.data,
+              sessionStart: new Date(res.data.sessionStart),
+              deadline: new Date(res.data.deadline),
+              createdAt: new Date(res.data.createdAt)
+          };
+          setSpeechDetail(communityData);
+        } catch (error) {
+          console.error('Error :', error);
+        }
+      }
+    };
 
 		fetchData();
 	}, []);
 
-	const deleteSpeech = async () => {
-		const confirmDelete = window.confirm('정말로 글을 삭제하시겠습니까?');
-		if (confirmDelete) {
-			try {
-				await localAxiosWithAuth.delete(`/community/${id}`);
-				alert('글 삭제 완료');
-				navigate('/speech');
-			} catch (error) {
-				console.error('err :', error);
-				alert('실패');
-			}
-		}
-	};
+
+
+  const deleteSpeech = async () => {
+    const confirmDelete = window.confirm('정말로 글을 삭제하시겠습니까?');
+    if (confirmDelete) {
+      try {
+        await localAxiosWithAuth.delete(`/community/${id}`);
+        alert('글 삭제 완료');
+        navigate('/speech');
+      } catch (error) {
+        console.error('err :', error);
+        alert('실패');
+      }
+    }
+  };
 
   const joinGroup = async () => {
-    console.log(id);
     try {
       const res = await localAxiosWithAuth.post(`/participant/${id}`);
-    }catch (err){
-      console.log("err ", err)
-    }finally {
-      console.log("fin")
+      alert('그룹 참여 완료');
+    } catch (error) {
+      const err = error as AxiosError;
+      if (err.response && err.response.status === 400) {
+        alert('이미 가입한 그룹입니다');
+      } else {
+        console.error("Error: ", err.message);
+      }
+    } finally {
+      console.log("Fin");
     }
   };
 
@@ -134,29 +147,32 @@ export const SpeechDetailPage = () => {
 							</div>
 						</div>
 
-						<div className='py-4 px-5 lg:px-8 border-t border-gray-200'>
-							<div className='mb-4'>
-								<h2 className='font-bold text-xl mb-2'>그룹 소개</h2>
-								<p className='text-gray-700'>{speechDetail.content}</p>
-							</div>
-							<div className=''>
-								<button
-									onClick={updateSpeech}
-									className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded '
-								>
-									글 수정
-								</button>
-								<button
-									className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'
-									onClick={deleteSpeech}
-								>
-									글 삭제
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</>
-	);
+              <div className='py-4 px-5 lg:px-8 border-t border-gray-200'>
+                <div className='mb-4'>
+                  <h2 className='font-bold text-xl mb-2'>그룹 소개</h2>
+                  <p className='text-gray-700'>{speechDetail.content}</p>
+                </div>
+                <div className="">
+                  {isOwner && (
+                      <div>
+                          <button onClick={updateSpeech}
+                                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded "
+                          >
+                            글 수정
+                          </button>
+                          <button
+                              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                              onClick={deleteSpeech}
+                          >
+                            글 삭제
+                          </button>
+                      </div>
+                )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+  );
 };
