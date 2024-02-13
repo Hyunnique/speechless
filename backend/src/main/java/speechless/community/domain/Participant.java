@@ -21,6 +21,7 @@ import speechless.member.domain.Member;
 public class Participant extends BaseTimeEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
