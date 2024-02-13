@@ -48,4 +48,12 @@ public class ParticipantController {
         return new ResponseEntity<>(participantService.getReservedParticipants(authCredentials),
             HttpStatus.OK);
     }
+
+    @GetMapping("/current")
+    public ResponseEntity<List<ParticipantCommunityResponse>> currentCommunityList(
+        @Parameter(hidden = true) @Auth AuthCredentials authCredentials
+    ){
+        return new ResponseEntity<>(participantService.getCurrentParticipants(authCredentials),
+            HttpStatus.OK);
+    }
 }
