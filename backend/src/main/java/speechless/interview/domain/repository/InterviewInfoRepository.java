@@ -1,8 +1,8 @@
 package speechless.interview.domain.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import javax.swing.text.html.Option;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,6 +23,9 @@ public interface InterviewInfoRepository extends JpaRepository<InterviewInfo, Lo
     Optional<InterviewInfo> findByIdAndMember(Long id, Member member);
 
     Page<InterviewInfo> findAllByMemberAndIsCompletionIsTrue(Member member, Pageable pageable);
+
+    List<InterviewInfo> findAllByMemberAndStartTimeBetweenAndIsCompletionIsTrue(
+        Member member, LocalDateTime startDate, LocalDateTime endDate);
 
     default InterviewInfo findByInterviewId(Long id) {
         return findById(id).orElseThrow(InterviewNotFoundException::new);

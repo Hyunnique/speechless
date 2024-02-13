@@ -1,6 +1,7 @@
 package speechless.interview.presentation;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +55,15 @@ public class InterviewController {
     ) throws Exception {
         questionService.asyncCreateQuestion(authCredentials.id(), request);
         return new ResponseEntity<>("OK", HttpStatus.CREATED);
+    }
+
+    @GetMapping("/monthly")
+    public ResponseEntity<List<InterviewInfoResponse>> getMonthlyInterviews(
+        @Parameter(hidden = true) @Auth AuthCredentials authCredentials,
+        @RequestParam("year") Integer year, @RequestParam("month") Integer month
+    ) throws Exception {
+        return new ResponseEntity<>(
+            interviewService.getMonthlyInterviewInfo(authCredentials, year, month), HttpStatus.OK);
     }
 
 }

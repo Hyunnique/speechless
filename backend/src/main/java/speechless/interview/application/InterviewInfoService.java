@@ -1,6 +1,9 @@
 package speechless.interview.application;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -96,6 +99,22 @@ public class InterviewInfoService {
             interviewRepository.findByIdAndMember(id, loginMember)
                 .orElseThrow(InterviewNotFoundException::new));
 
+    }
+
+    public List<InterviewInfoResponse> getMonthlyInterviewInfo(
+        AuthCredentials authCredentials, Integer year, Integer month) {
+
+        Member loginMember = getMember(authCredentials);
+
+        LocalDate firstDate = LocalDate.of(year.intValue(), month.intValue(), 1);
+        LocalDate lastDate = firstDate.withDayOfMonth(firstDate.lengthOfMonth());
+
+        List<InterviewInfo> result = interviewRepository.findAllByMemberAndStartTimeBetweenAndIsCompletionIsTrue(
+            loginMember, LocalDateTime.of(firstDate, LocalTime.MIN),
+            LocalDateTime.of(lastDate, LocalTime.MAX.minusSeconds(1))
+        );
+
+        return result.stream().map(InterviewInfoMapper.INSTANCE::toResponse).toList();
     }
 
     private Member getMember(AuthCredentials authCredentials) {
