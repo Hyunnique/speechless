@@ -2,12 +2,7 @@ package speechless.community.domain;
 
 import static lombok.AccessLevel.PROTECTED;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -29,8 +24,8 @@ public class Participant extends BaseTimeEntity {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "community_id")
+    @ManyToOne(fetch = FetchType.LAZY, cascade= CascadeType.ALL)
+    @JoinColumn(referencedColumnName = "id")
     private Community community;
 
     @ManyToOne(fetch = FetchType.LAZY)

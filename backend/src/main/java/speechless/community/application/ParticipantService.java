@@ -2,6 +2,8 @@ package speechless.community.application;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import speechless.auth.dto.AuthCredentials;
@@ -21,6 +23,7 @@ import speechless.member.exception.MemberNotFoundException;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ParticipantService {
 
     private final ParticipantRepository participantRepository;
