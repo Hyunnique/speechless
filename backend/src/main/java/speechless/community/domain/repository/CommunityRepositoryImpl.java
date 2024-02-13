@@ -90,14 +90,16 @@ public class CommunityRepositoryImpl implements CustomCommunityRepository{
         QCommunity community = QCommunity.community;
         BooleanExpression predicate = community.isDeleted.isFalse();
 
-        Optional.ofNullable(titleContains(title)).ifPresent(predicate::and);
-        Optional.ofNullable(writeEquals(writerName)).ifPresent(predicate::and);
-        Optional.ofNullable(contentContains(content)).ifPresent(predicate::and);
-        Optional.ofNullable(categoryEquals(category)).ifPresent(predicate::and);
-        predicate = predicate.and(isRecruiting());
-        Optional.ofNullable(maxParticipantsEquals(maxParticipants)).ifPresent(predicate::and);
+        predicate = Optional.ofNullable(titleContains(title)).map(predicate::and).orElse(predicate);
+        predicate = Optional.ofNullable(writeEquals(writerName)).map(predicate::and).orElse(predicate);
+        predicate = Optional.ofNullable(contentContains(content)).map(predicate::and).orElse(predicate);
+        predicate = Optional.ofNullable(categoryEquals(category)).map(predicate::and).orElse(predicate);
 
-        predicate = community.id.gt(0);
+        if(recruiting != null && recruiting) {
+            predicate = predicate.and(isRecruiting());
+        }
+
+        predicate = Optional.ofNullable(maxParticipantsEquals(maxParticipants)).map(predicate::and).orElse(predicate);
 
         if (cursor != null) {
             predicate = predicate.and(community.id.lt(cursor));
@@ -110,20 +112,15 @@ public class CommunityRepositoryImpl implements CustomCommunityRepository{
                 .fetch();
     }
 
-    public List<Community> findPopularCommunitiesWithCursor(Long cursorHit, Long cursorId, int limit) {
+
+    public List<Community> findPopularCommunities() {
         QCommunity community = QCommunity.community;
         BooleanExpression predicate = community.isDeleted.isFalse();
-
-        if (cursorHit != null && cursorId != null) {
-            BooleanExpression sameHitButLowerId = community.hit.eq(cursorHit).and(community.id.lt(cursorId));
-            BooleanExpression lowerHit = community.hit.lt(cursorHit);
-            predicate = predicate.and(sameHitButLowerId.or(lowerHit));
-        }
 
         return queryFactory.selectFrom(community)
                 .where(predicate)
                 .orderBy(community.hit.desc(), community.id.desc())
-                .limit(limit + 1)
+                .limit(8)
                 .fetch();
     }
 }

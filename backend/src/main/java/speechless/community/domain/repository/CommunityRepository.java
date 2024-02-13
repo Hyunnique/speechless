@@ -25,5 +25,5 @@ interface CustomCommunityRepository{
                                       String category, Boolean recruiting, Integer maxParticipants,
                                       Long cursor, int limit);
 
-    List<Community> findPopularCommunitiesWithCursor(Long cursorHit, Long cursor, int limit);
+    List<Community> findPopularCommunities();
 }
