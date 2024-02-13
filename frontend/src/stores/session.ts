@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type {InterviewQuestion} from "../types/Interview.ts";
-import type {Statement} from "../types/Statement.ts";
+import type { InterviewQuestion } from '../types/Interview.ts';
+import type { Statement } from '../types/Statement.ts';
 
 interface InterviewSessionState {
 	sessionId: string | null;
@@ -77,8 +77,8 @@ const useInterviewSessionStore = create<InterviewSessionState>()(
 		}),
 		{
 			name: 'interview-session',
-		}
-	)
+		},
+	),
 );
 
 const useSpeechSessionStore = create<SpeechSessionState>()((set) => ({}));

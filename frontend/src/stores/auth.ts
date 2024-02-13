@@ -66,7 +66,7 @@ const useAuthStore = create<AuthState>()(
 					email: undefined,
 					profileImage: undefined,
 				});
-			}
+			},
 		}),
 		{
 			name: 'auth-storage',

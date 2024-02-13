@@ -22,7 +22,7 @@ interface CommunityView {
 	deadline: Date;
 	sessionStart: Date;
 	createdAt: Date;
-	hit : number;
+	hit: number;
 	currentParticipants?: number;
 }
 

@@ -51,7 +51,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 								: color === 'blue' // fixed
 									? 'bg-blue-700 text-white border-blue-300 hover:bg-blue-800'
 									: color === 'indigo'
-										? 'bg-indigo-100 text-indigo-800 border-indigo-300 hover:bg-indigo-50'
+										? 'bg-indigo-300 text-indigo-800 border-indigo-500 hover:bg-indigo-400'
 										: color === 'purple'
 											? 'bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-50'
 											: color === 'pink'
@@ -72,10 +72,11 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 				sizeClassName,
 				colorClassName,
 				borderedClassName,
-				className
-			)
-		} onClick={props.onClick}>
-			{ children }
+				className,
+			)}
+			onClick={props.onClick}
+		>
+			{children}
 		</button>
 	);
 };

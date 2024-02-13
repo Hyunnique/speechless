@@ -14,7 +14,7 @@ import { SpeechDetailPage } from './containers/speech/SpeechDetailPage.tsx';
 import { StatementWritePage } from './containers/statement/StatementWritePage.tsx';
 import { InterviewEnterPage } from './containers/session/interview/InterviewEnterPage.tsx';
 import { StatementDetailPage } from './containers/statement/StatementDetailPage.tsx';
-import {SpeechCreatePage} from "./containers/speech/SpeechCreatePage.tsx";
+import { SpeechCreatePage } from './containers/speech/SpeechCreatePage.tsx';
 import { PrivateRoute } from './containers/layout/PrivateRoute.tsx';
 import { AuthRoute } from './containers/layout/AuthRoute.tsx';
 import { InterviewReportDetailPage } from './containers/report/InterviewReportDetailPage.tsx';
@@ -23,7 +23,6 @@ export default function App() {
 		<>
 			<BrowserRouter>
 				<Routes>
-
 					<Route element={<DefaultLayout />}>
 						<Route element={<PrivateRoute />}>
 							{/* 레이아웃 있음 && 로그인 필요 */}
@@ -56,18 +55,13 @@ export default function App() {
 						<Route path='/session/speech' element={<SpeechPage />} />
 					</Route>
 
-					<Route element={<AuthRoute />}>
-						{/* 레이아웃 없음 && 비로그인 필요 */}
-					</Route>
+					<Route element={<AuthRoute />}>{/* 레이아웃 없음 && 비로그인 필요 */}</Route>
 
 					{/* 레이아웃 없음 && 로그인 상관없음 */}
 					<Route path='/logout' element={<LogoutPage />} />
 					<Route path='/auth/google' element={<GoogleCallback />} />
 					<Route path='/auth/kakao' element={<KakaoCallback />} />
 					<Route path='/auth/naver' element={<NaverCallback />} />
-
-
-
 				</Routes>
 			</BrowserRouter>
 		</>

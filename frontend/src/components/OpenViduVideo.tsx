@@ -1,20 +1,20 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 
 import React, { useEffect, useRef } from 'react';
-import {Publisher, StreamManager} from "openvidu-browser";
+import { Publisher, StreamManager } from 'openvidu-browser';
 
 interface OVProps {
-    streamManager: StreamManager;
+	streamManager: StreamManager;
 }
 
 export const OpenViduVideo: React.FC<OVProps> = ({ streamManager }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
+	const videoRef = useRef<HTMLVideoElement>(null);
 
-    useEffect(() => {
-        if (streamManager && videoRef.current) {
-            streamManager.addVideoElement(videoRef.current);
-        }
-    }, [streamManager]);
+	useEffect(() => {
+		if (streamManager && videoRef.current) {
+			streamManager.addVideoElement(videoRef.current);
+		}
+	}, [streamManager]);
 
-    return <video autoPlay={true} ref={videoRef} />;
-}
+	return <video autoPlay={true} ref={videoRef} />;
+};

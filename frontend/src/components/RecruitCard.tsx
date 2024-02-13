@@ -15,9 +15,7 @@ export const RecruitCard: React.FC<RecruitCardProps> = ({ session }) => {
 	return (
 		<Card>
 			<div className='flex justify-between mb-2 gap-2'>
-				<div>
-					조회수 {session.hit}
-				</div>
+				<div>조회수 {session.hit}</div>
 				{badges.map((badge) => {
 					return (
 						<CustomBadge size='md' key={badge} color='yellow' bordered>

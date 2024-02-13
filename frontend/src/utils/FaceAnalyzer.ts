@@ -38,33 +38,33 @@ export class FaceAnalyzer {
 				return;
 			}
 			const detections = await faceapi
-			.detectAllFaces(this.videoRef.current, new faceapi.TinyFaceDetectorOptions())
-			.withFaceLandmarks()
-			.withFaceExpressions();
-	// 		if (detections.length >= 1) {
-	// 			const happyScore = detections[0].expressions.happy;
-	// 			secCumul.push(happyScore);
-	// 		}
-	// 		cnt += 1;
-	// 		if(cnt >= 10){
-	// 			if (secCumul.length==0) {
-	// 				this.scores.push(-1);
-	// 			}
-	// 			else{
-	// 				const meanScore = Math.floor(secCumul.reduce((a, b) => a + b, 0) / secCumul.length * 100);
-	// 				this.scores.push(meanScore);
-	// 			}
+				.detectAllFaces(this.videoRef.current, new faceapi.TinyFaceDetectorOptions())
+				.withFaceLandmarks()
+				.withFaceExpressions();
+			// 		if (detections.length >= 1) {
+			// 			const happyScore = detections[0].expressions.happy;
+			// 			secCumul.push(happyScore);
+			// 		}
+			// 		cnt += 1;
+			// 		if(cnt >= 10){
+			// 			if (secCumul.length==0) {
+			// 				this.scores.push(-1);
+			// 			}
+			// 			else{
+			// 				const meanScore = Math.floor(secCumul.reduce((a, b) => a + b, 0) / secCumul.length * 100);
+			// 				this.scores.push(meanScore);
+			// 			}
 
-	// 			this.lastEmotion = detections[0].expressions.asSortedArray()[0];
+			// 			this.lastEmotion = detections[0].expressions.asSortedArray()[0];
 
-	// 			secCumul = [];
-	// 			cnt = 0;
-	// 		}
-	// 	}, 100);
-	// }
+			// 			secCumul = [];
+			// 			cnt = 0;
+			// 		}
+			// 	}, 100);
+			// }
 			if (detections.length >= 1) {
 				const happyScore = detections[0].expressions.happy;
-				const intScore = Math.floor(happyScore*100);
+				const intScore = Math.floor(happyScore * 100);
 				this.scores.push(intScore);
 			}
 
@@ -72,7 +72,6 @@ export class FaceAnalyzer {
 
 			//secCumul = [];
 			//cnt = 0;
-	
 		}, 1000);
 	}
 	public stop() {
@@ -83,16 +82,15 @@ export class FaceAnalyzer {
 		}
 	}
 
-	public clear(){
+	public clear() {
 		this.stop();
 		this.scores = [];
 	}
-	
+
 	public getScoreAtSection(sec: number): number {
-		try{
-			return this.scores[sec-1];
-		}
-		catch{
+		try {
+			return this.scores[sec - 1];
+		} catch {
 			return -1;
 		}
 	}

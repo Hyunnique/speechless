@@ -1,6 +1,6 @@
-import Axios, {AxiosInstance, InternalAxiosRequestConfig} from 'axios';
-import { useAuthStore } from "../stores/auth.ts";
-import {useNavigate} from "react-router-dom";
+import Axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '../stores/auth.ts';
+import { useNavigate } from 'react-router-dom';
 
 // Local Axios Custom Hook
 // 파라미터로 isAuth: boolean을 받으며, 기본값은 true
@@ -13,7 +13,7 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 	const navigate = useNavigate();
 
 	const instance = Axios.create({
-		baseURL: import.meta.env.VITE_API_BASE_URL
+		baseURL: import.meta.env.VITE_API_BASE_URL,
 	});
 
 	// 인증이 필요할 경우 Interceptor를 사용함
@@ -39,7 +39,7 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 					}
 
 					const refreshAxios = Axios.create({
-						baseURL: import.meta.env.VITE_API_BASE_URL
+						baseURL: import.meta.env.VITE_API_BASE_URL,
 					});
 
 					refreshAxios.interceptors.response.use(
@@ -57,9 +57,9 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 
 					const refreshResponse = await refreshAxios.get('/auth/refresh', {
 						headers: {
-							Refresh: authStore.refreshToken
-						}
-					})
+							Refresh: authStore.refreshToken,
+						},
+					});
 
 					if (!refreshResponse.data.accessToken) {
 						authStore.clearAuth();
@@ -78,6 +78,6 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 	}
 
 	return instance;
-}
+};
 
 export { useLocalAxios };

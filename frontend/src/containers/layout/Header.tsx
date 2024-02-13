@@ -1,7 +1,7 @@
 import { Navbar, Dropdown, Avatar } from 'flowbite-react';
 
 import { useAuthStore } from '../../stores/auth.ts';
-import {Link, useNavigate} from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const navigationMenus = [
 	{
@@ -26,7 +26,7 @@ export const Header = () => {
 
 	const doLogout = () => {
 		navigate('/logout');
-	}
+	};
 	return (
 		<Navbar fluid rounded className='py-4 border-b-2'>
 			<div className='w-full max-w-[1400px] mx-auto flex flex-wrap items-center justify-between'>
@@ -43,7 +43,12 @@ export const Header = () => {
 							arrowIcon={false}
 							inline
 							label={
-								<Avatar img={authStore.profileImage} className='border-2 rounded-full' alt='User settings' rounded />
+								<Avatar
+									img={authStore.profileImage}
+									className='border-2 rounded-full'
+									alt='User settings'
+									rounded
+								/>
 							}
 						>
 							<Dropdown.Header>

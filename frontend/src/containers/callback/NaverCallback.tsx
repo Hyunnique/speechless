@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { useLocalAxios } from "../../utils/axios.ts";
-import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../stores/auth.ts";
+import { useLocalAxios } from '../../utils/axios.ts';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../stores/auth.ts';
 
 export const NaverCallback = () => {
 	const navigate = useNavigate();
@@ -16,10 +16,11 @@ export const NaverCallback = () => {
 			return;
 		}
 
-		localAxios.post('/auth/login/naver', null, {
-			params: { code }
-		})
-			.then(response => {
+		localAxios
+			.post('/auth/login/naver', null, {
+				params: { code },
+			})
+			.then((response) => {
 				authStore.setAuth(response.data);
 				navigate('/');
 			})

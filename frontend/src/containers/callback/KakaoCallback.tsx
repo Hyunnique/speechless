@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { useLocalAxios } from "../../utils/axios.ts";
-import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../stores/auth.ts";
+import { useLocalAxios } from '../../utils/axios.ts';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../stores/auth.ts';
 
 export const KakaoCallback = () => {
 	const navigate = useNavigate();
@@ -16,12 +16,11 @@ export const KakaoCallback = () => {
 			return;
 		}
 
-		return;
-
-		localAxios.post('/auth/login/kakao', null, {
-			params: { code }
-		})
-			.then(response => {
+		localAxios
+			.post('/auth/login/kakao', null, {
+				params: { code },
+			})
+			.then((response) => {
 				authStore.setAuth(response.data);
 				navigate('/');
 			})

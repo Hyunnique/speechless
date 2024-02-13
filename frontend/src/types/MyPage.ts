@@ -3,7 +3,7 @@ export interface MyPageItem {
 	date: string;
 }
 
-export interface Questions{
+export interface Questions {
 	question: string;
-	answer: string
+	answer: string;
 }

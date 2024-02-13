@@ -24,14 +24,16 @@ export const IndexPage = () => {
 		localAxiosWithAuth.get('/community/popular')
 			.then((res) => {
 				// TODO: 백엔드에서 받은 response로 글을 채워준다
-				const communityData: CommunityView[] = res.data.getCommunityResponses.map((communityView: CommunityResponse) => {
-					return {
-						...communityView,
-						sessionStart: new Date(communityView.sessionStart),
-						deadline: new Date(communityView.deadline),
-						createdAt: new Date(communityView.createdAt)
-					};
-				});
+				const communityData: CommunityView[] = res.data.getCommunityResponses.map(
+					(communityView: CommunityResponse) => {
+						return {
+							...communityView,
+							sessionStart: new Date(communityView.sessionStart),
+							deadline: new Date(communityView.deadline),
+							createdAt: new Date(communityView.createdAt),
+						};
+					},
+				);
 
 				setSpeechSessions(communityData);
 
@@ -45,7 +47,7 @@ export const IndexPage = () => {
 
 	return (
 		<>
-			<div className="relative h-56 sm:h-64 xl:h-80 2xl:h-96 mb-8">
+			<div className='relative h-56 sm:h-64 xl:h-80 2xl:h-96 mb-8'>
 				<Carousel slideInterval={5000}>
 					<img src={Banner1} alt='banner1' className='w-full h-full object-cover' />
 					<img src={Banner2} alt='banner2' className='w-full h-full object-cover' />
@@ -67,9 +69,7 @@ export const IndexPage = () => {
 										</p>
 									</div>
 									<div className='flex flex-col justify-between items-center'>
-										<p className='text-sm font-semibold'>
-											/ {session.maxParticipants}
-										</p>
+										<p className='text-sm font-semibold'>/ {session.maxParticipants}</p>
 										<Button size='xs' color='purple' disabled>
 											참여하기
 										</Button>
@@ -82,7 +82,7 @@ export const IndexPage = () => {
 				</TitledCard>
 				<TitledCard title='일정'>
 					<div className='flex flex-col justify-center h-full'>
-						<Calendar/>
+						<Calendar />
 					</div>
 				</TitledCard>
 			</div>
@@ -96,7 +96,7 @@ export const IndexPage = () => {
 
 						return (
 							<button key={session.id} onClick={handleClick}>
-								<RecruitCard session={session}/>
+								<RecruitCard session={session} />
 							</button>
 						);
 					})}
