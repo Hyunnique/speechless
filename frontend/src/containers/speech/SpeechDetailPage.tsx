@@ -51,8 +51,9 @@ export const SpeechDetailPage = () => {
   };
 
   const joinGroup = async () => {
+    console.log(id);
     try {
-      const res = await localAxiosWithAuth.get('/');
+      const res = await localAxiosWithAuth.post(`/participant/${id}`);
     }catch (err){
       console.log("err ", err)
     }finally {
@@ -70,8 +71,18 @@ export const SpeechDetailPage = () => {
     }
   }
 
+  const deleteGroup = async  () => {
+    try {
+      const res = await localAxiosWithAuth.delete(`/participant/${id}`);
+    }catch(err){
+      console.log("err ", err);
+    }finally {
+      console.log("fin");
+    }
+  }
+
   if (!speechDetail) {
-    return <div>Loading...</div>;
+    return <div>...</div>;
   }
 
   return (
@@ -87,10 +98,16 @@ export const SpeechDetailPage = () => {
                     <p className='text-sm md:text-base text-gray-600'>작성일: {speechDetail.createdAt.toLocaleString()}</p>
                     <p className='text-sm md:text-base text-gray-600'>조회수: {speechDetail.hit}</p>
                   </div>
-                  <button className='bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded' onClick={joinGroup}>
+                  <button className='bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded'
+                          onClick={joinGroup}>
                     그룹 참여
                   </button>
-                  <button className='bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' onClick={moveSpeech}>
+                  <button className='bg-negative-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded'
+                          onClick={deleteGroup}>
+                    그룹 탈퇴
+                  </button>
+                  <button className='bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+                          onClick={moveSpeech}>
                     발표 세션 이동
                   </button>
                 </div>

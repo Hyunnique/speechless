@@ -14,96 +14,15 @@ import Banner4 from '../assets/images/banner-4.png';
 import { useEffect, useState } from 'react';
 import { useLocalAxios } from '../utils/axios.ts';
 import { useNavigate } from 'react-router-dom';
-const awaitingSpeechSessions: CommunityView[] = [
-	//향후, Custom hook으로 변환 useEffect 정리, 스크롤 바가 밀리는 현상 해결해야함(SpeechSearch 컴포넌트 플로팅이 이유로 추정)=>일단 해결..
-	{
-		id: 1,
-		writer: '김민수',
-		category: 'IT',
-		title: 'IT 자유주제 5분 스피치',
-		content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-		maxParticipants: 8,
-		deadline: new Date(),
-		sessionStart: new Date(),
-		createdAt: new Date(),
-		hit: 0
-	},
-	{
-		id: 2,
-		writer: '김수',
-		category: 'IT',
-		title: 'IT 자유주제 5분 스피치',
-		content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-		maxParticipants: 6,
-		deadline: new Date(),
-		sessionStart: new Date(),
-		createdAt: new Date(),
-		hit: 0
-	},
-	{
-		id: 3,
-		writer: '민수',
-		category: '자기소개',
-		title: '자기소개 5분 스피치',
-		content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-		maxParticipants: 8,
-		deadline: new Date(),
-		sessionStart: new Date(),
-		createdAt: new Date(),
-		hit: 0
-	},
-	{
-		id: 4,
-		writer: '김민수',
-		category: 'IT',
-		title: '자유주제 5분 스피치',
-		content: '싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-		maxParticipants: 8,
-		deadline: new Date(),
-		sessionStart: new Date(),
-		createdAt: new Date(),
-		hit: 0
-	},
-	{
-		id: 5,
-		writer: '김민수',
-		category: 'IT',
-		title: 'IT 자유주제 5분 스피치',
-		content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-		maxParticipants: 8,
-		deadline: new Date(),
-		sessionStart: new Date(),
-		createdAt: new Date(),
-		hit: 0
-	},
-	{
-		id: 6,
-		writer: '김민수',
-		category: 'IT',
-		title: 'IT 자유주제 5분 스피치',
-		content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-		maxParticipants: 8,
-		deadline: new Date(),
-		sessionStart: new Date(),
-		createdAt: new Date(),
-		hit: 0
-	},
-];
-//
 
 export const IndexPage = () => {
 	const localAxiosWithAuth = useLocalAxios();
 	const navigate = useNavigate();
 	const [speechSessions, setSpeechSessions] = useState<CommunityView[]>([]);
-	const limit = 10;
 
 	useEffect(() => {
-		localAxiosWithAuth.get('/community/popular', {
-			params: {
-				limit },
-		})
+		localAxiosWithAuth.get('/community/popular')
 			.then((res) => {
-				console.log("ㄱㄱ")
 				// TODO: 백엔드에서 받은 response로 글을 채워준다
 				const communityData: CommunityView[] = res.data.getCommunityResponses.map((communityView: CommunityResponse) => {
 					return {
@@ -114,12 +33,11 @@ export const IndexPage = () => {
 					};
 				});
 
-				setSpeechSessions(communityData.slice(0,4));
+				setSpeechSessions(communityData);
 
 			})
 			.catch((err) => {
-				// TODO: 백엔드 response가 없어서 무조건 에러가 날 것이므로 임시로 더미 데이터를 넣어준다
-				setSpeechSessions(awaitingSpeechSessions.slice(0,4));
+				console.error('데이터 로딩 실패:', err);
 			});
 
 		//axios.get("/kakao");
@@ -138,7 +56,7 @@ export const IndexPage = () => {
 			<div className='grid grid-cols-1 lg:grid-cols-2 gap-4 px-2 mb-20 h-[400px]'>
 				<TitledCard title='내가 참여할 발표 세션'>
 					<ul className='flex flex-col px-4 gap-4 h-full justify-center'>
-						{awaitingSpeechSessions.slice(0, 3).map((session) => {
+						{speechSessions.slice(0, 3).map((session) => {
 							return (
 								<li key={session.id} className='flex justify-between border-b-2 px-2 pb-2'>
 									<div className='flex flex-col justify-between'>
