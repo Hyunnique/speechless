@@ -10,12 +10,14 @@ interface RecruitCardProps {
 export const RecruitCard: React.FC<RecruitCardProps> = ({ session }) => {
 	const badges = [];
 
-	badges.push(session.private ? '승인 가입' : '자유 가입');
 	badges.push(session.category);
 
 	return (
 		<Card>
-			<div className='flex justify-end mb-2 gap-2'>
+			<div className='flex justify-between mb-2 gap-2'>
+				<div>
+					조회수 {session.hit}
+				</div>
 				{badges.map((badge) => {
 					return (
 						<CustomBadge size='md' key={badge} color='yellow' bordered>

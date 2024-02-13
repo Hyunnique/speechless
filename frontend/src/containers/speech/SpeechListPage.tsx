@@ -1,229 +1,142 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { SpeechSearch } from '../../components/SpeechSearch';
 import { RecruitCard } from '../../components/RecruitCard';
-import { CommunityView } from '../../types/Community.ts';
-import { useLocalAxios } from '../../utils/axios.ts';
-import {Link} from "react-router-dom";
-import { SearchCriteria } from "../../types/SearchCriteria.ts";
+import { CommunityResponse, CommunityView } from '../../types/Community';
+import { useLocalAxios } from '../../utils/axios';
+import { Link } from "react-router-dom";
+import { SearchCriteria } from "../../types/SearchCriteria";
 
-const awaitingSpeechSessions: CommunityView[] = [
-      //향후, Custom hook으로 변환 useEffect 정리, 스크롤 바가 밀리는 현상 해결해야함(SpeechSearch 컴포넌트 플로팅이 이유로 추정)=>일단 해결..
-    {
-        id: 1,
-        writer: '김민수',
-        category: 'IT',
-        title: 'IT 자유주제 5분 스피치',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 4,
-        maxParticipants: 8,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: false,
-        createdAt: new Date()
-    },
-    {
-        id: 2,
-        writer: '김민수',
-        category: '자기소개',
-        title: '자소서 기반 자기소개 피드백',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 3,
-        maxParticipants: 4,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: false,
-        createdAt: new Date()
-    },
-    {
-        id: 3,
-        writer: '김민수',
-        category: '자유',
-        title: '싸피 PT 면접 준비하실분!!',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 6,
-        maxParticipants: 6,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: true,
-        createdAt: new Date()
-    },
-    {
-        id: 4,
-        writer: '김민수',
-        category: '게임',
-        title: '본인이 하는 게임 소개하기',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 2,
-        maxParticipants: 4,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: false,
-        createdAt: new Date()
-    },
-    {
-        id: 5,
-        writer: '김민수',
-        category: '게임',
-        title: '본인이 하는 게임 소개하기',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 2,
-        maxParticipants: 4,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: false,
-        createdAt: new Date()
-    },
-    {
-        id: 6,
-        writer: '김민수',
-        category: '게임',
-        title: '본인이 하는 게임 소개하기',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 2,
-        maxParticipants: 4,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: false,
-        createdAt: new Date()
-    },
-    {
-        id: 7,
-        writer: '김민수',
-        category: 'IT',
-        title: 'IT 자유주제 5분 스피치',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 4,
-        maxParticipants: 8,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: false,
-        createdAt: new Date()
-    },
-    {
-        id: 8,
-        writer: '김민수',
-        category: 'IT',
-        title: 'IT 자유주제 5분 스피치',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 4,
-        maxParticipants: 8,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: false,
-        createdAt: new Date()
-    },
-    {
-        id: 9,
-        writer: '김민수',
-        category: 'IT',
-        title: 'IT 자유주제 5분 스피치',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 4,
-        maxParticipants: 8,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: false,
-        createdAt: new Date()
-    },
-    {
-        id: 10,
-        writer: '김민수',
-        category: 'IT',
-        title: 'IT 자유주제 5분 스피치',
-        content: '안녕하세요. 싸피 6기 김민수입니다. 이번에 IT 자유주제 5분 스피치를 진행하려고 합니다. 자유주제라서 뭐든지 다 가능합니다. 자유롭게 말씀해주세요.',
-        currentParticipants: 4,
-        maxParticipants: 8,
-        deadline: new Date(),
-        sessionStart: new Date(),
-        invisible: false,
-        private: false,
-        createdAt: new Date()
-    }
-];
-export const SpeechListPage = () => {
+export const SpeechListPage: React.FC = () => {
     const [speechSessions, setSpeechSessions] = useState<CommunityView[]>([]);
-    const [pageIndex, setPageIndex] = useState(1);
-    const loadingRef = useRef(null);
-    const localAxios = useLocalAxios(true);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const [nextCursor, setNextCursor] = useState<number | null>(null);
+    const observer = useRef<IntersectionObserver | null>(null);
     const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({});
-    // 데이터 로딩을 위한 useEffect
-    useEffect(() => {
-        localAxios.get('/community/speechlist')
-            .then((res) => {
-                setSpeechSessions(res.data);
-            })
-            .catch((err) => {
-                console.log("err");
-                setSpeechSessions(awaitingSpeechSessions.slice(0, 9));
-            });
-    }, []);
+    const localAxios = useLocalAxios();
 
-    // 무한 스크롤 기능 구현을 위한 useEffect, Intersection Observer api로 구현
-    useEffect(() => {
-        const observer = new IntersectionObserver((entries) => {
-            const firstEntry = entries[0];
-            if (firstEntry.isIntersecting) {
-                loadMoreSpeechSessions();
-            }
-        }, { threshold: 0.8 });
+    //의존성 배열에 등록된 변수 바뀔 때만 렌더링 되도록 useCallback 사용
+    const fetchSpeechSessions = useCallback(async () => {
+        if (loading) return;
+        setLoading(true);
 
-        if (loadingRef.current) {
-            observer.observe(loadingRef.current);
-        }
-
-        return () => {
-            if (loadingRef.current) {
-                observer.unobserve(loadingRef.current);
-            }
+        const params: Record<string, string | number | boolean | null> = {
+            cursor: nextCursor ,
+            limit: 4,
+            ...searchCriteria,
         };
-    }, []);
+        console.log(params);
 
-    // 백엔드 로직 구현 이후 반환값 고려하여 수정 필요
-    const loadMoreSpeechSessions = () => {
-        const nextPage = pageIndex + 1;
-        const nextSpeechSessions = awaitingSpeechSessions.slice(nextPage * 3, (nextPage + 1) * 3);
-        if (nextSpeechSessions.length > 0) {
-            setSpeechSessions(prev => [...prev, ...nextSpeechSessions]);
-            setPageIndex(nextPage);
+        try {
+            const res = await localAxios.get('/community', { params });
+
+            //중복 키 검사
+            const newFetchedData = res.data.getCommunityResponses.filter(
+                (newItem:CommunityView) => !speechSessions.some(existingItem => existingItem.id === newItem.id)
+            );
+
+            const newData = newFetchedData.map((item:CommunityResponse) => ({
+                ...item,
+                sessionStart: new Date(item.sessionStart),
+                deadline: new Date(item.deadline),
+                createdAt: new Date(item.createdAt),
+            }));
+            setSpeechSessions(prev => [...prev, ...newData]);
+            setHasMore(newData.length > 0 && res.data.nextCursor !== undefined);
+            setNextCursor(res.data.nextCursor ?? null);
+        } catch (error) {
+            console.error('Fetching sessions failed:', error);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [loading, nextCursor, searchCriteria]);
 
-    useEffect(() => {
-        console.log("현재 검색 조건:", searchCriteria);
-        const filteredSessions = awaitingSpeechSessions.filter(session => {
+    const lastElementRef = useCallback((node: Element | null) => {
+        if (loading || !hasMore) return;
+
+        if (observer.current) observer.current.disconnect();
+
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                fetchSpeechSessions();
+            }
         });
-        setSpeechSessions(filteredSessions);
+
+        if (node) observer.current.observe(node);
+    }, [loading, hasMore, fetchSpeechSessions]);
+
+    // //의존성 배열에 등록된 변수 바뀔 때만 렌더링 되도록 useCallback 사용
+    // const fetchSpeechSessions = useCallback(async () => {
+    //     if (loading) return;
+    //     setLoading(true);
+    //
+    //     const params: Record<string, string | number | boolean | null> = {
+    //         cursor: nextCursor,
+    //         limit: 4,
+    //         ...searchCriteria,
+    //     };
+    //
+    //     try {
+    //         const [res, res2] = await Promise.all([
+    //             localAxios.get('/community', { params }),
+    //             localAxios.get('/reserved')
+    //         ]);
+    //
+    //         // 중복 키 검사
+    //         const newFetchedData = res.data.getCommunityResponses.filter(
+    //             (newItem: CommunityView) => !speechSessions.some(existingItem => existingItem.id === newItem.id)
+    //         );
+    //
+    //         const newData = newFetchedData.map((item: CommunityResponse) => ({
+    //             ...item,
+    //             sessionStart: new Date(item.sessionStart),
+    //             deadline: new Date(item.deadline),
+    //             createdAt: new Date(item.createdAt),
+    //             currentParticipants: res2.data.currentParticipants
+    //         }));
+    //
+    //         setSpeechSessions(prev => [...prev, ...newData]);
+    //         setHasMore(newData.length > 0 && res.data.nextCursor !== undefined);
+    //         setNextCursor(res.data.nextCursor ?? null);
+    //     } catch (error) {
+    //         console.error('err:', error);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }, [loading, nextCursor, searchCriteria]);
+
+
+    //Promise 수정 필요?
+    useEffect(() => {
+        fetchSpeechSessions();
     }, [searchCriteria]);
 
-
+    //클린업
+    useEffect(() => {
+        return () => observer.current?.disconnect();
+    }, []);
 
     return (
         <>
             <div className="flex">
-                <div>
-                    <div className="sticky top-0 z-10">
-                        <SpeechSearch onSearch={setSearchCriteria}/>
-                    </div>
+                <div className="sticky top-0 z-10">
+                    <SpeechSearch onSearch={(newCriteria: SearchCriteria) => {
+                        setSearchCriteria(newCriteria);
+                        setSpeechSessions([]);
+                        setNextCursor(null);
+                    }} />
                 </div>
-                <div className="ml-4 grid xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
-                    {speechSessions.map((session) => (
-                        <Link to={`/speech/${session.id}`} key={session.id}>
-                            <RecruitCard session={session}/>
-                        </Link>
+                <div className="ml-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
+                    {speechSessions.map((session, index) => (
+                        <div key={session.id} ref={index === speechSessions.length - 1 ? lastElementRef : null}>
+                            <Link to={`/speech/${session.id}`}>
+                                <RecruitCard session={session} />
+                            </Link>
+                        </div>
                     ))}
-                    <div ref={loadingRef}>Loading...</div>
+                    {loading && <p>Loading...</p>}
                 </div>
             </div>
         </>
     );
 };
-

@@ -1,9 +1,8 @@
 export interface SearchCriteria {
-    searchType?: string;
-    keyword?: string;
+    title?: string;
+    writerName?: string;
+    content?: string;
     category?: string;
-    startDate?: string;
-    endDate?: string;
-    status?: 'recruiting' | 'completed' | 'finished';
+    recruiting?: boolean;
     maxParticipants?: number;
 }
