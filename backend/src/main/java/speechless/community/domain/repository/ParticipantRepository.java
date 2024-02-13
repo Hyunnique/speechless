@@ -31,4 +31,13 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
         + "ON c.sessionStart >= current_date "
         + "AND p.community = c")
     Optional<List<Community>> findReservedByMember(Member member);
+
+    @Query(value = "SELECT c FROM Participant p "
+        + "JOIN Member m "
+        + "ON m = :member "
+        + "AND m = p.member "
+        + "JOIN Community c "
+        + "ON MONTH(c.sessionStart) = MONTH(current_date) "
+        + "AND p.community = c")
+    Optional<List<Community>> findCurrentByMember(Member member);
 }
