@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ import speechless.auth.presentation.Auth;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/openvidu/announcement")
+@RequiredArgsConstructor
 public class AnnouncementController {
   @Value("${OPENVIDU_URL}")
   private String OPENVIDU_URL;
@@ -45,7 +47,7 @@ public class AnnouncementController {
     this.openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
   }
 
-  private  AnnouncementService announcementService;
+  private final AnnouncementService announcementService;
 
   @PostMapping("")
   public ResponseEntity<String> initializeSession(

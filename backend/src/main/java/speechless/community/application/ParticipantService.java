@@ -1,19 +1,23 @@
 package speechless.community.application;
 
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import speechless.auth.dto.AuthCredentials;
 import speechless.common.error.SpeechlessException;
+import speechless.common.error.validation.PageException;
 import speechless.community.domain.Community;
 import speechless.community.domain.Participant;
 import speechless.community.domain.mapper.ParticipantMapper;
 import speechless.community.domain.repository.CommunityRepository;
 import speechless.community.domain.repository.ParticipantRepository;
 import speechless.community.dto.response.ParticipantCommunityResponse;
+import speechless.community.dto.response.ParticipantListResponse;
 import speechless.community.exception.CommunityNotFoundException;
 import speechless.community.exception.NotAllowedParticipantException;
 import speechless.community.exception.ParticipantExistException;
@@ -58,22 +62,39 @@ public class ParticipantService {
         participantRepository.delete(participant);
     }
 
-    public List<ParticipantCommunityResponse> getFinishedParticipants(
-        AuthCredentials authCredentials)
+    public ParticipantListResponse getFinishedParticipants(
+        AuthCredentials authCredentials, Integer pageSize, Integer pageNum)
         throws SpeechlessException {
+
+        if (pageNum < 1 || pageSize < 1 || pageSize > 50) {
+            throw new PageException();
+        }
+
         Member loginMember = getMember(authCredentials);
-        List<Community> communities = participantRepository.findFinishedByMember(loginMember)
-            .orElse(new ArrayList<>());
-        return communities.stream().map(ParticipantMapper.INSTANCE::toResponse).toList();
+
+        Page<Community> communities = participantRepository.findFinishedByMember(loginMember, PageRequest.of(pageNum - 1, pageSize, Sort.by("id").descending()));
+
+        Page<ParticipantCommunityResponse> responsePage = communities.map(ParticipantMapper.INSTANCE::toResponse);
+        return new ParticipantListResponse(
+            responsePage.getContent(), responsePage.getNumber()+1, responsePage.getTotalPages(),
+            responsePage.getTotalElements());
     }
 
-    public List<ParticipantCommunityResponse> getReservedParticipants(
-        AuthCredentials authCredentials)
+    public ParticipantListResponse getReservedParticipants(
+        AuthCredentials authCredentials, Integer pageSize, Integer pageNum)
         throws SpeechlessException {
+        if (pageNum < 1 || pageSize < 1 || pageSize > 50) {
+            throw new PageException();
+        }
+
         Member loginMember = getMember(authCredentials);
-        List<Community> communities = participantRepository.findReservedByMember(loginMember)
-            .orElse(new ArrayList<>());
-        return communities.stream().map(ParticipantMapper.INSTANCE::toResponse).toList();
+
+        Page<Community> communities = participantRepository.findReservedByMember(loginMember, PageRequest.of(pageNum - 1, pageSize, Sort.by("id").descending()));
+
+        Page<ParticipantCommunityResponse> responsePage = communities.map(ParticipantMapper.INSTANCE::toResponse);
+        return new ParticipantListResponse(
+            responsePage.getContent(), responsePage.getNumber()+1, responsePage.getTotalPages(),
+            responsePage.getTotalElements());
     }
 
     public List<ParticipantCommunityResponse> getCurrentParticipants(

@@ -10,12 +10,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import speechless.auth.dto.AuthCredentials;
 import speechless.auth.presentation.Auth;
 import speechless.community.application.ParticipantService;
 import speechless.community.domain.Participant;
 import speechless.community.dto.response.ParticipantCommunityResponse;
+import speechless.community.dto.response.ParticipantListResponse;
 
 @RestController
 @AllArgsConstructor
@@ -42,10 +44,11 @@ public class ParticipantController {
     }
 
     @GetMapping("/reserved")
-    public ResponseEntity<List<ParticipantCommunityResponse>> reservedCommunityList(
-        @Parameter(hidden = true) @Auth AuthCredentials authCredentials
+    public ResponseEntity<ParticipantListResponse> reservedCommunityList(
+        @Parameter(hidden = true) @Auth AuthCredentials authCredentials,
+        @RequestParam Integer pageSize, @RequestParam Integer pageNum
     ) {
-        return new ResponseEntity<>(participantService.getReservedParticipants(authCredentials),
+        return new ResponseEntity<>(participantService.getReservedParticipants(authCredentials, pageSize, pageNum),
             HttpStatus.OK);
     }
 

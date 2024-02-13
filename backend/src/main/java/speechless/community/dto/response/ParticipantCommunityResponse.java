@@ -15,15 +15,7 @@ public class ParticipantCommunityResponse {
 
     private Long id;
 
-    private Member writer;
-
-    private String category;
-
     private String title;
-
-    private String content;
-
-    private Date deadline;
 
     private Date sessionStart;
 

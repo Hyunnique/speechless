@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import speechless.community.domain.Community;
@@ -21,7 +23,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long>,
         + "JOIN Community c "
         + "ON c.sessionStart < current_date "
         + "AND p.community = c")
-    Optional<List<Community>> findFinishedByMember(Member member);
+    Page<Community> findFinishedByMember(Member member, Pageable pageable);
 
     @Query(value = "SELECT c FROM Participant p "
         + "JOIN Member m "
@@ -30,7 +32,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long>,
         + "JOIN Community c "
         + "ON c.sessionStart >= current_date "
         + "AND p.community = c")
-    Optional<List<Community>> findReservedByMember(Member member);
+    Page<Community> findReservedByMember(Member member, Pageable pageable);
 
     @Query(value = "SELECT c FROM Participant p "
         + "JOIN Member m "
