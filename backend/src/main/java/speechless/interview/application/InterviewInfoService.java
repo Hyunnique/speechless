@@ -73,8 +73,7 @@ public class InterviewInfoService {
             throw new PageException();
         }
 
-        Member loginMember = memberRepository.findById(authCredentials.id())
-            .orElseThrow(MemberNotFoundException::new);
+        Member loginMember = getMember(authCredentials);
 
         Page<InterviewInfo> interviewInfos = interviewRepository.findAllByMemberAndIsCompletionIsTrue(
             loginMember, PageRequest.of(pageNum - 1, pageSize, Sort.by("id").descending()));
@@ -87,6 +86,7 @@ public class InterviewInfoService {
         );
     }
 
+
     public InterviewInfoResponse getInterviewInfo(AuthCredentials authCredentials, Long id) {
 
         Member loginMember = memberRepository.findById(authCredentials.id())
@@ -96,5 +96,10 @@ public class InterviewInfoService {
             interviewRepository.findByIdAndMember(id, loginMember)
                 .orElseThrow(InterviewNotFoundException::new));
 
+    }
+
+    private Member getMember(AuthCredentials authCredentials) {
+        return memberRepository.findById(authCredentials.id())
+            .orElseThrow(MemberNotFoundException::new);
     }
 }

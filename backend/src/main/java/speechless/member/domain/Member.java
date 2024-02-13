@@ -9,6 +9,7 @@ import speechless.common.entity.BaseTimeEntity;
 import speechless.community.domain.Community;
 
 import java.util.List;
+import speechless.community.domain.Participant;
 import speechless.interview.domain.InterviewInfo;
 import speechless.statement.domain.Statement;
 
@@ -61,4 +62,8 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<InterviewInfo> interviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private  List<Participant> participants = new ArrayList<>();
 }

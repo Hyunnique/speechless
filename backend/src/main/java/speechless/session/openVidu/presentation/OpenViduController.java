@@ -36,7 +36,6 @@ import speechless.session.openVidu.dto.OpenviduCreateRequest;
 import speechless.session.openVidu.dto.OpenviduCreateResponse;
 import speechless.session.openVidu.dto.OpenviduDeleteRequest;
 
-@OpenAPIDefinition(tags = @Tag(name = "OpenViduController", description = "OpenVidu를 사용하여 비디오 세션을 관리하는 API. 세션 초기화, 연결 생성 및 고유 세션 ID 생성 기능을 제공합니다."))
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/openvidu/sessions")
