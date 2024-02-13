@@ -57,8 +57,8 @@ public class CommunityController {
     @GetMapping("/popular")
     @Operation(summary = "인기 글 목록 조회", description = "조회수를 기반으로 인기 글 목록을 조회")
     public ResponseEntity<GetCommunitiesResponse> getPopularCommunities(
-            @RequestParam(required = false) Long cursor,
-            @RequestParam(defaultValue = "10") int limit
+            @Parameter(hidden = true) @RequestParam(required = false) Long cursor,
+            @Parameter(hidden = true) @RequestParam(defaultValue = "8") int limit
     ) {
         GetCommunitiesResponse response = communityService.getPopularCommunities(cursor, limit);
         return ResponseEntity.ok(response);

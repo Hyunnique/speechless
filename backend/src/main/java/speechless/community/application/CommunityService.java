@@ -54,7 +54,7 @@ public class CommunityService {
     }
 
     public GetCommunitiesResponse getPopularCommunities(Long cursor, int limit) {
-        List<Community> communities = commnunityRepository.findCommunitiesWithCursor(cursor, limit + 1);
+        List<Community> communities = commnunityRepository.findPopularCommunities();
         return prepareResponseWithPagination(communities, limit);
     }
 
