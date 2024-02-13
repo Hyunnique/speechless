@@ -106,6 +106,15 @@ public class ParticipantService {
         return communities.stream().map(ParticipantMapper.INSTANCE::toResponse).toList();
     }
 
+    public List<ParticipantCommunityResponse> getNextParticipants(
+        AuthCredentials authCredentials)
+        throws SpeechlessException{
+        Member loginMember = getMember(authCredentials);
+        List<Community> communities = participantRepository.findNextByMember(loginMember)
+            .orElse(new ArrayList<>());
+        return communities.stream().map(ParticipantMapper.INSTANCE::toResponse).toList();
+    }
+
     public Participant getParticipant(Long id) throws SpeechlessException {
         return participantRepository.findById(id)
             .orElseThrow(ParticipantNotFoundException::new);

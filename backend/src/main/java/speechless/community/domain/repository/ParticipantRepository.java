@@ -43,4 +43,15 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long>,
         + "AND p.community = c")
     Optional<List<Community>> findCurrentByMember(Member member);
 
+    @Query("SELECT c FROM Participant p "
+        + "JOIN Member m "
+        + "ON m = :member "
+        + "AND m = p.member "
+        + "JOIN Community c "
+        + "ON c.sessionStart >= current_date "
+        + "AND p.community = c "
+        + "ORDER BY c.sessionStart ASC "
+        + "LIMIT 3")
+    Optional<List<Community>> findNextByMember(Member member);
+
 }

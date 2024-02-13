@@ -43,6 +43,15 @@ public class ParticipantController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/finished")
+    public ResponseEntity<ParticipantListResponse> finishedCommunityList(
+        @Parameter(hidden = true) @Auth AuthCredentials authCredentials,
+        @RequestParam Integer pageSize, @RequestParam Integer pageNum
+    ) {
+        return new ResponseEntity<>(participantService.getFinishedParticipants(authCredentials, pageSize, pageNum),
+            HttpStatus.OK);
+    }
+
     @GetMapping("/reserved")
     public ResponseEntity<ParticipantListResponse> reservedCommunityList(
         @Parameter(hidden = true) @Auth AuthCredentials authCredentials,
@@ -58,5 +67,12 @@ public class ParticipantController {
     ){
         return new ResponseEntity<>(participantService.getCurrentParticipants(authCredentials),
             HttpStatus.OK);
+    }
+
+    @GetMapping("/next")
+    public ResponseEntity<List<ParticipantCommunityResponse>> nextCommunityList(
+        @Parameter(hidden = true) @Auth AuthCredentials authCredentials
+    ){
+        return new ResponseEntity<>(participantService.getNextParticipants(authCredentials), HttpStatus.OK);
     }
 }
