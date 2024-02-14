@@ -39,7 +39,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 		color === 'primary'
 			? 'bg-primary-100 text-primary-800 border-primary-300 hover:bg-primary-50'
 			: color === 'positive'
-				? 'bg-positive-300 text-white border-positive-500 hover:bg-positive-500'
+				? 'bg-positive-400 text-white border-positive-500 hover:bg-positive-500'
 				: color === 'negative'
 					? 'bg-negative-500 text-negative-50 border-negative-500 hover:bg-negative-600'
 					: color === 'red'

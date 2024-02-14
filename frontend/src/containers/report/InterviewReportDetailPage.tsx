@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from 'flowbite-react';
+import {Breadcrumb, BreadcrumbItem, Button, Card} from 'flowbite-react';
 import { useLocalAxios } from '../../utils/axios';
-import { useParams } from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { TitledCard } from '../../components/TitledCard.tsx';
 import { InterviewReport } from '../../types/Report.ts';
+
+import moment from 'moment';
 
 import {
 	Chart as ChartJS,
@@ -21,6 +23,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, Title, Too
 
 import { Bar, Line } from 'react-chartjs-2';
 import { useAuthStore } from '../../stores/auth.ts';
+import {CustomButton} from "../../components/CustomButton.tsx";
 
 export const InterviewReportDetailPage: React.FC = () => {
 	const { id } = useParams();
@@ -127,46 +130,95 @@ export const InterviewReportDetailPage: React.FC = () => {
 	}
 
 	return (
-		<TitledCard className='!bg-white p-8' title='면접 연습 결과 리포트'>
-			<div className='flex flex-col w-2/3 mx-auto'>
-				<div className='flex flex-row gap-3'>
-					<Button className='bg-negative-400 mt-5' onClick={() => navigate('/interview')}>
-						뒤로 가기
-					</Button>
-				</div>
-				<div className='mt-5'>
-					<div className='space-y-6'>
-						<p className='font-bold text-3xl'> {formData?.topic} </p>
-						<div className='flex flex-justify-between'>
-							<p className=' text-gray-500 dark:text-gray-400'>표정 점수 평균</p>
-							<p className=' text-gray-700 dark:text-gray-400 ml-5'> {formData?.faceScore} </p>
-						</div>
-						<Line data={faceGraphData} />
-						<div className='flex flex-justify-between mt-7'>
-							<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>발음 점수 평균</p>
-							<p className=' text-gray-700 dark:text-gray-400 ml-5'> {formData?.pronunciationScore} </p>
-						</div>
-						<Bar data={pronunciationGraphData} />
-						<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>문답과 피드백</p>
-						{formData?.questions.map((_, index) => (
-							<div key={index} className='p-3'>
-								<div className='bg-primary-50'>
-									<p className='text-2xl leading-relaxed text-gray-500 dark:text-gray-400'>문항</p>
-									<p> {formData.questions[index].question} </p>
-								</div>
-								<div className='bg-primary-100'>
-									<p className='text-2xl leading-relaxed text-gray-500 dark:text-gray-400'>답변</p>
-									<p> {formData.questions[index].answer} </p>
-								</div>
-								<div className='bg-primary-200'>
-									<p className='text-2xl leading-relaxed text-gray-500 dark:text-gray-400'>피드백</p>
-									<p> {formData.questions[index].feedback} </p>
-								</div>
+		<>
+			<div className='content-header mb-10'>
+				<Breadcrumb className='pb-8'>
+					<BreadcrumbItem>
+						<Link to='/'>홈</Link>
+					</BreadcrumbItem>
+					<BreadcrumbItem>
+						<Link to='/interview'>면접 연습하기</Link>
+					</BreadcrumbItem>
+					<BreadcrumbItem>
+						<Link to='/interview'>면접 연습 기록 관리</Link>
+					</BreadcrumbItem>
+					<BreadcrumbItem>
+						면접 연습 결과 리포트
+					</BreadcrumbItem>
+				</Breadcrumb>
+				<div className='flex justify-between items-center'>
+					<h1 className='text-3xl font-semibold leading-tight text-gray-700'>면접 연습 결과 리포트</h1>
+					<div className='flex gap-3'>
+						<CustomButton
+							bordered
+							color='blue'
+							onClick={() => {
+								navigate('/interview');
+							}}
+						>
+							<div className='flex items-center gap-2'>
+								<span className='material-symbols-outlined text-sm'>arrow_back</span>
+								<span>목록으로 이동</span>
 							</div>
-						))}
+						</CustomButton>
 					</div>
 				</div>
 			</div>
-		</TitledCard>
+			<Card className='2xl:w-3/4 xl:w-4/5 w-full mx-auto p-10'>
+				<div className='flex flex-col space-y-10'>
+					<p className='text-black text-3xl font-semibold'>{formData?.topic}</p>
+					<div className='pb-6'>
+						<div className='flex gap-2'>
+							<span className='font-semibold pr-2 border-r-2 border-gray-400'>세션 시간</span>
+							<span>{Math.floor(moment.duration(moment(formData?.endTime).diff(moment(formData?.startTime))).asMinutes())}분</span>
+							<span>({moment(formData?.startTime).format('YYYY. MM. DD. HH:mm')} ~ {moment(formData?.endTime).format('YYYY. MM. DD. HH:mm')})</span>
+						</div>
+						<div className='flex gap-2'>
+							<span className='font-semibold pr-2 border-r-2 border-gray-400'>질문 갯수</span>
+							<span>{formData?.questions.length}개</span>
+						</div>
+					</div>
+					<div>
+						<p className='text-2xl font-semibold border-b-2 pb-1 mb-4 border-gray-400'>표정 분석</p>
+						<div className='flex mb-4'>
+							<p className='text-gray-500'>표정 점수 평균</p>
+							<p className='text-gray-700 ml-3'>{formData?.faceScore}</p>
+						</div>
+						<Line data={faceGraphData} />
+					</div>
+					<div>
+						<p className='text-2xl font-semibold border-b-2 pb-1 mb-4 border-gray-400'>발음 분석</p>
+						<div className='flex mb-4'>
+							<p className='text-gray-500'>발음 점수 평균</p>
+							<p className='text-gray-700 ml-3'>{formData?.pronunciationScore}</p>
+						</div>
+						<Bar data={pronunciationGraphData} />
+					</div>
+					<div>
+						<p className='text-2xl font-semibold border-b-2 pb-1 mb-4 border-gray-400'>문답과 피드백</p>
+						{
+							formData?.questions.map((question, index) => (
+								<Card key={index} className='mb-5'>
+									<div className='w-full border-b-2 border-gray-400 pb-1 flex items-center gap-2'>
+										<span className='text-2xl font-semibold'>Q.</span>
+										<span className='text-xl'>{question.question}</span>
+									</div>
+									<div className='w-full border-b-2 border-gray-400 pb-1 flex gap-2'>
+										<span className='text-2xl font-semibold'>A.</span>
+										<span className='text-md text-gray-700'>{question.answer}</span>
+									</div>
+									<div className='w-full'>
+										<div className='text-xl font-semibold mb-2'>[피드백]</div>
+										<div className='ml-3 text-teal-600'>
+											{question.feedback}
+										</div>
+									</div>
+								</Card>
+							))
+						}
+					</div>
+				</div>
+			</Card>
+		</>
 	);
 };

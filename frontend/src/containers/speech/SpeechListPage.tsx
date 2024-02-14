@@ -160,7 +160,7 @@ export const SpeechListPage: React.FC = () => {
 						}}
 					/>
 				</div>
-				<div className='ml-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4'>
+				<div className='ml-4 grid 2xl:grid-cols-4 lg:grid-cols-2 grid-cols-1 gap-4'>
 					{speechSessions.map((session, index) => (
 						<div className='h-full' key={session.id}
 							 ref={index === speechSessions.length - 1 ? lastElementRef : null}>

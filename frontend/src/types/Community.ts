@@ -10,6 +10,7 @@ interface CommunityResponse {
 	maxParticipants: number;
 	hit: number;
 	currentParticipants?: number;
+	isParticipated?: boolean;
 }
 
 interface CommunityView {
@@ -24,6 +25,7 @@ interface CommunityView {
 	createdAt: Date;
 	hit: number;
 	currentParticipants?: number;
+	isParticipated?: boolean;
 }
 
 export type { CommunityResponse, CommunityView };

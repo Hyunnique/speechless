@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SearchCriteria } from '../types/SearchCriteria';
+import {Card, Dropdown} from "flowbite-react";
+import {CustomButton} from "./CustomButton.tsx";
 
 interface SpeechSearchProps {
 	onSearch: (criteria: SearchCriteria) => void;
@@ -8,9 +10,24 @@ interface SpeechSearchProps {
 
 export const SpeechSearch: React.FC<SpeechSearchProps> = ({ onSearch }) => {
 	const [criteria, setCriteria] = useState<SearchCriteria>({});
-	const [searchType, setSearchType] = useState<string>('');
+	const [searchType, setSearchType] = useState<string | null>(null);
 	const [keyword, setKeyword] = useState<string>('');
 	const navigate = useNavigate();
+
+    const filters = [
+        {
+            name: '제목',
+            value: 'title'
+        },
+        {
+            name: '작성자',
+            value: 'writerName'
+        },
+        {
+            name: '내용',
+            value: 'content'
+        }
+    ];
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const { name, value, type, checked } = e.target as HTMLInputElement;
@@ -25,9 +42,7 @@ export const SpeechSearch: React.FC<SpeechSearchProps> = ({ onSearch }) => {
 		setKeyword(e.target.value);
 	};
 
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-
+	const handleSubmit = () => {
 		let searchParams: Partial<SearchCriteria> = { ...criteria };
 
 		if (searchType && keyword) {
@@ -44,19 +59,23 @@ export const SpeechSearch: React.FC<SpeechSearchProps> = ({ onSearch }) => {
 
     return (
         <>
-            <div className='card max-w-full'>
-                <div className="flex justify-center">
-                    <button onClick={writeSpeech} className="btn">
-                        모집하기
-                    </button>
-                </div>
-                <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-                    <select name="searchType" onChange={(e) => setSearchType(e.target.value)} className="select">
-                        <option value="">검색 유형 선택</option>
-                        <option value="title">제목</option>
-                        <option value="writerName">작성자</option>
-                        <option value="content">내용</option>
-                    </select>
+            <Card>
+                <p className='font-semibold text-md border-b-2 border-gray-200 mb-2 pb-1'>검색 필터</p>
+                <div className='flex flex-col gap-4'>
+                    <Dropdown color='teal' label={ filters.find(x => x.value === searchType)?.name || '검색 유형 선택'}>
+                        {
+                            filters.map((filter) => (
+                                <Dropdown.Item
+                                    key={filter.value}
+                                    onClick={() => {
+                                        setSearchType(filter.value);
+                                    }}
+                                >
+                                    {filter.name}
+                                </Dropdown.Item>
+                            ))
+                        }
+                    </Dropdown>
                     <input
                         type="text"
                         name="keyword"
@@ -84,7 +103,8 @@ export const SpeechSearch: React.FC<SpeechSearchProps> = ({ onSearch }) => {
                             type="checkbox"
                             name="recruiting"
                             onChange={handleChange}
-                        /> 모집 중
+                        />
+                        <span className='ml-2'>모집 중</span>
                     </label>
                     <input
                         type="number"
@@ -93,11 +113,14 @@ export const SpeechSearch: React.FC<SpeechSearchProps> = ({ onSearch }) => {
                         placeholder="최대 참여자 수"
                         className="input"
                     />
-                    <button type="submit" className="btn">
-                        검색
-                    </button>
-                </form>
-            </div>
+                    <CustomButton color='blue' onClick={handleSubmit}>
+                        <div className='flex justify-center items-center gap-2'>
+                            <span className='material-symbols-outlined text-[1.2rem]'>search</span>
+                            <span>검색</span>
+                        </div>
+                    </CustomButton>
+                </div>
+            </Card>
         </>
     );
 };

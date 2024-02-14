@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Button } from 'flowbite-react';
+import {Button, Card} from 'flowbite-react';
 import { CustomButton } from '../../../components/CustomButton.tsx';
 
 import { useLocalAxios } from '../../../utils/axios.ts';
@@ -582,7 +582,7 @@ export const InterviewPage = () => {
 						면접 종료
 					</CustomButton>
 				</div>
-				<div className='session-title flex justify-center text-5xl mt-5'>
+				<div className='session-title flex justify-center text-3xl mt-5'>
 					{interviewSessionStore.stage === 'Start'
 						? '시작 버튼을 눌러주세요.'
 						: interviewSessionStore.stage === 'Wait'
@@ -602,8 +602,8 @@ export const InterviewPage = () => {
 								<div className='session-screen-header flex justify-end py-3 gap-4'>
 									{interviewSessionStore.stage === 'Answer' ? (
 										<div className='session-indicator-expression flex gap-2 items-center'>
-											<span className='text-3xl font-semibold'>표정</span>
-											<span className='material-symbols-outlined text-yellow-400 text-2xl'>
+											<span className='text-2xl font-semibold'>표정</span>
+											<span className='material-symbols-outlined text-yellow-400 text-5xl'>
 												{lastEmotion.expression === 'happy'
 													? 'sentiment_very_satisfied'
 													: lastEmotion.expression === 'neutral'
@@ -620,8 +620,7 @@ export const InterviewPage = () => {
 																			? 'sentiment_frustrated'
 																			: 'sentiment_neutral'}
 											</span>
-											<span className='text-2xl font-semibold'>Score: </span>
-											<span className='text-2xl font-semibold'>{lastScore}</span>
+											<span className='text-xl font-semibold'>{lastScore}</span>
 										</div>
 									) : (
 										<div className='session-indicator-expression flex gap-2 items-center'>
@@ -676,29 +675,34 @@ export const InterviewPage = () => {
 									interviewSessionStore.stage==="Wait" || interviewSessionStore.stage==="End" ? 
 										interviewSessionStore.questions.slice(0, questionCursor.current).map((question, index) => {
 											return (
-												<div key={index} className='mt-10'>
-													<div className='w-full flex justify-start border-b-2 border-gray-500'>
-														<div className='session-question flex justify-center items-cente1r text-2xl'>
-															{question.question}
+												<Card key={index} className='mx-3 mb-5'>
+													<div className='w-full border-b-2 border-gray-400 flex justify-between pb-1'>
+														<div className='flex items-center gap-2'>
+															<span className='text-2xl font-semibold'>Q.</span>
+															<span className='text-xl'>{question.question}</span>
+														</div>
+														<div className='flex items-center gap-3'>
+															<div className='flex items-center gap-1'>
+																<span className='material-symbols-outlined'>face</span>
+																<span>{question.faceScore}</span>
+															</div>
+															<div className='flex items-center gap-0.5'>
+																<span className='material-symbols-outlined'>mic</span>
+																<span>{question.speechScore}</span>
+															</div>
 														</div>
 													</div>
-													<div className='w-full flex justify-end border-b-2 border-gray-500 bg-primary-50'>
-														<div className='session-answer flex justify-center items-center'>
-															{question.answer}
-														</div>
+													<div className='w-full border-b-2 border-gray-400 flex gap-2 pb-1'>
+														<span className='text-2xl font-semibold'>A.</span>
+														<span className='text-md text-gray-700'>{question.answer}</span>
 													</div>
-													<div className='w-full flex justify-end border-b-2 border-gray-500'>
-														<div className='session-answer flex justify-center items-center'>
+													<div className='w-full'>
+														<div className='text-xl font-semibold mb-2'>[피드백]</div>
+														<div className='ml-3 text-teal-600'>
 															{question.feedback}
 														</div>
 													</div>
-													<div className='w-full flex justify-end border-b-2 border-gray-500'>
-														<div className='session-answer flex justify-center items-center'>
-															표정 점수: {question.faceScore} &nbsp; 발음 점수:{' '}
-															{question.speechScore}
-														</div>
-													</div>
-												</div>
+												</Card>
 											);
 										})
 			

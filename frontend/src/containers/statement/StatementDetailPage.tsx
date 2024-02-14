@@ -67,6 +67,9 @@ export const StatementDetailPage: React.FC = () => {
 			<div className='content-header mb-10'>
 				<Breadcrumb className='pb-8'>
 					<BreadcrumbItem>
+						<Link to='/'>홈</Link>
+					</BreadcrumbItem>
+					<BreadcrumbItem>
 						<Link to='/interview'>면접 연습하기</Link>
 					</BreadcrumbItem>
 					<BreadcrumbItem>
