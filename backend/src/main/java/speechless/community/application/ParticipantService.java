@@ -39,7 +39,8 @@ public class ParticipantService {
         throws SpeechlessException {
         Member loginMember = getMember(authCredentials);
         Community participantCommunity = getCommunity(communityId);
-        if (participantRepository.existsByCommunityIdAndMemberId(communityId, loginMember.getId())) {
+        if (participantRepository.existsByCommunityIdAndMemberId(communityId,
+            loginMember.getId())) {
             throw new ParticipantExistException();
         }
         Participant participant = Participant.builder()
@@ -47,6 +48,7 @@ public class ParticipantService {
             .community(participantCommunity)
             .build();
         participantRepository.save(participant);
+
         return participant;
     }
 
@@ -72,11 +74,13 @@ public class ParticipantService {
 
         Member loginMember = getMember(authCredentials);
 
-        Page<Community> communities = participantRepository.findFinishedByMember(loginMember, PageRequest.of(pageNum - 1, pageSize, Sort.by("id").descending()));
+        Page<Community> communities = participantRepository.findFinishedByMember(loginMember,
+            PageRequest.of(pageNum - 1, pageSize, Sort.by("id").descending()));
 
-        Page<ParticipantCommunityResponse> responsePage = communities.map(ParticipantMapper.INSTANCE::toResponse);
+        Page<ParticipantCommunityResponse> responsePage = communities.map(
+            ParticipantMapper.INSTANCE::toResponse);
         return new ParticipantListResponse(
-            responsePage.getContent(), responsePage.getNumber()+1, responsePage.getTotalPages(),
+            responsePage.getContent(), responsePage.getNumber() + 1, responsePage.getTotalPages(),
             responsePage.getTotalElements());
     }
 
@@ -89,11 +93,13 @@ public class ParticipantService {
 
         Member loginMember = getMember(authCredentials);
 
-        Page<Community> communities = participantRepository.findReservedByMember(loginMember, PageRequest.of(pageNum - 1, pageSize, Sort.by("id").descending()));
+        Page<Community> communities = participantRepository.findReservedByMember(loginMember,
+            PageRequest.of(pageNum - 1, pageSize, Sort.by("id").descending()));
 
-        Page<ParticipantCommunityResponse> responsePage = communities.map(ParticipantMapper.INSTANCE::toResponse);
+        Page<ParticipantCommunityResponse> responsePage = communities.map(
+            ParticipantMapper.INSTANCE::toResponse);
         return new ParticipantListResponse(
-            responsePage.getContent(), responsePage.getNumber()+1, responsePage.getTotalPages(),
+            responsePage.getContent(), responsePage.getNumber() + 1, responsePage.getTotalPages(),
             responsePage.getTotalElements());
     }
 
@@ -108,11 +114,16 @@ public class ParticipantService {
 
     public List<ParticipantCommunityResponse> getNextParticipants(
         AuthCredentials authCredentials)
-        throws SpeechlessException{
+        throws SpeechlessException {
         Member loginMember = getMember(authCredentials);
         List<Community> communities = participantRepository.findNextByMember(loginMember)
             .orElse(new ArrayList<>());
         return communities.stream().map(ParticipantMapper.INSTANCE::toResponse).toList();
+    }
+
+    public Integer getParticipantNumber(Long communityId) throws SpeechlessException {
+        Community community = getCommunity(communityId);
+        return participantRepository.findAllByCommunity(community).orElse(new ArrayList<>()).size();
     }
 
     public Participant getParticipant(Long id) throws SpeechlessException {
