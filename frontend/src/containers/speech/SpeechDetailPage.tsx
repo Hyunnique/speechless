@@ -5,6 +5,7 @@ import { useLocalAxios } from '../../utils/axios';
 import { Breadcrumb, BreadcrumbItem } from 'flowbite-react';
 import {useAuthStore} from "../../stores/auth.ts";
 import { AxiosError } from 'axios';
+import { useSpeechSessionStore } from '../../stores/session.ts';
 
 export const SpeechDetailPage = () => {
 	const [speechDetail, setSpeechDetail] = useState<CommunityView | null>(null);
