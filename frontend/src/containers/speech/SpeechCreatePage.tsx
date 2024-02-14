@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {CustomButton} from "../../components/CustomButton.tsx";
 import {Editor} from "@toast-ui/react-editor";
+import moment from "moment";
 
 export const SpeechCreatePage = () => {
 
@@ -76,6 +77,7 @@ export const SpeechCreatePage = () => {
 			} else {
 				// 생성 요청
 				const res = await localAxios.post('/community', formData);
+				console.log(formData);
 				alert('작성 완료');
 				navigate(`/speech/${res.data.id}`);
 			}
@@ -219,16 +221,20 @@ export const SpeechCreatePage = () => {
 							<div className='text-gray-700 font-semibold pl-2 pb-3'>모집 마감 시간</div>
 							<input type='datetime-local'
 								   name='deadline'
-								   value={formData.deadline.substring(0, 16)}
-								   onChange={handleChange}
+								   value={moment(formData.deadline).toISOString(true).substring(0, 16)}
+								   onChange={(e) => {
+									   setFormData({ ...formData, deadline: moment(e.target.value).toISOString() });
+								   }}
 							/>
 						</div>
 						<div className='w-1/2'>
 							<div className='text-gray-700 font-semibold pl-2 pb-3'>세션 시작 시간</div>
 							<input type='datetime-local'
 								   name='sessionStart'
-								   value={formData.sessionStart.substring(0, 16)}
-								   onChange={handleChange}
+								   value={moment(formData.sessionStart).toISOString(true).substring(0, 16)}
+								   onChange={(e) => {
+									   setFormData({ ...formData, sessionStart: moment(e.target.value).toISOString() });
+								   }}
 							/>
 						</div>
 					</div>

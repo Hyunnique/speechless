@@ -9,16 +9,22 @@ import Banner1 from '../assets/images/banner-1.png';
 import Banner2 from '../assets/images/banner-2.png';
 import Banner3 from '../assets/images/banner-3.png';
 import Banner4 from '../assets/images/banner-4.png';
-//import { Banner1, Banner2 } from '../components/Banners.tsx';
 
 import { useEffect, useState } from 'react';
 import { useLocalAxios } from '../utils/axios.ts';
 import { useNavigate } from 'react-router-dom';
 
+interface SpeechSummary {
+	id: number;
+	title: string;
+	sessionStart: string;
+}
+
 export const IndexPage = () => {
 	const localAxiosWithAuth = useLocalAxios();
 	const navigate = useNavigate();
 	const [speechSessions, setSpeechSessions] = useState<CommunityView[]>([]);
+	const [awaitingSessions, setAwaitingSessions] = useState<SpeechSummary[]>([]);
 
 	useEffect(() => {
 		localAxiosWithAuth.get('/community/popular')
@@ -42,8 +48,13 @@ export const IndexPage = () => {
 				console.error('데이터 로딩 실패:', err);
 			});
 
-		//axios.get("/kakao");
+
+		localAxiosWithAuth.get('/participant/next')
+			.then((res) => {
+				setAwaitingSessions(res.data);
+			})
 	}, []);
+
 
 	return (
 		<>
@@ -56,20 +67,23 @@ export const IndexPage = () => {
 				</Carousel>
 			</div>
 			<div className='grid grid-cols-1 lg:grid-cols-2 gap-4 px-2 mb-20 h-[400px]'>
-				<TitledCard title='내가 참여할 발표 세션'>
+				<TitledCard title='내가 참여 중인 발표 그룹'>
 					<ul className='flex flex-col px-4 gap-4 h-full justify-center'>
-						{speechSessions.slice(0, 3).map((session) => {
+						{awaitingSessions.map((session) => {
 							return (
 								<li key={session.id} className='flex justify-between border-b-2 px-2 pb-2'>
 									<div className='flex flex-col justify-between'>
 										<p className='text-md font-semibold'>{session.title}</p>
 										<p className='text-sm'>
-											{session.sessionStart.toLocaleDateString()}{' '}
-											{session.sessionStart.toLocaleDateString()}
+											{new Date(session.sessionStart).toLocaleDateString()}{' '}
+											{new Date(session.sessionStart).toLocaleTimeString()}
+										</p>
+										<p className='text-sm'>
+
 										</p>
 									</div>
-									<div className='flex flex-col justify-between items-center'>
-										<p className='text-sm font-semibold'>/ {session.maxParticipants}</p>
+									<div className='flex flex-col justify-center items-center'>
+										{/*<p className='text-sm font-semibold'>/ {session.maxParticipants}</p>*/}
 										<Button size='xs' color='purple' disabled>
 											참여하기
 										</Button>

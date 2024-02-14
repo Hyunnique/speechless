@@ -7,5 +7,7 @@ export interface InterviewReport {
 	pronunciationGraph: string;
 	faceScore: number;
 	faceGraph: string;
+	startTime: string;
+	endTime: string;
 	questions: InterviewQuestion[];
 }

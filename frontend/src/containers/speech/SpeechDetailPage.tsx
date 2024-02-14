@@ -2,13 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { type CommunityResponse, CommunityView } from '../../types/Community.ts';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLocalAxios } from '../../utils/axios';
-import { Breadcrumb, BreadcrumbItem } from 'flowbite-react';
+import {Breadcrumb, BreadcrumbItem, Card} from 'flowbite-react';
 import {useAuthStore} from "../../stores/auth.ts";
 import { AxiosError } from 'axios';
 import { useSpeechSessionStore } from '../../stores/session.ts';
+import {CustomButton} from "../../components/CustomButton.tsx";
+
+import moment from 'moment';
+import {Viewer} from "@toast-ui/react-editor";
 
 export const SpeechDetailPage = () => {
 	const [speechDetail, setSpeechDetail] = useState<CommunityView | null>(null);
+    const [viewerKey, setViewerKey] = useState(0);
 	const { id } = useParams();
 	const localAxiosWithAuth = useLocalAxios();
 	const navigate = useNavigate();
@@ -115,79 +120,155 @@ export const SpeechDetailPage = () => {
 
   return (
       <>
-        <div className='bg-primary-50 font-sans leading-normal tracking-normal'>
-          <div className='container max-w-4xl px-4 md:px-0 mx-auto pt-6 pb-8'>
-            <div className='bg-white rounded shadow'>
-              <div className='py-4 px-5 lg:px-8 text-black border-b border-gray-200'>
-                <h1 className='font-bold text-2xl mb-2'>{speechDetail.title}</h1>
-                <div className='flex justify-between items-center'>
-                  <div className='flex gap-4 md:gap-10'>
-                    <p className='text-sm md:text-base text-gray-600'>작성자: {speechDetail.writer}</p>
-                    <p className='text-sm md:text-base text-gray-600'>작성일: {speechDetail.createdAt.toLocaleString()}</p>
-                    <p className='text-sm md:text-base text-gray-600'>조회수: {speechDetail.hit}</p>
+          <div className='content-header mb-10'>
+              <Breadcrumb className='pb-8'>
+                  <BreadcrumbItem>
+                      <Link to='/'>홈</Link>
+                  </BreadcrumbItem>
+                  <BreadcrumbItem>
+                      <Link to='/speech'>함께 발표하기</Link>
+                  </BreadcrumbItem>
+                  <BreadcrumbItem>
+                      발표 그룹 모집
+                  </BreadcrumbItem>
+              </Breadcrumb>
+              <div className='flex justify-between items-center'>
+                  <h1 className='text-3xl font-semibold leading-tight text-gray-700'>발표 그룹 모집</h1>
+                  <div className='flex gap-3'>
+                      <CustomButton
+                          bordered
+                          color='blue'
+                          onClick={() => {
+                              navigate('/speech');
+                          }}
+                      >
+                          <div className='flex items-center gap-2'>
+                              <span className='material-symbols-outlined text-sm'>arrow_back</span>
+                              <span>목록으로 이동</span>
+                          </div>
+                      </CustomButton>
                   </div>
-                  <button className='bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded'
-                          onClick={joinGroup}>
-                    그룹 참여
-                  </button>
-                  <button className='bg-negative-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded'
-                          onClick={deleteGroup}>
-                    그룹 탈퇴
-                  </button>
-                  <button className='bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-                          onClick={moveSpeech}>
-                    발표 세션 이동
-                  </button>
-                </div>
               </div>
-
-						<div className='flex flex-wrap -mx-3 mb-6 p-5 lg:px-8'>
-							<div className='w-full md:w-1/2 px-3 mb-6 md:mb-0'>
-								<div className='mb-2'>
-									<strong>신청 현황:</strong> {speechDetail.currentParticipants}/
-									{speechDetail.maxParticipants}
-								</div>
-								<div className='mb-2'>
-									<strong>세션 일자:</strong> {speechDetail.sessionStart.toLocaleString()}
-								</div>
-								<div>
-									<strong>마감 일자:</strong> {speechDetail.deadline.toLocaleString()}
-								</div>
-							</div>
-							<div className='w-full md:w-1/2 px-3'>
-								<div className='mb-2'>
-									<strong>발표 주제: </strong>
-									{speechDetail.category}
-								</div>
-							</div>
-						</div>
-
-              <div className='py-4 px-5 lg:px-8 border-t border-gray-200'>
-                <div className='mb-4'>
-                  <h2 className='font-bold text-xl mb-2'>그룹 소개</h2>
-                  <p className='text-gray-700'>{speechDetail.content}</p>
-                </div>
-                <div className="">
-                  {isOwner && (
-                      <div>
-                          <button onClick={updateSpeech}
-                                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded "
-                          >
-                            글 수정
-                          </button>
-                          <button
-                              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                              onClick={deleteSpeech}
-                          >
-                            글 삭제
-                          </button>
-                      </div>
-                )}
-                </div>
-              </div>
-            </div>
           </div>
-        </div>
+
+          <Card className='2xl:w-3/4 xl:w-4/5 w-full mx-auto p-10'>
+              <div className='flex flex-col space-y-10'>
+                  <div className='flex justify-between items-center gap-10'>
+                      <div className='flex-1'>
+                          <p className='text-2xl font-semibold'>{speechDetail.title}</p>
+                      </div>
+                      <div className='flex items-center gap-3'>
+                          {
+                              speechDetail.isParticipated
+                              ?
+                                  <CustomButton
+                                      color='blue'
+                                      bordered
+                                      onClick={deleteGroup}
+                                  >
+                                      <div className='flex items-center gap-2'>
+                                          <span className='material-symbols-outlined'>arrow_forward</span>
+                                          <span>발표 세션 이동</span>
+                                      </div>
+                                  </CustomButton>
+                              :
+                                  <CustomButton
+                                      color='positive'
+                                      bordered
+                                      onClick={joinGroup}
+                                  >
+                                      <div className='flex items-center gap-2'>
+                                          <span className='material-symbols-outlined'>check</span>
+                                          <span>그룹 참여</span>
+                                      </div>
+                                  </CustomButton>
+                          }
+                      </div>
+                  </div>
+                  <div className='flex items-center gap-8'>
+                      <span className='flex items-center gap-3'>
+                          <span className='text-2xl text-yellow-400'>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path
+                                  fill="currentColor"
+                                  d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14z"/></svg>
+                          </span>
+                          <span className='font-semibold'>{speechDetail.writer}</span>
+                      </span>
+                      <span className='flex items-center gap-3'>
+                          <span className='material-symbols-outlined'>person</span>
+                          <span className='font-semibold'>{speechDetail.currentParticipants ? speechDetail.currentParticipants : 0} / {speechDetail.maxParticipants}</span>
+                      </span>
+                      <span className='flex items-center gap-3'>
+                          <span className='material-symbols-outlined'>visibility</span>
+                          <span className='font-semibold'>{speechDetail.hit}</span>
+                      </span>
+                  </div>
+                  <div>
+                      <div className='flex gap-2'>
+                          <span className='font-semibold pr-2 border-r-2 border-gray-400'>발표 주제</span>
+                          <span>{speechDetail.category}</span>
+                      </div>
+                      <div className='flex gap-2'>
+                          <span className='font-semibold pr-2 border-r-2 border-gray-400'>발표 세션 시작일</span>
+                          <span>{moment(speechDetail.sessionStart).format('YYYY년 MM월 DD일 HH시 mm분')}</span>
+                      </div>
+                      <div className='flex gap-2'>
+                          <span className='font-semibold pr-2 border-r-2 border-gray-400'>모집 기간</span>
+                          <span className='flex gap-2'>
+                              <span>{moment(speechDetail.createdAt).format('YYYY년 MM월 DD일 HH시 mm분')}</span>
+                              <span>~</span>
+                              <span>{moment(speechDetail.deadline).format('YYYY년 MM월 DD일 HH시 mm분')}</span>
+                          </span>
+                      </div>
+                  </div>
+                  <div className='pt-5'>
+                      <Viewer key={viewerKey} initialValue={speechDetail.content} />
+                  </div>
+                  <div className='flex justify-end gap-5 pt-10'>
+                      {
+                          speechDetail.isParticipated
+                          ? <CustomButton
+                                  bordered
+                                  color='negative'
+                                  onClick={deleteGroup}
+                              >
+                                  <div className='flex items-center gap-2'>
+                                      <span className='material-symbols-outlined text-sm'>logout</span>
+                                      <span>그룹 나가기</span>
+                                  </div>
+                              </CustomButton>
+                          : <></>
+                      }
+                      {
+                          isOwner ?
+                              <>
+                                  <CustomButton
+                                      bordered
+                                      color='white'
+                                      onClick={updateSpeech}
+                                  >
+                                      <div className='flex items-center gap-2'>
+                                          <span className='material-symbols-outlined text-sm'>edit</span>
+                                          <span>모집 글 수정</span>
+                                      </div>
+                                  </CustomButton>
+                                  <CustomButton
+                                      bordered
+                                      color='negative'
+                                      onClick={deleteSpeech}
+                                  >
+                                      <div className='flex items-center gap-2'>
+                                          <span className='material-symbols-outlined text-sm'>delete</span>
+                                          <span>모집 글 삭제</span>
+                                      </div>
+                                  </CustomButton>
+                              </>
+                              :
+                              <></>
+                      }
+                  </div>
+              </div>
+          </Card>
       </>
   );
 };
