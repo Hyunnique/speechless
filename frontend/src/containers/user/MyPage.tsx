@@ -2,8 +2,9 @@ import React from 'react';
 import { Card, Avatar } from 'flowbite-react';
 import { useAuthStore } from '../../stores/auth';
 
-import { CustomButton } from '../../components/CustomButton.tsx';
 import { RecentScoreChart } from './RecentScoreChart.tsx';
+import { ReservedSpeechView } from './ReservedSpeechView.tsx';
+import { FinishedSpeechView } from './FinishedSpeechView.tsx';
 
 
 export const MyPage = () => {
@@ -28,6 +29,14 @@ export const MyPage = () => {
 					</div>
 				</div>
 			</Card>
+
+			<div className='w-3/4 mx-auto mt-7'>
+				<ReservedSpeechView/>
+			</div>
+
+			<div className='w-3/4 mx-auto mt-7'>
+				<FinishedSpeechView/>
+			</div>
 		</>
 	);
 };
