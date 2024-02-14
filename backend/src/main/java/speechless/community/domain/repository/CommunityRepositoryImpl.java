@@ -8,10 +8,6 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 import speechless.community.domain.Community;
 import speechless.community.domain.QCommunity;
-import speechless.member.domain.Member;
-
-
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -115,7 +111,8 @@ public class CommunityRepositoryImpl implements CustomCommunityRepository{
 
     public List<Community> findPopularCommunities() {
         QCommunity community = QCommunity.community;
-        BooleanExpression predicate = community.isDeleted.isFalse();
+        BooleanExpression predicate = community.isDeleted.isFalse()
+                .and(isRecruiting());
 
         return queryFactory.selectFrom(community)
                 .where(predicate)
