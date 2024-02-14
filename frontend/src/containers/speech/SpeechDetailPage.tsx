@@ -20,6 +20,9 @@ export const SpeechDetailPage = () => {
     navigate(`/speech/write/${id}`);
   };
   const isOwner = userName === speechDetail?.writer;
+
+  const speechSessionStore = useSpeechSessionStore();
+
   //형 변환 할 것들(date...)
   useEffect(() => {
     const fetchData = async () => {
@@ -74,15 +77,26 @@ export const SpeechDetailPage = () => {
     }
   };
 
-	const moveSpeech = async () => {
-		try {
-			const res = await localAxiosWithAuth.get('/');
-		} catch (err) {
-			console.log('err ', err);
-		} finally {
-			console.log('fin');
+  const moveSpeech = async  () => {
+    const response = await localAxiosWithAuth.post('openvidu/announcement', {
+			topic: speechDetail?.title,
+      communityId: speechDetail?.id
+		});
+
+		if (speechSessionStore.sessionId) {
+			try {
+				await localAxiosWithAuth.delete(`openvidu/sessions/${speechSessionStore.sessionId}`);
+			} catch (e) {
+				console.log("session deletion failed");
+			}
+
+			speechSessionStore.clearSession();
 		}
-	};
+
+		speechSessionStore.setSessionId(response.data);
+
+		navigate('/session/speech');
+  }
 
   const deleteGroup = async  () => {
     try {

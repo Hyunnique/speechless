@@ -3,12 +3,20 @@ import { persist } from 'zustand/middleware';
 import type { InterviewQuestion } from '../types/Interview.ts';
 import type { Statement } from '../types/Statement.ts';
 
-interface InterviewSessionState {
+interface SessionState{
 	sessionId: string | null;
-	interviewId: string | null;
 	recordingId: string | null;
 	connectionId: string | null;
 	connectionString: string | null;
+
+	setSessionId: (sessionId: string) => void;
+	setRecordingId: (recordingId: string) => void;
+	setConnection: (connectionId: string, connectionToken: string) => void;
+	clearSession: () => void;
+}
+
+interface InterviewSessionState extends SessionState {
+	interviewId: string | null;
 	title: string | null;
 	questionsCount: number;
 	statement: Statement | null;
@@ -17,23 +25,23 @@ interface InterviewSessionState {
 	feedbackCursor: number;
 	stage: string;
 
-	setSessionId: (sessionId: string) => void;
-	setInterviewId: (interviewId: string) => void;
-	setRecordingId: (recordingId: string) => void;
-	setConnection: (connectionId: string, connectionToken: string) => void;
 	setTitle: (title: string) => void;
+	setInterviewId: (interviewId: string) => void;
 	setQuestionsCount: (questionsCount: number) => void;
 	setStatement: (statement: Statement) => void;
 	setQuestions: (questions: InterviewQuestion[]) => void;
 	setQuestionCursor: (cursor: number) => void;
 	setFeedBackCursor: (cursor: number) => void;
 	setStage: (stage: string) => void;
-	clearSession: () => void;
 }
 
-interface SpeechSessionState {}
+interface SpeechSessionState extends SessionState{
+	groupId: string | null;
 
-const useInterviewSessionStore = create<InterviewSessionState>()(
+	setGroupId: (groupId: string) => void;
+}
+
+const useInterviewSessionStore = create<InterviewSessionState>() (
 	persist(
 		(set) => ({
 			sessionId: null,
@@ -81,6 +89,32 @@ const useInterviewSessionStore = create<InterviewSessionState>()(
 	),
 );
 
-const useSpeechSessionStore = create<SpeechSessionState>()((set) => ({}));
+const useSpeechSessionStore = create<SpeechSessionState>()(
+	persist(
+		(set) => ({
+			groupId: null,
+			sessionId: null,
+			interviewId: null,
+			recordingId: null,
+			connectionId: null,
+			connectionString: null,
+
+			setSessionId: (sessionId: string) => set({ sessionId }),
+			setGroupId: (groupId: string) => set({ groupId }),
+			setRecordingId: (recordingId: string) => set({ recordingId }),
+			setConnection: (connectionId: string, connectionString: string) => set({ connectionId, connectionString }),
+
+			clearSession: () => {
+				set({ sessionId: null });
+				set({ groupId: null });
+				set({ connectionId: null });
+				set({ connectionString: null });
+			},
+		}),
+		{
+			name: 'speech-session',
+		}
+	)
+);
 
 export { useInterviewSessionStore, useSpeechSessionStore };
