@@ -42,12 +42,16 @@ export const RecentScoreChart = () => {
             .get('interview', { params: { pageSize: 10, pageNum: 1 } })
             .then((res) => {
                 const infos = res.data.interviewInfos;
-                const faceYlist =  infos.map((info: { faceScore: number; }) => info.faceScore);
-				const pronunciationYlist =  infos.map((info: { pronunciationScore: number; }) => info.pronunciationScore);
+                const faceYlist =  infos.map((info: { faceScore: number; }) => info.faceScore).reverse();
+				const pronunciationYlist =  infos.map((info: { pronunciationScore: number; }) => info.pronunciationScore).reverse();
                 const faceColor = getRandomColor();
 				const pronunciationColor = getRandomColor();
+                const xlist = new Array(faceYlist.length).fill('');
+                xlist[0] = '이전';
+                xlist[xlist.length-1] = '현재';
+
                 setGraphData({
-                    labels: new Array(faceYlist.length).fill(''),
+                    labels: xlist,
                     datasets: [
                         {
                             label: '표정 점수',

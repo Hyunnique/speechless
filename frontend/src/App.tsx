@@ -18,6 +18,7 @@ import { SpeechCreatePage } from './containers/speech/SpeechCreatePage.tsx';
 import { PrivateRoute } from './containers/layout/PrivateRoute.tsx';
 import { AuthRoute } from './containers/layout/AuthRoute.tsx';
 import { InterviewReportDetailPage } from './containers/report/InterviewReportDetailPage.tsx';
+import ErrorPage from './error.tsx';
 export default function App() {
 	return (
 		<>
@@ -47,6 +48,7 @@ export default function App() {
 					<Route element={<DefaultLayout />}>
 						{/* 레이아웃 있음 && 로그인 상관없음*/}
 						<Route path='/' element={<IndexPage />} />
+						<Route path='/error/:id' element={<ErrorPage/>} />
 					</Route>
 
 					<Route element={<PrivateRoute />}>

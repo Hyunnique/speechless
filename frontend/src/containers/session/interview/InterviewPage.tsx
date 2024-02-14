@@ -523,10 +523,6 @@ export const InterviewPage = () => {
 	};
 
 	const endInterview = () => {
-		if (questionCursor.current !== feedbackCursor.current) {
-			alert('피드백이 끝날때까지 잠시 기다려 주세요.');
-			return;
-		}
 		const qc = questionsRef.current.length;
 		const interviewResult = {
 			interviewId: interviewSessionStore.interviewId,
