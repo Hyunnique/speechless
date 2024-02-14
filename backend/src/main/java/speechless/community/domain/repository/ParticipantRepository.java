@@ -22,7 +22,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long>,
         + "ON m = :member "
         + "AND m = p.member "
         + "JOIN Community c "
-        + "ON c.sessionStart < current_date "
+        + "ON c.sessionStart < current_timestamp "
         + "AND p.community = c")
     Page<Community> findFinishedByMember(Member member, Pageable pageable);
 
@@ -31,7 +31,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long>,
         + "ON m = :member "
         + "AND m = p.member "
         + "JOIN Community c "
-        + "ON c.sessionStart >= current_date "
+        + "ON c.sessionStart >= current_timestamp "
         + "AND p.community = c")
     Page<Community> findReservedByMember(Member member, Pageable pageable);
 
@@ -49,7 +49,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long>,
         + "ON m = :member "
         + "AND m = p.member "
         + "JOIN Community c "
-        + "ON c.sessionStart >= current_date "
+        + "ON c.sessionStart >= current_timestamp "
         + "AND p.community = c "
         + "ORDER BY c.sessionStart ASC "
         + "LIMIT 3")
