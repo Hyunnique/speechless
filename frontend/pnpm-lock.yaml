@@ -48,6 +48,12 @@ dependencies:
   openvidu-browser:
     specifier: ^2.29.1
     version: 2.29.1
+  prosemirror-model:
+    specifier: 1.14.1
+    version: 1.14.1
+  prosemirror-state:
+    specifier: 1.3.4
+    version: 1.3.4
   react:
     specifier: ^18.2.0
     version: 18.2.0
