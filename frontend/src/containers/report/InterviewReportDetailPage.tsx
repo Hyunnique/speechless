@@ -47,6 +47,11 @@ export const InterviewReportDetailPage: React.FC = () => {
 	const [pronunciationGraphData, setPronunciationGraphData] = useState({
 		labels: [],
 		datasets: [
+			{
+				label: '발음 점수',
+				data: [],
+				backgroundColor: 'rgba(53, 162, 235, 0.5)',
+			},
 		],
 	});
 	const [faceGraphData, setFaceGraphData] = useState<ChartData<"line", number[], unknown>>({
