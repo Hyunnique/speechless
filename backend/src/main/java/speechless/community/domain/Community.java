@@ -102,7 +102,6 @@ public class Community extends BaseTimeEntity {
     @Builder.Default
     private List<Participant> participants = new ArrayList<>();
 
-    @Builder.Default
     @OneToOne(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Announcement announcement = new Announcement();
+    private Announcement announcement;
 }
