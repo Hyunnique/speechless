@@ -5,20 +5,21 @@ import { useLocalAxios } from '../../utils/axios';
 import { Link, useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
-import { Editor } from '@toast-ui/react-editor';
 import { CustomButton } from '../../components/CustomButton.tsx';
 import { CustomBadge } from '../../components/CustomBadge.tsx';
+
+import { Editor } from '@tinymce/tinymce-react';
 
 interface StatementForm extends Statement {
 	questions: { question: string; answer: string }[];
 }
 
+const EDITOR_API_KEY = import.meta.env.VITE_TINY_API_KEY;
+
 export const StatementWritePage: React.FC = () => {
 	const { id } = useParams();
 
 	const localAxios = useLocalAxios(true);
-
-	const editorRef = useRef<Editor | null>(null);
 
 	//내부적으로 사용하는 Statement 데이터. 만약 update 모드면 기존 데이터를 가져온다.
 	const [formData, setFormData] = useState<StatementForm>({
@@ -287,26 +288,18 @@ export const StatementWritePage: React.FC = () => {
 						</div>
 						<p className='text-gray-700 text-md'>답변</p>
 						<Editor
-							key={editorKey}
-							initialValue={formData.questions[questionCursor - 1].answer}
-							placeholder='답변을 입력해주세요.'
-							initialEditType='wysiwyg'
-							onChange={() => {
+							apiKey={EDITOR_API_KEY}
+							// initialValue={formData.questions[questionCursor - 1].answer}
+							value={formData.questions[questionCursor - 1].answer}
+							plugins={'autosave wordcount'}
+							onEditorChange={(val, editor) => {
 								const newQuestions = formData.questions.map((q, idx) =>
 									idx === questionCursor - 1
-										? { ...q, answer: editorRef.current?.getInstance().getMarkdown() }
+										? { ...q, answer: val }
 										: q,
 								);
 								setFormData({ ...formData, questions: newQuestions });
 							}}
-							ref={editorRef}
-							hideModeSwitch={true}
-							toolbarItems={[
-								['heading', 'bold', 'italic', 'strike'],
-								['hr', 'quote'],
-								['ul', 'ol', 'task', 'indent', 'outdent'],
-								['table', 'link'],
-							]}
 						/>
 						<div className='flex items-center justify-center gap-2'>
 							<CustomButton color='blue' className='!py-3 !px-5' onClick={addQuestion}>

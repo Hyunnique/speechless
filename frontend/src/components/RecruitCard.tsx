@@ -5,6 +5,7 @@ import type { CommunityView } from '../types/Community.ts';
 import { CustomBadge } from './CustomBadge.tsx';
 
 import moment from 'moment';
+import DOMPurify from 'dompurify';
 
 interface RecruitCardProps {
 	session: CommunityView;
@@ -35,7 +36,9 @@ export const RecruitCard: React.FC<RecruitCardProps> = ({ session }) => {
 				})}
 			</div>
 			<div className='text-xl border-b-2 pb-1 text-ellipsis overflow-hidden whitespace-nowrap'>{session.title}</div>
-			<div className='px-1 h-[140px] text-ellipsis overflow-hidden text-left'>{session.content}</div>
+			<div className='px-1 h-[140px] text-ellipsis overflow-hidden text-left' dangerouslySetInnerHTML={{
+				__html: DOMPurify.sanitize(session.content)
+			}} />
 			<div className='flex flex-col gap-2'>
 				<div className='flex'>
 					<CustomBadge size='md' color={

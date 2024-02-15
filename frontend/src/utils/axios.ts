@@ -1,4 +1,4 @@
-import Axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import Axios, {AxiosInstance, AxiosResponse, InternalAxiosRequestConfig} from 'axios';
 import { useAuthStore } from '../stores/auth.ts';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,49 +35,40 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 				if (error.response.status === 401 && error.config.url !== '/auth/refresh') {
 					if (!authStore.refreshToken) {
 						authStore.clearAuth();
-						return Promise.reject(error);
+						return Promise.resolve();
 					}
 
 					const refreshAxios = Axios.create({
 						baseURL: import.meta.env.VITE_API_BASE_URL,
 					});
 
-					refreshAxios.interceptors.response.use(
-						(response) => response,
-						async (error) => {
-							if (error.config.url === '/auth/refresh' && error.response.status === 404) {
-								// refresh token이 만료되었을 경우
-								authStore.clearAuth();
-								navigate('/');
-							}
-
-							return Promise.reject(error);
-						},
-					);
-
+					let refreshResponse: AxiosResponse | null = null;
 					try {
-						const refreshResponse = await refreshAxios.get('/auth/refresh', {
+						refreshResponse = await refreshAxios.get('/auth/refresh', {
 							headers: {
 								Refresh: authStore.refreshToken,
 							},
 						});
 
-						if (!refreshResponse.data.accessToken) {
+						if (!refreshResponse?.data.accessToken) {
 							authStore.clearAuth();
-							return Promise.reject(error);
+							return Promise.resolve();
 						}
 
 						authStore.setAccessToken(refreshResponse.data.accessToken);
 					} catch (e) {
 						console.error(e);
 						authStore.clearAuth();
-						return Promise.reject(error);
+						return Promise.resolve();
 					}
 
-					return instance.request(error.config);
+					console.log("changed accessToken");
+					error.config.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
+					navigate('/');
+					//return instance.request(error.config);
 				}
 
-				return Promise.reject(error);
+				return Promise.resolve();
 			},
 		);
 	}

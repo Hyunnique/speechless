@@ -4,9 +4,10 @@ import {Breadcrumb, BreadcrumbItem, Card, Datepicker, Dropdown, FloatingLabel, T
 import classNames from 'classnames';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {CustomButton} from "../../components/CustomButton.tsx";
-import {Editor} from "@toast-ui/react-editor";
 import moment from "moment";
+import {Editor} from "@tinymce/tinymce-react";
 
+const EDITOR_API_KEY = import.meta.env.VITE_TINY_API_KEY;
 export const SpeechCreatePage = () => {
 
 	const categories = [
@@ -34,7 +35,7 @@ export const SpeechCreatePage = () => {
 	});
 
 	const [ editorKey, setEditorKey ] = useState(0);
-	const editorRef = useRef<Editor | null>(null);
+	// const editorRef = useRef<Editor | null>(null);
 	const { id } = useParams();
 	const localAxios = useLocalAxios(true);
 	const navigate = useNavigate();
@@ -186,22 +187,31 @@ export const SpeechCreatePage = () => {
 					<div>
 						<div className='text-gray-700 font-semibold pl-2 pb-3'>내용</div>
 						<Editor
-							key={editorKey}
-							initialValue={formData.content}
-							placeholder='내용을 입력해주세요.'
-							initialEditType='wysiwyg'
-							onChange={() => {
-								setFormData({...formData, content: editorRef.current?.getInstance().getMarkdown()});
+							apiKey={EDITOR_API_KEY}
+							// initialValue={formData.questions[questionCursor - 1].answer}
+							value={formData.content}
+							plugins={'autosave wordcount'}
+							onEditorChange={(val, editor) => {
+								setFormData({ ...formData, content: val });
 							}}
-							ref={editorRef}
-							hideModeSwitch={true}
-							toolbarItems={[
-								['heading', 'bold', 'italic', 'strike'],
-								['hr', 'quote'],
-								['ul', 'ol', 'task', 'indent', 'outdent'],
-								['table', 'link'],
-							]}
 						/>
+						{/*<Editor*/}
+						{/*	key={editorKey}*/}
+						{/*	initialValue={formData.content}*/}
+						{/*	placeholder='내용을 입력해주세요.'*/}
+						{/*	initialEditType='wysiwyg'*/}
+						{/*	onChange={() => {*/}
+						{/*		setFormData({...formData, content: editorRef.current?.getInstance().getMarkdown()});*/}
+						{/*	}}*/}
+						{/*	ref={editorRef}*/}
+						{/*	hideModeSwitch={true}*/}
+						{/*	toolbarItems={[*/}
+						{/*		['heading', 'bold', 'italic', 'strike'],*/}
+						{/*		['hr', 'quote'],*/}
+						{/*		['ul', 'ol', 'task', 'indent', 'outdent'],*/}
+						{/*		['table', 'link'],*/}
+						{/*	]}*/}
+						{/*/>*/}
 					</div>
 					<div>
 						<div className='text-gray-700 font-semibold pl-2 pb-3'>카테고리</div>

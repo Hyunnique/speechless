@@ -7,11 +7,14 @@ import { useNavigate } from 'react-router-dom';
 import { TitledCard } from '../../components/TitledCard.tsx';
 import { CustomButton } from '../../components/CustomButton.tsx';
 import { CustomBadge } from '../../components/CustomBadge.tsx';
-import { Viewer } from '@toast-ui/react-editor';
+
+import DOMPurify from 'dompurify';
 
 interface StatementForm extends Statement {
 	questions: { question: string; answer: string }[];
 }
+
+const EDITOR_API_KEY = import.meta.env.VITE_TINY_API_KEY;
 
 export const StatementDetailPage: React.FC = () => {
 	const { id } = useParams();
@@ -144,9 +147,9 @@ export const StatementDetailPage: React.FC = () => {
 								{formData.questions[questionCursor - 1].question}
 							</span>
 						</div>
-						<div className='bg-gray-200 rounded-md px-4 py-6'>
-							<Viewer key={viewerKey} initialValue={formData.questions[questionCursor - 1].answer} />
-						</div>
+						<div className='bg-gray-200 rounded-md px-4 py-6' dangerouslySetInnerHTML={{
+							__html: DOMPurify.sanitize(formData.questions[questionCursor - 1].answer)
+						}} />
 
 						<span className='flex items-center justify-center gap-2 p-2 rounded-full bg-white w-fit mx-auto border-2'>
 							<button className='material-symbols-outlined' onClick={decreaseCursor}>
@@ -159,14 +162,6 @@ export const StatementDetailPage: React.FC = () => {
 								chevron_right
 							</button>
 						</span>
-						{/*{formData.questions.map((_, index) => (*/}
-						{/*	<div key={index} className='p-3 bg-primary-50'>*/}
-						{/*		<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>문항</p>*/}
-						{/*		<p> {formData.questions[index].question} </p>*/}
-						{/*		<p className='text-base leading-relaxed text-gray-500 dark:text-gray-400'>답변</p>*/}
-						{/*		<p> {formData.questions[index].answer} </p>*/}
-						{/*	</div>*/}
-						{/*))}*/}
 					</div>
 				</div>
 			</Card>

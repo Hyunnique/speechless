@@ -9,7 +9,7 @@ import { useSpeechSessionStore } from '../../stores/session.ts';
 import {CustomButton} from "../../components/CustomButton.tsx";
 
 import moment from 'moment';
-import {Viewer} from "@toast-ui/react-editor";
+import DOMPurify from 'dompurify';
 
 export const SpeechDetailPage = () => {
 	const [speechDetail, setSpeechDetail] = useState<CommunityView | null>(null);
@@ -237,12 +237,12 @@ export const SpeechDetailPage = () => {
                           </span>
                       </div>
                   </div>
-                  <div className='pt-5'>
-                      <Viewer key={viewerKey} initialValue={speechDetail.content} />
-                  </div>
+                  <div className='pt-5' dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(speechDetail.content)
+                  }} />
                   <div className='flex justify-end gap-5 pt-10'>
                       {
-                          speechDetail.isParticipated
+                          speechDetail.isParticipated && !isOwner
                           ? <CustomButton
                                   bordered
                                   color='negative'
