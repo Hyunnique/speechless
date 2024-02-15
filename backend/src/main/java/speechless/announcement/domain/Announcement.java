@@ -25,7 +25,7 @@ public class Announcement extends BaseTimeEntity {
   private Long id;
 
   @OneToOne(fetch = FetchType.LAZY, cascade=CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(referencedColumnName = "id")
+  @JoinColumn(name = "community_id", referencedColumnName = "id")
   private Community community;
 
   @Column(name = "announcement_id", length = 30)

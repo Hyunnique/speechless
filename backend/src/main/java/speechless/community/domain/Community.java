@@ -15,6 +15,7 @@ import static lombok.AccessLevel.PROTECTED;
 import static lombok.EqualsAndHashCode.Include;
 
 @Entity
+@Table(name = "community")
 @Getter
 @Builder
 @AllArgsConstructor
@@ -27,7 +28,7 @@ public class Community extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(referencedColumnName = "id")
+    @JoinColumn(name = "writer_id", referencedColumnName = "id")
     private Member writer;
 
     @Column(nullable = false, name = "category")

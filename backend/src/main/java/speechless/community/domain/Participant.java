@@ -33,7 +33,7 @@ public class Participant extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinColumn(referencedColumnName = "id")
+    @JoinColumn(name = "community_id", referencedColumnName = "id")
     private Community community;
 
     @ManyToOne(fetch = FetchType.LAZY)
