@@ -36,8 +36,8 @@ export const RecentScoreChart = () => {
                 const infos = res.data.interviewInfos;
                 const faceYlist =  infos.map((info: { faceScore: number; }) => info.faceScore).reverse();
 				const pronunciationYlist =  infos.map((info: { pronunciationScore: number; }) => info.pronunciationScore).reverse();
-                const faceColor = getRandomColor();
-				const pronunciationColor = getRandomColor();
+                const faceColor = 'rgba(255, 165, 0, 1)';
+				const pronunciationColor = 'rgba(154, 205, 50, 1)';
                 const xlist = new Array(faceYlist.length).fill('');
                 xlist[0] = '이전';
                 xlist[xlist.length-1] = '현재';
@@ -50,7 +50,6 @@ export const RecentScoreChart = () => {
                             data: faceYlist,
 							borderColor: faceColor,
                             backgroundColor: faceColor,
-                            pointRadius: 0,
                             fill: false,
                         },
 						{
@@ -58,29 +57,12 @@ export const RecentScoreChart = () => {
                             data: pronunciationYlist,
 							borderColor: pronunciationColor,
                             backgroundColor: pronunciationColor,
-                            pointRadius: 0,
                             fill: false,
                         },
                     ],
                 })
             })
 	}, []);
-
-	function getRandomColor() {
-		const colorList = [
-			'rgba(255, 0, 0, 1)', // 빨강
-			'rgba(255, 165, 0, 1)', // 주황
-			'rgba(255, 255, 0, 1)', // 황색
-			'rgba(154, 205, 50, 1)', // 연두
-			'rgba(0, 128, 0, 1)', // 녹색
-			'rgba(0, 255, 255, 1)', // 청록
-			'rgba(0, 0, 255, 1)', // 청색
-			'rgba(128, 0, 128, 1)', // 보라
-			'rgba(0, 0, 0, 1)', // 검정
-		];
-
-		return colorList[Math.floor(Math.random() * colorList.length)];
-	}
 
 	return (
 		<div>

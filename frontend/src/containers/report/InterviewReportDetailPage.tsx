@@ -17,6 +17,7 @@ import {
 	Title,
 	Tooltip,
 	Legend,
+	ChartData,
 } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, Title, Tooltip, Legend);
@@ -24,6 +25,17 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, Title, Too
 import { Bar, Line } from 'react-chartjs-2';
 import { useAuthStore } from '../../stores/auth.ts';
 import {CustomButton} from "../../components/CustomButton.tsx";
+
+const colorList = [
+	'rgba(255, 0, 0, 1)', // 빨강
+	'rgba(255, 165, 0, 1)', // 주황
+	'rgba(255, 255, 0, 1)', // 황색
+	'rgba(154, 205, 50, 1)', // 연두
+	'rgba(0, 128, 0, 1)', // 녹색
+	'rgba(0, 255, 255, 1)', // 청록
+	'rgba(0, 0, 255, 1)', // 청색
+	'rgba(128, 0, 128, 1)', // 보라
+];
 
 export const InterviewReportDetailPage: React.FC = () => {
 	const { id } = useParams();
@@ -35,21 +47,11 @@ export const InterviewReportDetailPage: React.FC = () => {
 	const [pronunciationGraphData, setPronunciationGraphData] = useState({
 		labels: [],
 		datasets: [
-			{
-				//label: 'test',
-				data: [],
-				backgroundColor: 'rgba(53, 162, 235, 0.5)',
-			},
 		],
 	});
-	const [faceGraphData, setFaceGraphData] = useState({
+	const [faceGraphData, setFaceGraphData] = useState<ChartData<"line", number[], unknown>>({
 		labels: [],
 		datasets: [
-			{
-				//label: 'test',
-				data: [],
-				backgroundColor: 'rgba(53, 162, 235, 0.5)',
-			},
 		],
 	});
 
@@ -105,7 +107,9 @@ export const InterviewReportDetailPage: React.FC = () => {
 					label: `${index + 1}번 문답`, // 데이터셋의 라벨
 					data: ylist.map((y, i) => ({ x: xlists[index][i], y: y })), // x, y 좌표를 매핑
 					fill: false, // 선 아래를 채우지 않음
-					backgroundColor: getRandomColor(), // 선 색상
+					backgroundColor: colorList[index], // 선 색상
+					borderColor: colorList[index],
+					pointRadius: 0,
 				})),
 			};
 
@@ -113,21 +117,6 @@ export const InterviewReportDetailPage: React.FC = () => {
 		}
 	}, [formData]);
 
-	function getRandomColor() {
-		const colorList = [
-			'rgba(255, 0, 0, 1)', // 빨강
-			'rgba(255, 165, 0, 1)', // 주황
-			'rgba(255, 255, 0, 1)', // 황색
-			'rgba(154, 205, 50, 1)', // 연두
-			'rgba(0, 128, 0, 1)', // 녹색
-			'rgba(0, 255, 255, 1)', // 청록
-			'rgba(0, 0, 255, 1)', // 청색
-			'rgba(128, 0, 128, 1)', // 보라
-			'rgba(0, 0, 0, 1)', // 검정
-		];
-
-		return colorList[Math.floor(Math.random() * colorList.length)];
-	}
 
 	return (
 		<>
