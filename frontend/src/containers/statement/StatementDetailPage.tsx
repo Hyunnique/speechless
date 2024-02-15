@@ -44,6 +44,13 @@ export const StatementDetailPage: React.FC = () => {
 				})
 				.catch((err) => {
 					console.log(err);
+					navigate('/error', {
+						replace: true,
+						state: {
+							code: 404,
+							message: '존재하지 않는 자소서입니다.',
+						},
+					});
 				});
 		}
 	}, []);

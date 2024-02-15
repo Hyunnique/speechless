@@ -12,6 +12,7 @@ import Banner3 from '../assets/images/banner-3.jpg';
 import { useEffect, useState } from 'react';
 import { useLocalAxios } from '../utils/axios.ts';
 import { useNavigate } from 'react-router-dom';
+import { useSpeechSessionStore } from '../stores/session.ts';
 
 interface SpeechSummary {
 	id: number;
@@ -24,6 +25,8 @@ export const IndexPage = () => {
 	const navigate = useNavigate();
 	const [speechSessions, setSpeechSessions] = useState<CommunityView[]>([]);
 	const [awaitingSessions, setAwaitingSessions] = useState<SpeechSummary[]>([]);
+
+	const speechSessionStore = useSpeechSessionStore();
 
 	useEffect(() => {
 		localAxiosWithAuth.get('/community/popular')
@@ -54,6 +57,32 @@ export const IndexPage = () => {
 			})
 	}, []);
 
+	const moveSpeech = async  (topic: string, id: number) => {
+        const response = await localAxiosWithAuth.post('openvidu/announcement', {
+                topic: topic,
+                communityId: id
+            });
+    
+            if (speechSessionStore.sessionId) {
+                try {
+                    await localAxiosWithAuth.delete(`openvidu/sessions/${speechSessionStore.sessionId}`);
+                } catch (e) {
+                    console.log("session deletion failed");
+                }
+    
+                speechSessionStore.clearSession();
+            }
+    
+            speechSessionStore.setSessionId(response.data);
+    
+            navigate('/session/speech');
+      }
+
+	const getDiffMinDate = (minute: number) => {
+		const date = new Date();
+		date.setMinutes(date.getMinutes() + minute);
+		return date;
+	}
 
 	return (
 		<>
@@ -82,7 +111,7 @@ export const IndexPage = () => {
 									</div>
 									<div className='flex flex-col justify-center items-center'>
 										{/*<p className='text-sm font-semibold'>/ {session.maxParticipants}</p>*/}
-										<Button size='xs' color='purple' disabled>
+										<Button size='xs' color='purple' onClick={() => moveSpeech(session.title, session.id)} disabled={getDiffMinDate(10) < new Date(session.sessionStart)}>
 											참여하기
 										</Button>
 										{/* 참여하기 버튼은 시작 시간 10분 전부터 활성화? */}

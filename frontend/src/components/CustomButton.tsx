@@ -21,6 +21,7 @@ interface CustomButtonProps {
 		| 'naver';
 	bordered?: boolean;
 	className?: string;
+	disabled?: boolean;
 	onClick?: (e: React.MouseEvent) => void;
 }
 
@@ -32,6 +33,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 		bordered = false,
 		className = undefined,
 		onClick = undefined,
+		disabled = false,
 	} = props;
 
 	const sizeClassName = size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : 'text-lg';
@@ -75,6 +77,7 @@ export const CustomButton: React.FC<CustomButtonProps> = (props: CustomButtonPro
 				className,
 			)}
 			onClick={props.onClick}
+			disabled={props.disabled}
 		>
 			{children}
 		</button>

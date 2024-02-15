@@ -13,6 +13,7 @@ import {Viewer} from "@toast-ui/react-editor";
 
 export const SpeechDetailPage = () => {
 	const [speechDetail, setSpeechDetail] = useState<CommunityView | null>(null);
+    const [isParticipated, setIsParticipated] = useState(false);
     const [viewerKey, setViewerKey] = useState(0);
 	const { id } = useParams();
 	const localAxiosWithAuth = useLocalAxios();
@@ -42,8 +43,16 @@ export const SpeechDetailPage = () => {
               createdAt: new Date(res.data.createdAt)
           };
           setSpeechDetail(communityData);
+          setIsParticipated(communityData.isParticipated ?? false);
         } catch (error) {
           console.error('Error :', error);
+          navigate('/error', {
+            replace: true,
+            state: {
+                code: 404,
+                message: '존재하지 않는 글입니다.',
+            },
+         });
         }
       }
     };
@@ -118,6 +127,12 @@ export const SpeechDetailPage = () => {
     return <div>...</div>;
   }
 
+  const getDiffMinDate = (minute: number) => {
+    const date = new Date();
+    date.setMinutes(date.getMinutes() + minute);
+    return date;
+}
+
   return (
       <>
           <div className='content-header mb-10'>
@@ -159,12 +174,13 @@ export const SpeechDetailPage = () => {
                       </div>
                       <div className='flex items-center gap-3'>
                           {
-                              speechDetail.isParticipated
+                              isParticipated
                               ?
                                   <CustomButton
                                       color='blue'
                                       bordered
-                                      onClick={deleteGroup}
+                                      onClick={moveSpeech}
+                                      disabled={getDiffMinDate(10) < new Date(speechDetail.sessionStart)}
                                   >
                                       <div className='flex items-center gap-2'>
                                           <span className='material-symbols-outlined'>arrow_forward</span>

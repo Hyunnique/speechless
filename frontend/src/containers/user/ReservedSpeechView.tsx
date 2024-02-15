@@ -59,6 +59,12 @@ export const ReservedSpeechView = () => {
             navigate('/session/speech');
       }
 
+      const getDiffMinDate = (minute: number) => {
+		const date = new Date();
+		date.setMinutes(date.getMinutes() + minute);
+		return date;
+	}
+
 	return (
 		<TitledCard title='예정된 발표 연습'>
             <ul className='mt-5 h-full flex flex-col gap-3 w-11/12 mx-auto'>
@@ -79,7 +85,8 @@ export const ReservedSpeechView = () => {
                             </div>
 
                             <button className='bg-primary-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-                                onClick={() => moveSpeech(Number(index))}>
+                                onClick={() => moveSpeech(Number(index))}
+                                disabled={getDiffMinDate(10) < new Date(group.sessionStart)}>
                                 발표 세션 이동
                             </button>
                         </li>

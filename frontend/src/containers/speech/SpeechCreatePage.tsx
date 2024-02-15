@@ -50,6 +50,13 @@ export const SpeechCreatePage = () => {
 					setEditorKey(editorKey + 1);
 				} catch (error) {
 					console.error('데이터 로딩 실패:', error);
+					navigate('/error', {
+						replace: true,
+						state: {
+							code: 404,
+							message: '존재하지 않는 글입니다.',
+						},
+					});
 				}
 			};
 			fetchData();

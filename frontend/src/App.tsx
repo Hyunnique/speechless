@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { DefaultLayout } from './containers/layout/DefaultLayout.tsx';
 import { IndexPage } from './containers/IndexPage.tsx';
 import { LoginPage } from './containers/user/LoginPage.tsx';
@@ -48,7 +48,7 @@ export default function App() {
 					<Route element={<DefaultLayout />}>
 						{/* 레이아웃 있음 && 로그인 상관없음*/}
 						<Route path='/' element={<IndexPage />} />
-						<Route path='/error/:id' element={<ErrorPage/>} />
+						<Route path='/error/:id?' element={<ErrorPage/>} />
 					</Route>
 
 					<Route element={<PrivateRoute />}>
@@ -64,6 +64,22 @@ export default function App() {
 					<Route path='/auth/google' element={<GoogleCallback />} />
 					<Route path='/auth/kakao' element={<KakaoCallback />} />
 					<Route path='/auth/naver' element={<NaverCallback />} />
+
+
+					{/* 존재하지 않는 경로에 대한 처리 */}
+                    <Route
+                        path="*"
+                        element={
+                            <Navigate
+                                to="/error"
+                                replace={true}
+                                state={{
+                                    code: 404,
+                                    message: '존재하지 않는 페이지입니다.',
+                                }}
+                            />
+                        }
+                    />
 				</Routes>
 			</BrowserRouter>
 		</>

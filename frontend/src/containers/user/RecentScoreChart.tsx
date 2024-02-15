@@ -26,14 +26,6 @@ export const RecentScoreChart = () => {
 	const [graphData, setGraphData] = useState<ChartData<"line", number[], unknown>>({
         labels: [],
         datasets: [
-            {
-                label: '표정 점수',
-                data: [],
-                backgroundColor: getRandomColor(),
-                borderColor: getRandomColor(),
-                pointRadius: 0,
-                fill: false,
-            },
         ],
     });
 

@@ -47,6 +47,13 @@ export const StatementWritePage: React.FC = () => {
 				})
 				.catch((err) => {
 					console.log(err);
+					navigate('/error', {
+						replace: true,
+						state: {
+							code: 404,
+							message: '존재하지 않는 글입니다.',
+						},
+					});
 				});
 		}
 
