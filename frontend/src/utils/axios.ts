@@ -55,19 +55,24 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 						},
 					);
 
-					const refreshResponse = await refreshAxios.get('/auth/refresh', {
-						headers: {
-							Refresh: authStore.refreshToken,
-						},
-					});
+					try {
+						const refreshResponse = await refreshAxios.get('/auth/refresh', {
+							headers: {
+								Refresh: authStore.refreshToken,
+							},
+						});
 
-					if (!refreshResponse.data.accessToken) {
+						if (!refreshResponse.data.accessToken) {
+							authStore.clearAuth();
+							return Promise.reject(error);
+						}
+
+						authStore.setAccessToken(refreshResponse.data.accessToken);
+					} catch (e) {
+						console.error(e);
 						authStore.clearAuth();
 						return Promise.reject(error);
 					}
-
-					console.log(refreshResponse);
-					authStore.setAccessToken(refreshResponse.data.accessToken);
 
 					return instance.request(error.config);
 				}
