@@ -42,23 +42,26 @@ export const RecruitCard: React.FC<RecruitCardProps> = ({ session }) => {
 			<div className='flex flex-col gap-2'>
 				<div className='flex'>
 					<CustomBadge size='md' color={
-						leftTime <= 24
-							? 'red'
-							: leftTime <= 72
-								? 'yellow'
-								: 'green'
+						leftTime < 0
+							? 'gray'
+							: leftTime <= 24
+								? 'red'
+								: leftTime <= 72
+									? 'yellow'
+									: 'green'
 					} bordered>
 						<div className='flex items-center gap-2'>
 							<span className='material-symbols-outlined text-sm'>schedule</span>
 							<span>
-								<span>마감&nbsp;</span>
 								<span>
 									{
-										leftTime <= 1
-											? '임박!'
-											: leftTime >= 24
-												? Math.floor(leftTime / 24) + '일 전'
-												: leftTime + '시간 전'
+										leftTime < 0
+											? '모집 종료'
+											: leftTime <= 1
+												? '마감 임박!'
+												: leftTime >= 24
+													? '마감 ' + Math.floor(leftTime / 24) + '일 전'
+													: '마감 ' + leftTime + '시간 전'
 									}
 								</span>
 							</span>
@@ -67,7 +70,10 @@ export const RecruitCard: React.FC<RecruitCardProps> = ({ session }) => {
 				</div>
 				<div className='flex justify-between items-center'>
 					<CustomBadge size='md' color='white' bordered>
-						{moment(session.sessionStart).format('YYYY. MM. DD. HH:mm')}
+						<div className='flex items-center gap-2'>
+							<span className='material-symbols-outlined text-sm'>mic</span>
+							<span>{moment(session.sessionStart).format('YYYY. MM. DD. HH:mm')}</span>
+						</div>
 					</CustomBadge>
 					{/*<span className='text-sm font-bold'>*/}
 					{/*	{session.currentParticipants} / {session.maxParticipants}*/}
