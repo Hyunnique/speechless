@@ -18,10 +18,7 @@ import speechless.community.domain.repository.CommunityRepository;
 import speechless.community.domain.repository.ParticipantRepository;
 import speechless.community.dto.response.ParticipantCommunityResponse;
 import speechless.community.dto.response.ParticipantListResponse;
-import speechless.community.exception.CommunityNotFoundException;
-import speechless.community.exception.NotAllowedParticipantException;
-import speechless.community.exception.ParticipantExistException;
-import speechless.community.exception.ParticipantNotFoundException;
+import speechless.community.exception.*;
 import speechless.member.domain.Member;
 import speechless.member.domain.repository.MemberRepository;
 import speechless.member.exception.MemberNotFoundException;
@@ -33,12 +30,15 @@ public class ParticipantService {
 
     private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
-    private final CommunityRepository commnunityRepository;
+    private final CommunityRepository communityRepository;
 
     public Participant createParticipant(AuthCredentials authCredentials, Long communityId)
         throws SpeechlessException {
         Member loginMember = getMember(authCredentials);
         Community participantCommunity = getCommunity(communityId);
+        if (participantRepository.findAllByCommunity(participantCommunity).orElse(new ArrayList<>()).size() >= participantCommunity.getMaxParticipants()) {
+            throw new ExceedCapacityException();
+        }
         if (participantRepository.existsByCommunityIdAndMemberId(communityId,
             loginMember.getId())) {
             throw new ParticipantExistException();
@@ -50,6 +50,20 @@ public class ParticipantService {
         participantRepository.save(participant);
 
         return participant;
+    }
+
+    public void createParticipantWithCommunity(Long memberId, Long communityId) {
+        Member member = memberRepository.getById(memberId);
+        Community participantCommunity = getCommunity(communityId);
+        if (participantRepository.existsByCommunityIdAndMemberId(communityId,
+                member.getId())) {
+            throw new ParticipantExistException();
+        }
+        Participant participant = Participant.builder()
+                .member(member)
+                .community(participantCommunity)
+                .build();
+        participantRepository.save(participant);
     }
 
     public void deleteParticipant(AuthCredentials authCredentials, Long communityId)
@@ -137,7 +151,7 @@ public class ParticipantService {
     }
 
     private Community getCommunity(Long communityId) throws SpeechlessException {
-        return commnunityRepository.findById(communityId)
+        return communityRepository.findById(communityId)
             .orElseThrow(CommunityNotFoundException::new);
     }
 
@@ -146,5 +160,9 @@ public class ParticipantService {
         if (!authCredentials.id().equals(participant.getMember().getId())) {
             throw new NotAllowedParticipantException();
         }
+    }
+
+    public boolean isParticipated(Long communityId, Long memberId) {
+        return participantRepository.existsByCommunityIdAndMemberId(communityId, memberId);
     }
 }

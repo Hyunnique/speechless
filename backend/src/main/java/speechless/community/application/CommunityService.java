@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import speechless.community.domain.Community;
 import speechless.community.domain.repository.CommunityRepository;
+import speechless.community.domain.repository.ParticipantRepository;
 import speechless.community.dto.request.CreateCommunityRequest;
 import speechless.community.dto.response.GetCommunitiesResponse;
 import speechless.community.exception.CommunityDeleteException;
@@ -21,6 +22,7 @@ import java.util.List;
 public class CommunityService {
     private final MemberRepository memberRepository;
     private final CommunityRepository commnunityRepository;
+    private final ParticipantRepository participantRepository;
 
     public Community createCommunity(Long memberId, CreateCommunityRequest request) {
         Member member = memberRepository.getById(memberId);
@@ -75,6 +77,6 @@ public class CommunityService {
             nextCursor = communities.get(communities.size() - 1).getId();
         }
 
-        return GetCommunitiesResponse.from(communities, nextCursor);
+        return GetCommunitiesResponse.from(communities, nextCursor, participantRepository);
     }
 }

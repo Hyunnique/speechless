@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import speechless.auth.dto.AuthCredentials;
 import speechless.auth.presentation.Auth;
 import speechless.community.application.CommunityService;
+import speechless.community.application.ParticipantService;
 import speechless.community.domain.Community;
 import speechless.community.dto.request.CreateCommunityRequest;
 import speechless.community.dto.response.GetCommunitiesResponse;
 import speechless.community.dto.response.GetCommunityResponse;
+import speechless.community.dto.response.GetParticipatedResponse;
 import speechless.community.dto.response.PostCommunityResponse;
 
 import java.util.List;
@@ -24,19 +26,22 @@ import java.util.List;
 @Tag(name = "커뮤니티", description = "함께 발표연습하기")
 public class CommunityController {
     private final CommunityService communityService;
-
+    private final ParticipantService participantService;
     @PostMapping
     @Operation(summary = "글 작성", description = "함께 발표연습하기 글작성")
     public ResponseEntity<PostCommunityResponse> createCommunity(@Parameter(hidden = true) @Auth AuthCredentials authCredentials, @RequestBody @Valid CreateCommunityRequest createCommunityRequest) {
         Community community = communityService.createCommunity(authCredentials.id(), createCommunityRequest);
+        participantService.createParticipantWithCommunity(authCredentials.id(), community.getId());
         return ResponseEntity.ok(new PostCommunityResponse(community.getId()));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "특정 글 조회", description = "ID를 통해 특정 글 정보를 조회")
-    public ResponseEntity<GetCommunityResponse> getCommunityById(@PathVariable Long id) {
+    public ResponseEntity<GetParticipatedResponse> getCommunityById(@Parameter(hidden = true)@Auth AuthCredentials authCredentials, @PathVariable Long id) {
         Community community = communityService.getCommunityById(id);
-        return ResponseEntity.ok(GetCommunityResponse.from(community));
+        Integer participantNumber = participantService.getParticipantNumber(community.getId());
+        Boolean isParticipated = participantService.isParticipated(community.getId(), authCredentials.id());
+        return ResponseEntity.ok(GetParticipatedResponse.from(community, participantNumber, isParticipated));
     }
 
     @GetMapping
@@ -67,7 +72,7 @@ public class CommunityController {
 
     @PutMapping("/{id}")
     @Operation(summary = "글 업데이트", description = "특정 글을 업데이트합니다.")
-    public ResponseEntity<?> updateCommunity(@Auth AuthCredentials authCredentials, @PathVariable Long id, @RequestBody CreateCommunityRequest createCommunityRequest) {
+    public ResponseEntity<?> updateCommunity(@Auth AuthCredentials authCredentials, @PathVariable Long id,  @RequestBody CreateCommunityRequest createCommunityRequest) {
         communityService.updateCommunity(authCredentials.id(), id, createCommunityRequest);
         return ResponseEntity.noContent().build();
     }

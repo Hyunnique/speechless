@@ -14,10 +14,11 @@ public record GetCommunityResponse(
     Date deadline,
     LocalDateTime createdAt,
     Integer maxParticipants,
-    Long hit
+    Long hit,
+    Integer currentParticipants
 ) {
 
-    public static GetCommunityResponse from(Community community) {
+    public static GetCommunityResponse from(Community community, Integer currentParticipants) {
         return new GetCommunityResponse(
             community.getId(),
             community.getWriter().getName(),
@@ -28,7 +29,8 @@ public record GetCommunityResponse(
             community.getDeadline(),
             community.getCreatedAt(),
             community.getMaxParticipants(),
-            community.getHit()
+            community.getHit(),
+            currentParticipants
         );
     }
 }
