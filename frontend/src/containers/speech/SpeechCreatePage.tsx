@@ -1,15 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocalAxios } from '../../utils/axios';
-import {Breadcrumb, BreadcrumbItem, Card, Datepicker, Dropdown, FloatingLabel, TextInput} from 'flowbite-react';
+import { Breadcrumb, BreadcrumbItem, Card, Datepicker, Dropdown, FloatingLabel, TextInput } from 'flowbite-react';
 import classNames from 'classnames';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import {CustomButton} from "../../components/CustomButton.tsx";
-import moment from "moment";
-import {Editor} from "@tinymce/tinymce-react";
+import { CustomButton } from '../../components/CustomButton.tsx';
+import moment from 'moment';
+import { Editor } from '@tinymce/tinymce-react';
 
 const EDITOR_API_KEY = import.meta.env.VITE_TINY_API_KEY;
 export const SpeechCreatePage = () => {
-
 	const categories = [
 		'자유주제',
 		'자기소개',
@@ -34,7 +33,7 @@ export const SpeechCreatePage = () => {
 		maxParticipants: 2,
 	});
 
-	const [ editorKey, setEditorKey ] = useState(0);
+	const [editorKey, setEditorKey] = useState(0);
 	// const editorRef = useRef<Editor | null>(null);
 	const { id } = useParams();
 	const localAxios = useLocalAxios(true);
@@ -178,11 +177,7 @@ export const SpeechCreatePage = () => {
 				<div className='flex flex-col space-y-10'>
 					<div>
 						<div className='text-gray-700 font-semibold pl-2 pb-3'>제목</div>
-						<TextInput
-							value={formData.title}
-							name='title'
-							onChange={handleChange}
-						/>
+						<TextInput value={formData.title} name='title' onChange={handleChange} />
 					</div>
 					<div>
 						<div className='text-gray-700 font-semibold pl-2 pb-3'>내용</div>
@@ -226,7 +221,7 @@ export const SpeechCreatePage = () => {
 									// 	'hover:bg-positive-500 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline',
 									// 	formData.category === category ? 'bg-positive-500' : 'bg-teal-100',
 									// )}
-									onClick={() => setFormData((prev) => ({...prev, category}))}
+									onClick={() => setFormData((prev) => ({ ...prev, category }))}
 								>
 									{category}
 								</CustomButton>
@@ -236,22 +231,24 @@ export const SpeechCreatePage = () => {
 					<div className='flex gap-5'>
 						<div className='w-1/2'>
 							<div className='text-gray-700 font-semibold pl-2 pb-3'>모집 마감 시간</div>
-							<input type='datetime-local'
-								   name='deadline'
-								   value={moment(formData.deadline).toISOString(true).substring(0, 16)}
-								   onChange={(e) => {
-									   setFormData({ ...formData, deadline: moment(e.target.value).toISOString() });
-								   }}
+							<input
+								type='datetime-local'
+								name='deadline'
+								value={moment(formData.deadline).toISOString(true).substring(0, 16)}
+								onChange={(e) => {
+									setFormData({ ...formData, deadline: moment(e.target.value).toISOString() });
+								}}
 							/>
 						</div>
 						<div className='w-1/2'>
 							<div className='text-gray-700 font-semibold pl-2 pb-3'>세션 시작 시간</div>
-							<input type='datetime-local'
-								   name='sessionStart'
-								   value={moment(formData.sessionStart).toISOString(true).substring(0, 16)}
-								   onChange={(e) => {
-									   setFormData({ ...formData, sessionStart: moment(e.target.value).toISOString() });
-								   }}
+							<input
+								type='datetime-local'
+								name='sessionStart'
+								value={moment(formData.sessionStart).toISOString(true).substring(0, 16)}
+								onChange={(e) => {
+									setFormData({ ...formData, sessionStart: moment(e.target.value).toISOString() });
+								}}
 							/>
 						</div>
 					</div>
@@ -259,27 +256,21 @@ export const SpeechCreatePage = () => {
 						<div className='text-gray-700 font-semibold pl-2 pb-3'>최대 참가 인원</div>
 						<div className='flex items-center gap-3'>
 							<Dropdown color='teal' label={formData.maxParticipants}>
-								{
-									[2, 3, 4, 5, 6, 7, 8].map(num => (
-										<Dropdown.Item
-											key={num}
-											onClick={() => {
-												setFormData({...formData, maxParticipants: num});
-											}}
-										>
-											{num}
-										</Dropdown.Item>
-									))
-								}
+								{[2, 3, 4, 5, 6, 7, 8].map((num) => (
+									<Dropdown.Item
+										key={num}
+										onClick={() => {
+											setFormData({ ...formData, maxParticipants: num });
+										}}
+									>
+										{num}
+									</Dropdown.Item>
+								))}
 							</Dropdown>
 							<span>명</span>
 						</div>
 					</div>
-					<CustomButton
-						className='w-1/3 mt-10 mx-auto'
-						color='blue'
-						onClick={submitData}
-					>
+					<CustomButton className='w-1/3 mt-10 mx-auto' color='blue' onClick={submitData}>
 						{id ? '수정' : '저장'}
 					</CustomButton>
 				</div>

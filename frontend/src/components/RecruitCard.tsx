@@ -1,5 +1,5 @@
 import { Badge, Card } from 'flowbite-react';
-import React, {ReactNode, useEffect, useState} from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 
 import type { CommunityView } from '../types/Community.ts';
 import { CustomBadge } from './CustomBadge.tsx';
@@ -13,7 +13,7 @@ interface RecruitCardProps {
 export const RecruitCard: React.FC<RecruitCardProps> = ({ session }) => {
 	const badges = [];
 
-	const [ leftTime, setLeftTime ] = useState(0);
+	const [leftTime, setLeftTime] = useState(0);
 
 	useEffect(() => {
 		setLeftTime(Math.floor(moment.duration(moment(session.deadline).diff(moment())).asHours()));
@@ -35,34 +35,33 @@ export const RecruitCard: React.FC<RecruitCardProps> = ({ session }) => {
 					);
 				})}
 			</div>
-			<div className='text-xl border-b-2 pb-1 text-ellipsis overflow-hidden whitespace-nowrap'>{session.title}</div>
-			<div className='px-1 h-[140px] text-ellipsis overflow-hidden text-left' dangerouslySetInnerHTML={{
-				__html: DOMPurify.sanitize(session.content)
-			}} />
+			<div className='text-xl border-b-2 pb-1 text-ellipsis overflow-hidden whitespace-nowrap'>
+				{session.title}
+			</div>
+			<div
+				className='px-1 h-[140px] text-ellipsis overflow-hidden text-left'
+				dangerouslySetInnerHTML={{
+					__html: DOMPurify.sanitize(session.content),
+				}}
+			/>
 			<div className='flex flex-col gap-2'>
 				<div className='flex'>
-					<CustomBadge size='md' color={
-						leftTime < 0
-							? 'gray'
-							: leftTime <= 24
-								? 'red'
-								: leftTime <= 72
-									? 'yellow'
-									: 'green'
-					} bordered>
+					<CustomBadge
+						size='md'
+						color={leftTime < 0 ? 'gray' : leftTime <= 24 ? 'red' : leftTime <= 72 ? 'yellow' : 'green'}
+						bordered
+					>
 						<div className='flex items-center gap-2'>
 							<span className='material-symbols-outlined text-sm'>schedule</span>
 							<span>
 								<span>
-									{
-										leftTime < 0
-											? '모집 종료'
-											: leftTime <= 1
-												? '마감 임박!'
-												: leftTime >= 24
-													? '마감 ' + Math.floor(leftTime / 24) + '일 전'
-													: '마감 ' + leftTime + '시간 전'
-									}
+									{leftTime < 0
+										? '모집 종료'
+										: leftTime <= 1
+											? '마감 임박!'
+											: leftTime >= 24
+												? '마감 ' + Math.floor(leftTime / 24) + '일 전'
+												: '마감 ' + leftTime + '시간 전'}
 								</span>
 							</span>
 						</div>

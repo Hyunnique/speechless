@@ -147,9 +147,12 @@ export const StatementDetailPage: React.FC = () => {
 								{formData.questions[questionCursor - 1].question}
 							</span>
 						</div>
-						<div className='bg-gray-200 rounded-md px-4 py-6' dangerouslySetInnerHTML={{
-							__html: DOMPurify.sanitize(formData.questions[questionCursor - 1].answer)
-						}} />
+						<div
+							className='bg-gray-200 rounded-md px-4 py-6'
+							dangerouslySetInnerHTML={{
+								__html: DOMPurify.sanitize(formData.questions[questionCursor - 1].answer),
+							}}
+						/>
 
 						<span className='flex items-center justify-center gap-2 p-2 rounded-full bg-white w-fit mx-auto border-2'>
 							<button className='material-symbols-outlined' onClick={decreaseCursor}>

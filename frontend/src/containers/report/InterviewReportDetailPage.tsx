@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {Breadcrumb, BreadcrumbItem, Button, Card} from 'flowbite-react';
+import { Breadcrumb, BreadcrumbItem, Button, Card } from 'flowbite-react';
 import { useLocalAxios } from '../../utils/axios';
-import {Link, useParams} from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { TitledCard } from '../../components/TitledCard.tsx';
 import { InterviewReport } from '../../types/Report.ts';
@@ -24,7 +24,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, Title, Too
 
 import { Bar, Line } from 'react-chartjs-2';
 import { useAuthStore } from '../../stores/auth.ts';
-import {CustomButton} from "../../components/CustomButton.tsx";
+import { CustomButton } from '../../components/CustomButton.tsx';
 
 const colorList = [
 	'rgba(255, 0, 0, 1)', // 빨강
@@ -54,10 +54,9 @@ export const InterviewReportDetailPage: React.FC = () => {
 			},
 		],
 	});
-	const [faceGraphData, setFaceGraphData] = useState<ChartData<"line", number[], unknown>>({
+	const [faceGraphData, setFaceGraphData] = useState<ChartData<'line', number[], unknown>>({
 		labels: [],
-		datasets: [
-		],
+		datasets: [],
 	});
 
 	const navigate = useNavigate();
@@ -122,7 +121,6 @@ export const InterviewReportDetailPage: React.FC = () => {
 		}
 	}, [formData]);
 
-
 	return (
 		<>
 			<div className='content-header mb-10'>
@@ -136,9 +134,7 @@ export const InterviewReportDetailPage: React.FC = () => {
 					<BreadcrumbItem>
 						<Link to='/interview'>면접 연습 기록 관리</Link>
 					</BreadcrumbItem>
-					<BreadcrumbItem>
-						면접 연습 결과 리포트
-					</BreadcrumbItem>
+					<BreadcrumbItem>면접 연습 결과 리포트</BreadcrumbItem>
 				</Breadcrumb>
 				<div className='flex justify-between items-center'>
 					<h1 className='text-3xl font-semibold leading-tight text-gray-700'>면접 연습 결과 리포트</h1>
@@ -164,8 +160,18 @@ export const InterviewReportDetailPage: React.FC = () => {
 					<div className='pb-6'>
 						<div className='flex gap-2'>
 							<span className='font-semibold pr-2 border-r-2 border-gray-400'>세션 시간</span>
-							<span>{Math.floor(moment.duration(moment(formData?.endTime).diff(moment(formData?.startTime))).asMinutes())}분</span>
-							<span>({moment(formData?.startTime).format('YYYY. MM. DD. HH:mm')} ~ {moment(formData?.endTime).format('YYYY. MM. DD. HH:mm')})</span>
+							<span>
+								{Math.floor(
+									moment
+										.duration(moment(formData?.endTime).diff(moment(formData?.startTime)))
+										.asMinutes(),
+								)}
+								분
+							</span>
+							<span>
+								({moment(formData?.startTime).format('YYYY. MM. DD. HH:mm')} ~{' '}
+								{moment(formData?.endTime).format('YYYY. MM. DD. HH:mm')})
+							</span>
 						</div>
 						<div className='flex gap-2'>
 							<span className='font-semibold pr-2 border-r-2 border-gray-400'>질문 갯수</span>
@@ -190,26 +196,22 @@ export const InterviewReportDetailPage: React.FC = () => {
 					</div>
 					<div>
 						<p className='text-2xl font-semibold border-b-2 pb-1 mb-4 border-gray-400'>문답과 피드백</p>
-						{
-							formData?.questions.map((question, index) => (
-								<Card key={index} className='mb-5'>
-									<div className='w-full border-b-2 border-gray-400 pb-1 flex items-center gap-2'>
-										<span className='text-2xl font-semibold'>Q.</span>
-										<span className='text-xl'>{question.question}</span>
-									</div>
-									<div className='w-full border-b-2 border-gray-400 pb-1 flex gap-2'>
-										<span className='text-2xl font-semibold'>A.</span>
-										<span className='text-md text-gray-700'>{question.answer}</span>
-									</div>
-									<div className='w-full'>
-										<div className='text-xl font-semibold mb-2'>[피드백]</div>
-										<div className='ml-3 text-teal-600'>
-											{question.feedback}
-										</div>
-									</div>
-								</Card>
-							))
-						}
+						{formData?.questions.map((question, index) => (
+							<Card key={index} className='mb-5'>
+								<div className='w-full border-b-2 border-gray-400 pb-1 flex items-center gap-2'>
+									<span className='text-2xl font-semibold'>Q.</span>
+									<span className='text-xl'>{question.question}</span>
+								</div>
+								<div className='w-full border-b-2 border-gray-400 pb-1 flex gap-2'>
+									<span className='text-2xl font-semibold'>A.</span>
+									<span className='text-md text-gray-700'>{question.answer}</span>
+								</div>
+								<div className='w-full'>
+									<div className='text-xl font-semibold mb-2'>[피드백]</div>
+									<div className='ml-3 text-teal-600'>{question.feedback}</div>
+								</div>
+							</Card>
+						))}
 					</div>
 				</div>
 			</Card>

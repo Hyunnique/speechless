@@ -29,7 +29,8 @@ export const IndexPage = () => {
 	const speechSessionStore = useSpeechSessionStore();
 
 	useEffect(() => {
-		localAxiosWithAuth.get('/community/popular')
+		localAxiosWithAuth
+			.get('/community/popular')
 			.then((res) => {
 				// TODO: 백엔드에서 받은 response로 글을 채워준다
 				const communityData: CommunityView[] = res.data.getCommunityResponses.map(
@@ -44,45 +45,42 @@ export const IndexPage = () => {
 				);
 
 				setSpeechSessions(communityData);
-
 			})
 			.catch((err) => {
 				console.error('데이터 로딩 실패:', err);
 			});
 
-
-		localAxiosWithAuth.get('/participant/next')
-			.then((res) => {
-				setAwaitingSessions(res.data);
-			})
+		localAxiosWithAuth.get('/participant/next').then((res) => {
+			setAwaitingSessions(res.data);
+		});
 	}, []);
 
-	const moveSpeech = async  (topic: string, id: number) => {
-        const response = await localAxiosWithAuth.post('openvidu/announcement', {
-                topic: topic,
-                communityId: id
-            });
-    
-            if (speechSessionStore.sessionId) {
-                try {
-                    await localAxiosWithAuth.delete(`openvidu/sessions/${speechSessionStore.sessionId}`);
-                } catch (e) {
-                    console.log("session deletion failed");
-                }
-    
-                speechSessionStore.clearSession();
-            }
-    
-            speechSessionStore.setSessionId(response.data);
-    
-            navigate('/session/speech');
-      }
+	const moveSpeech = async (topic: string, id: number) => {
+		const response = await localAxiosWithAuth.post('openvidu/announcement', {
+			topic: topic,
+			communityId: id,
+		});
+
+		if (speechSessionStore.sessionId) {
+			try {
+				await localAxiosWithAuth.delete(`openvidu/sessions/${speechSessionStore.sessionId}`);
+			} catch (e) {
+				console.log('session deletion failed');
+			}
+
+			speechSessionStore.clearSession();
+		}
+
+		speechSessionStore.setSessionId(response.data);
+
+		navigate('/session/speech');
+	};
 
 	const getDiffMinDate = (minute: number) => {
 		const date = new Date();
 		date.setMinutes(date.getMinutes() + minute);
 		return date;
-	}
+	};
 
 	return (
 		<>
@@ -105,13 +103,16 @@ export const IndexPage = () => {
 											{new Date(session.sessionStart).toLocaleDateString()}{' '}
 											{new Date(session.sessionStart).toLocaleTimeString()}
 										</p>
-										<p className='text-sm'>
-
-										</p>
+										<p className='text-sm'></p>
 									</div>
 									<div className='flex flex-col justify-center items-center'>
 										{/*<p className='text-sm font-semibold'>/ {session.maxParticipants}</p>*/}
-										<Button size='xs' color='purple' onClick={() => moveSpeech(session.title, session.id)} disabled={getDiffMinDate(10) < new Date(session.sessionStart)}>
+										<Button
+											size='xs'
+											color='purple'
+											onClick={() => moveSpeech(session.title, session.id)}
+											disabled={getDiffMinDate(10) < new Date(session.sessionStart)}
+										>
 											참여하기
 										</Button>
 										{/* 참여하기 버튼은 시작 시간 10분 전부터 활성화? */}

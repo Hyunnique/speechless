@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { InterviewQuestion } from '../types/Interview.ts';
 import type { Statement } from '../types/Statement.ts';
 
-interface SessionState{
+interface SessionState {
 	sessionId: string | null;
 	recordingId: string | null;
 	connectionId: string | null;
@@ -35,13 +35,13 @@ interface InterviewSessionState extends SessionState {
 	setStage: (stage: string) => void;
 }
 
-interface SpeechSessionState extends SessionState{
+interface SpeechSessionState extends SessionState {
 	groupId: string | null;
 
 	setGroupId: (groupId: string) => void;
 }
 
-const useInterviewSessionStore = create<InterviewSessionState>() (
+const useInterviewSessionStore = create<InterviewSessionState>()(
 	persist(
 		(set) => ({
 			sessionId: null,
@@ -113,8 +113,8 @@ const useSpeechSessionStore = create<SpeechSessionState>()(
 		}),
 		{
 			name: 'speech-session',
-		}
-	)
+		},
+	),
 );
 
 export { useInterviewSessionStore, useSpeechSessionStore };

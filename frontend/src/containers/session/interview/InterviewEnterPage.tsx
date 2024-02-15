@@ -123,7 +123,12 @@ export const InterviewEnterPage = () => {
 								{authStore.name ? authStore.name : '사용자'}님에게 맞는 면접 연습을 시작하세요!
 							</p>
 							<div className='text-right'>
-								<CustomButton className='w-1/4 text-lg' size='md' color='positive' onClick={openEnterModal}>
+								<CustomButton
+									className='w-1/4 text-lg'
+									size='md'
+									color='positive'
+									onClick={openEnterModal}
+								>
 									연습 시작
 								</CustomButton>
 							</div>

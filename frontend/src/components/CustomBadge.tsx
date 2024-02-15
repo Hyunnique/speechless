@@ -2,11 +2,11 @@ import React, { ReactNode } from 'react';
 import classNames from 'classnames';
 
 interface CustomBadgeProps {
-    children: ReactNode,
-    size?: 'sm' | 'md' | 'lg',
-    color?: 'white' | 'gray' | 'red' | 'yellow' | 'green' | 'blue' | 'indigo' | 'purple' | 'pink',
-    bordered?: boolean,
-    className?: string,
+	children: ReactNode;
+	size?: 'sm' | 'md' | 'lg';
+	color?: 'white' | 'gray' | 'red' | 'yellow' | 'green' | 'blue' | 'indigo' | 'purple' | 'pink';
+	bordered?: boolean;
+	className?: string;
 }
 
 export const CustomBadge: React.FC<CustomBadgeProps> = (props: CustomBadgeProps) => {

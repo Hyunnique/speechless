@@ -6,7 +6,6 @@ import { RecentScoreChart } from './RecentScoreChart.tsx';
 import { ReservedSpeechView } from './ReservedSpeechView.tsx';
 import { FinishedSpeechView } from './FinishedSpeechView.tsx';
 
-
 export const MyPage = () => {
 	const authStore = useAuthStore();
 
@@ -25,17 +24,17 @@ export const MyPage = () => {
 						<p className='text-md font-semibold text-gray-600'>{authStore.email}</p>
 					</div>
 					<div className='basis-2/3'>
-						<RecentScoreChart/>
+						<RecentScoreChart />
 					</div>
 				</div>
 			</Card>
 
 			<div className='w-3/4 mx-auto mt-7'>
-				<ReservedSpeechView/>
+				<ReservedSpeechView />
 			</div>
 
 			<div className='w-3/4 mx-auto mt-7'>
-				<FinishedSpeechView/>
+				<FinishedSpeechView />
 			</div>
 		</>
 	);

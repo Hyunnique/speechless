@@ -1,4 +1,4 @@
-import Axios, {AxiosInstance, AxiosResponse, InternalAxiosRequestConfig} from 'axios';
+import Axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../stores/auth.ts';
 import { useNavigate } from 'react-router-dom';
 
@@ -62,7 +62,7 @@ const useLocalAxios = (isAuth?: boolean): AxiosInstance => {
 						return Promise.resolve();
 					}
 
-					console.log("changed accessToken");
+					console.log('changed accessToken');
 					error.config.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
 					navigate('/');
 					//return instance.request(error.config);

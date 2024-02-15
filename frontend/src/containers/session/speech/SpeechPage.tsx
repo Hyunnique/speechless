@@ -7,9 +7,9 @@ import { CustomButton } from '../../../components/CustomButton.tsx';
 import { useLocalAxios } from '../../../utils/axios.ts';
 import { useNavigate } from 'react-router-dom';
 
-import { useSpeechSessionStore } from "../../../stores/session.ts";
-import {Device, OpenVidu, Publisher, Session, SignalEvent, StreamManager, Subscriber} from "openvidu-browser";
-import {OpenViduVideo} from "../../../components/OpenViduVideo.tsx";
+import { useSpeechSessionStore } from '../../../stores/session.ts';
+import { Device, OpenVidu, Publisher, Session, SignalEvent, StreamManager, Subscriber } from 'openvidu-browser';
+import { OpenViduVideo } from '../../../components/OpenViduVideo.tsx';
 
 //import { FaceAnalyzer } from '../../../utils/FaceAnalyzer.ts';
 import * as faceapi from 'face-api.js';
@@ -68,8 +68,8 @@ export const SpeechPage = () => {
 		});
 
 		mySession.on('streamCreated', (event) => {
-			const subscriber = mySession.subscribe(event.stream, "session-ui");
-			setSubscribers((prevSubscribers) => [ ...prevSubscribers, subscriber ]);
+			const subscriber = mySession.subscribe(event.stream, 'session-ui');
+			setSubscribers((prevSubscribers) => [...prevSubscribers, subscriber]);
 		});
 
 		mySession.on('streamDestroyed', (event) => {
@@ -90,10 +90,7 @@ export const SpeechPage = () => {
 		const sessionId = speechSessionStore.sessionId;
 		const connectionData = await createConnection(sessionId);
 
-		speechSessionStore.setConnection(
-			connectionData.connectionId,
-			connectionData.token
-		);
+		speechSessionStore.setConnection(connectionData.connectionId, connectionData.token);
 
 		await mySession.connect(connectionData.token);
 		const _publisher = await ov.initPublisherAsync(undefined, {
@@ -122,7 +119,7 @@ export const SpeechPage = () => {
 
 		return () => {
 			subscriberVideosRef.current?.childNodes.forEach((node) => {
-			  subscriberVideosRef.current?.removeChild(node);
+				subscriberVideosRef.current?.removeChild(node);
 			});
 		};
 	}, [speechSessionStore]);
@@ -134,9 +131,13 @@ export const SpeechPage = () => {
 	}, [mainStreamManager]);
 
 	const createConnection = async (sessionId: string) => {
-		const response = await localAxios.post('openvidu/announcement/' + sessionId + '/connections', {}, {
-			headers: { 'Content-Type': 'application/json', },
-		});
+		const response = await localAxios.post(
+			'openvidu/announcement/' + sessionId + '/connections',
+			{},
+			{
+				headers: { 'Content-Type': 'application/json' },
+			},
+		);
 
 		console.log(response);
 		return response.data;
@@ -180,13 +181,12 @@ export const SpeechPage = () => {
 		setSubscribers([]);
 		speechSessionStore.clearSession();
 		navigate('/');
-	}
-
+	};
 
 	// /*
 	// * face-api 기능 --------------------------------------------------
 	// */
-	// const [lastEmotion, setLastEmotion] = useState({expression: '', probability: -1}); 
+	// const [lastEmotion, setLastEmotion] = useState({expression: '', probability: -1});
 	// const [scores, setScores] = useState([] as number[]);
 	// const intervalId = useRef<number | null>(null);
 	// const modelUrl = '/models';
@@ -213,7 +213,7 @@ export const SpeechPage = () => {
 
 	// 		if (detections.length >= 1) {
 	// 			const happyScore = Math.floor(detections[0].expressions.happy*50);
-				
+
 	// 			let negativeScore = 0;
 	// 			negativeScore += detections[0].expressions.sad;
 	// 			negativeScore += detections[0].expressions.angry;
@@ -223,11 +223,11 @@ export const SpeechPage = () => {
 	// 			negativeScore = Math.floor(negativeScore*50);
 
 	// 			let score = 50 + happyScore - negativeScore;
-				
+
 	// 			setScores([...scores, score]);
 	// 			setLastEmotion(detections[0].expressions.asSortedArray()[0]);
 	// 		}
-	
+
 	// 	}, 1000);
 	// }
 	// const stopFaceAnalyze = () => {
@@ -242,7 +242,6 @@ export const SpeechPage = () => {
 	// 	setScores([]);
 	// }
 
-
 	return (
 		<div className='w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col items-center'>
 			<div className='p-10 w-[90vw] h-[80vh]'>
@@ -255,8 +254,7 @@ export const SpeechPage = () => {
 					<div className='session-content grid grid-cols-2 flex-1'>
 						<div className='session-screen flex flex-col items-center justify-center'>
 							<div className='session-screen-container flex flex-col'>
-								<div className='session-screen-header flex justify-end py-3 gap-4'>
-								</div>
+								<div className='session-screen-header flex justify-end py-3 gap-4'></div>
 								<video autoPlay={true} ref={videoRef} />
 								<div className='flex flex-row justify-center m-10 gap-16'>
 									{audioEnabled ? (
@@ -298,18 +296,13 @@ export const SpeechPage = () => {
 								</div>
 							</div>
 						</div>
-						{
-							subscribers.length <=1 ?
-							<div id="session-ui" className='session-ui grid grid-cols-1 mt-7 gap-3'>
-							</div>
-							:
-							subscribers.length <=4 ?
-							<div id="session-ui" className='session-ui grid grid-cols-2 mt-7  gap-3'>
-							</div>
-							:
-							<div id="session-ui" className='session-ui grid grid-cols-4 mt-7  gap-3'>
-							</div>
-						}
+						{subscribers.length <= 1 ? (
+							<div id='session-ui' className='session-ui grid grid-cols-1 mt-7 gap-3'></div>
+						) : subscribers.length <= 4 ? (
+							<div id='session-ui' className='session-ui grid grid-cols-2 mt-7  gap-3'></div>
+						) : (
+							<div id='session-ui' className='session-ui grid grid-cols-4 mt-7  gap-3'></div>
+						)}
 					</div>
 				</div>
 			</div>

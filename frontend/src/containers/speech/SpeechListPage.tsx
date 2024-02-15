@@ -3,10 +3,10 @@ import { SpeechSearch } from '../../components/SpeechSearch';
 import { RecruitCard } from '../../components/RecruitCard';
 import { CommunityResponse, CommunityView } from '../../types/Community';
 import { useLocalAxios } from '../../utils/axios';
-import {Link, useNavigate} from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { SearchCriteria } from '../../types/SearchCriteria';
 import { Breadcrumb, BreadcrumbItem } from 'flowbite-react';
-import {CustomButton} from "../../components/CustomButton.tsx";
+import { CustomButton } from '../../components/CustomButton.tsx';
 
 export const SpeechListPage: React.FC = () => {
 	const [speechSessions, setSpeechSessions] = useState<CommunityView[]>([]);
@@ -162,10 +162,13 @@ export const SpeechListPage: React.FC = () => {
 				</div>
 				<div className='ml-4 grid 2xl:grid-cols-4 lg:grid-cols-2 grid-cols-1 gap-4'>
 					{speechSessions.map((session, index) => (
-						<div className='h-full' key={session.id}
-							 ref={index === speechSessions.length - 1 ? lastElementRef : null}>
+						<div
+							className='h-full'
+							key={session.id}
+							ref={index === speechSessions.length - 1 ? lastElementRef : null}
+						>
 							<Link to={`/speech/${session.id}`} className='h-full block'>
-								<RecruitCard session={session}/>
+								<RecruitCard session={session} />
 							</Link>
 						</div>
 					))}

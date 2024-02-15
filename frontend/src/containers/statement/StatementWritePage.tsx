@@ -294,9 +294,7 @@ export const StatementWritePage: React.FC = () => {
 							plugins={'autosave wordcount'}
 							onEditorChange={(val, editor) => {
 								const newQuestions = formData.questions.map((q, idx) =>
-									idx === questionCursor - 1
-										? { ...q, answer: val }
-										: q,
+									idx === questionCursor - 1 ? { ...q, answer: val } : q,
 								);
 								setFormData({ ...formData, questions: newQuestions });
 							}}

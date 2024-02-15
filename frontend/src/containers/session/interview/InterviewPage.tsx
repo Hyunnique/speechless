@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {Button, Card} from 'flowbite-react';
+import { Button, Card } from 'flowbite-react';
 import { CustomButton } from '../../../components/CustomButton.tsx';
 
 import { useLocalAxios } from '../../../utils/axios.ts';
@@ -285,8 +285,7 @@ export const InterviewPage = () => {
 		setSubscribers([]);
 		interviewSessionStore.clearSession();
 		navigate('/interview');
-	}
-
+	};
 
 	/*
 	 * face-api 기능 --------------------------------------------------
@@ -401,12 +400,12 @@ export const InterviewPage = () => {
 		setTimerOn(false);
 		setDuration(999);
 		//setClickAllowTime(999);
-	}
+	};
 
 	const restartTimer = (duration: number, clickAllowTime: number) => {
 		setDuration(duration);
 		//setClickAllowTime(clickAllowTime);
-		console.log("타이머 리스타트")
+		console.log('타이머 리스타트');
 		setTimerOn(true);
 		setUniqueKey((prevKey) => prevKey + 1);
 	};
@@ -418,10 +417,10 @@ export const InterviewPage = () => {
 	// useEffect(() => {
 	// 	refreshButtonClickState();
 	// }, [duration, clickAllowTime])
-	
+
 	useEffect(() => {
 		//refreshButtonClickState();
-		if(remainingTime === 0) {
+		if (remainingTime === 0) {
 			moveToNextState();
 		}
 	}, [remainingTime]);
@@ -539,18 +538,17 @@ export const InterviewPage = () => {
 		console.log(questionsRef.current);
 		console.log(interviewResult);
 
-		localAxios.delete('/openvidu/sessions/'+interviewSessionStore.sessionId,
-		{
-			data: interviewResult
-		},
-		)
-		.then(() => {
-			disconnectAndQuit();
-		})
-		.catch((error) => {
-			console.log(error);
-		})
-	}
+		localAxios
+			.delete('/openvidu/sessions/' + interviewSessionStore.sessionId, {
+				data: interviewResult,
+			})
+			.then(() => {
+				disconnectAndQuit();
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+	};
 
 	const moveToNextState = () => {
 		if (interviewSessionStore.stage === 'Start' || interviewSessionStore.stage === 'Wait') {
@@ -667,9 +665,10 @@ export const InterviewPage = () => {
 						</div>
 						<div className='session-ui flex flex-col'>
 							<div className='h-[65vh] mr-12 mt-10 gird grid-cols-1 items-center overflow-auto'>
-								{
-									interviewSessionStore.stage==="Wait" || interviewSessionStore.stage==="End" ? 
-										interviewSessionStore.questions.slice(0, questionCursor.current).map((question, index) => {
+								{interviewSessionStore.stage === 'Wait' || interviewSessionStore.stage === 'End' ? (
+									interviewSessionStore.questions
+										.slice(0, questionCursor.current)
+										.map((question, index) => {
 											return (
 												<Card key={index} className='mx-3 mb-5'>
 													<div className='w-full border-b-2 border-gray-400 flex justify-between pb-1'>
@@ -694,18 +693,13 @@ export const InterviewPage = () => {
 													</div>
 													<div className='w-full'>
 														<div className='text-xl font-semibold mb-2'>[피드백]</div>
-														<div className='ml-3 text-teal-600'>
-															{question.feedback}
-														</div>
+														<div className='ml-3 text-teal-600'>{question.feedback}</div>
 													</div>
 												</Card>
 											);
 										})
-			
-									:
-
-									interviewSessionStore.stage==="Answer"?
-									<div className="flex justify-center items-center h-full">
+								) : interviewSessionStore.stage === 'Answer' ? (
+									<div className='flex justify-center items-center h-full'>
 										<CountdownCircleTimer
 											key={uniqueKey}
 											isPlaying={timerOn || false}
@@ -721,33 +715,30 @@ export const InterviewPage = () => {
 											)}
 										</CountdownCircleTimer>
 									</div>
-
-									:
-
-									interviewSessionStore.stage==="Question"?
-
-								<div className="flex justify-center items-center h-full">
+								) : interviewSessionStore.stage === 'Question' ? (
+									<div className='flex justify-center items-center h-full'>
 										<span className='text-2xl'>
 											질문에 대한 답이 준비되면 다음을 클릭해 주세요.
 										</span>
 									</div>
-
-									:
-
-									""
-								}
+								) : (
+									''
+								)}
 							</div>
 							<div className='basis-1/6 mt-5'>
 								<div className='flex justify-end'>
 									<CustomButton size='lg' color='blue' onClick={moveToNextState} className='mr-12'>
-										{
-											interviewSessionStore.stage==='Start' ? "시작" :
-											interviewSessionStore.stage==='Wait' ? "다음" :
-											interviewSessionStore.stage==='Question' ? "답변 시작" :
-											interviewSessionStore.stage==='Answer' ? "답변 종료" :
-											interviewSessionStore.stage==='End' ? "완료" :
-											"에러 발생"
-										}
+										{interviewSessionStore.stage === 'Start'
+											? '시작'
+											: interviewSessionStore.stage === 'Wait'
+												? '다음'
+												: interviewSessionStore.stage === 'Question'
+													? '답변 시작'
+													: interviewSessionStore.stage === 'Answer'
+														? '답변 종료'
+														: interviewSessionStore.stage === 'End'
+															? '완료'
+															: '에러 발생'}
 									</CustomButton>
 								</div>
 							</div>
