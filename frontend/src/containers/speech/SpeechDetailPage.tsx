@@ -80,6 +80,7 @@ export const SpeechDetailPage = () => {
     try {
       const res = await localAxiosWithAuth.post(`/participant/${id}`);
       alert('그룹 참여 완료');
+      navigate(0);
     } catch (error) {
       const err = error as AxiosError;
       if (err.response && err.response.status === 400) {
@@ -116,6 +117,8 @@ export const SpeechDetailPage = () => {
   const deleteGroup = async  () => {
     try {
       const res = await localAxiosWithAuth.delete(`/participant/${id}`);
+      alert('그룹 탈퇴 완료');
+      navigate(0);
     }catch(err){
       console.log("err ", err);
     }finally {
