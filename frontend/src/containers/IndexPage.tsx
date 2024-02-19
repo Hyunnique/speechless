@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { useLocalAxios } from '../utils/axios.ts';
 import { useNavigate } from 'react-router-dom';
 import { useSpeechSessionStore } from '../stores/session.ts';
+import {useAuthStore} from "../stores/auth.ts";
 
 interface SpeechSummary {
 	id: number;
@@ -27,6 +28,7 @@ export const IndexPage = () => {
 	const [awaitingSessions, setAwaitingSessions] = useState<SpeechSummary[]>([]);
 
 	const speechSessionStore = useSpeechSessionStore();
+	const authStore = useAuthStore();
 
 	useEffect(() => {
 		localAxiosWithAuth
@@ -84,50 +86,57 @@ export const IndexPage = () => {
 
 	return (
 		<>
-			<div className='relative h-56 sm:h-64 xl:h-80 2xl:h-96 mb-8'>
+			<div className='relative h-56 sm:h-64 xl:h-80 2xl:h-96 mb-8 border-2 rounded-xl'>
 				<Carousel slideInterval={5000}>
-					<img src={Banner1} alt='banner1' className='w-full h-full object-cover' />
-					<img src={Banner2} alt='banner2' className='w-full h-full object-cover' />
-					<img src={Banner3} alt='banner3' className='w-full h-full object-cover' />
+					<img src={Banner1} alt='banner1' className='w-full h-full object-cover'/>
+					<img src={Banner2} alt='banner2' className='w-full h-full object-cover'/>
+					<img src={Banner3} alt='banner3' className='w-full h-full object-cover'/>
 				</Carousel>
 			</div>
-			<div className='grid grid-cols-1 lg:grid-cols-2 gap-4 px-2 mb-20 h-[400px]'>
-				<TitledCard title='내가 참여 중인 발표 그룹'>
-					<ul className='flex flex-col px-4 gap-4 h-full justify-center'>
-						{awaitingSessions.map((session) => {
-							return (
-								<li key={session.id} className='flex justify-between border-b-2 px-2 pb-2'>
-									<div className='flex flex-col justify-between'>
-										<p className='text-md font-semibold'>{session.title}</p>
-										<p className='text-sm'>
-											{new Date(session.sessionStart).toLocaleDateString()}{' '}
-											{new Date(session.sessionStart).toLocaleTimeString()}
-										</p>
-										<p className='text-sm'></p>
-									</div>
-									<div className='flex flex-col justify-center items-center'>
-										{/*<p className='text-sm font-semibold'>/ {session.maxParticipants}</p>*/}
-										<Button
-											size='xs'
-											color='purple'
-											onClick={() => moveSpeech(session.title, session.id)}
-											disabled={getDiffMinDate(10) < new Date(session.sessionStart)}
-										>
-											참여하기
-										</Button>
-										{/* 참여하기 버튼은 시작 시간 10분 전부터 활성화? */}
-									</div>
-								</li>
-							);
-						})}
-					</ul>
-				</TitledCard>
-				<TitledCard title='일정'>
-					<div className='flex flex-col justify-center h-full'>
-						<Calendar />
+			{
+				authStore.accessToken
+					?
+					<div className='grid grid-cols-1 lg:grid-cols-2 gap-4 px-2 mb-20 h-[400px]'>
+						<TitledCard title='내가 참여 중인 발표 그룹'>
+							<ul className='flex flex-col px-4 gap-4 h-full justify-center'>
+								{awaitingSessions.map((session) => {
+									return (
+										<li key={session.id} className='flex justify-between border-b-2 px-2 pb-2'>
+											<div className='flex flex-col justify-between'>
+												<p className='text-md font-semibold'>{session.title}</p>
+												<p className='text-sm'>
+													{new Date(session.sessionStart).toLocaleDateString()}{' '}
+													{new Date(session.sessionStart).toLocaleTimeString()}
+												</p>
+												<p className='text-sm'></p>
+											</div>
+											<div className='flex flex-col justify-center items-center'>
+												{/*<p className='text-sm font-semibold'>/ {session.maxParticipants}</p>*/}
+												<Button
+													size='xs'
+													color='purple'
+													onClick={() => moveSpeech(session.title, session.id)}
+													disabled={getDiffMinDate(10) < new Date(session.sessionStart)}
+												>
+													참여하기
+												</Button>
+												{/* 참여하기 버튼은 시작 시간 10분 전부터 활성화? */}
+											</div>
+										</li>
+									);
+								})}
+							</ul>
+						</TitledCard>
+						<TitledCard title='일정'>
+							<div className='flex flex-col justify-center h-full'>
+								<Calendar />
+							</div>
+						</TitledCard>
 					</div>
-				</TitledCard>
-			</div>
+					:
+					<></>
+			}
+
 			<div>
 				<p className='text-2xl ml-4 mb-4'>이번 주 인기 발표 모집 글</p>
 				<div className='grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4'>
@@ -138,7 +147,7 @@ export const IndexPage = () => {
 
 						return (
 							<button key={session.id} onClick={handleClick}>
-								<RecruitCard session={session} />
+								<RecruitCard session={session}/>
 							</button>
 						);
 					})}

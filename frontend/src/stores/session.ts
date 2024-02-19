@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { InterviewQuestion } from '../types/Interview.ts';
 import type { Statement } from '../types/Statement.ts';
+import {CommunityView} from "../types/Community.ts";
 
 interface SessionState {
 	sessionId: string | null;
@@ -37,8 +38,10 @@ interface InterviewSessionState extends SessionState {
 
 interface SpeechSessionState extends SessionState {
 	groupId: string | null;
+	detail: CommunityView | null;
 
 	setGroupId: (groupId: string) => void;
+	setDetail: (community: CommunityView | null) => void;
 }
 
 const useInterviewSessionStore = create<InterviewSessionState>()(
@@ -93,12 +96,14 @@ const useSpeechSessionStore = create<SpeechSessionState>()(
 	persist(
 		(set) => ({
 			groupId: null,
+			detail: null,
 			sessionId: null,
 			interviewId: null,
 			recordingId: null,
 			connectionId: null,
 			connectionString: null,
 
+			setDetail: (community: CommunityView | null) => set({ detail: community }),
 			setSessionId: (sessionId: string) => set({ sessionId }),
 			setGroupId: (groupId: string) => set({ groupId }),
 			setRecordingId: (recordingId: string) => set({ recordingId }),

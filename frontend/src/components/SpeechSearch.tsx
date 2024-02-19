@@ -10,7 +10,7 @@ interface SpeechSearchProps {
 
 export const SpeechSearch: React.FC<SpeechSearchProps> = ({ onSearch }) => {
 	const [criteria, setCriteria] = useState<SearchCriteria>({});
-	const [searchType, setSearchType] = useState<string | null>(null);
+	const [searchType, setSearchType] = useState<string | null>('title');
 	const [keyword, setKeyword] = useState<string>('');
 	const navigate = useNavigate();
 
@@ -49,7 +49,6 @@ export const SpeechSearch: React.FC<SpeechSearchProps> = ({ onSearch }) => {
 			searchParams[searchType as keyof Pick<SearchCriteria, 'title' | 'writerName' | 'content'>] = keyword;
 		}
 
-		console.log('검색 조건:', searchParams);
 		onSearch(searchParams as SearchCriteria);
 	};
 

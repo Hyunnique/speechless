@@ -622,7 +622,7 @@ export const InterviewPage = () => {
 										</div>
 									)}
 								</div>
-								<video autoPlay={true} ref={videoRef} />
+								<video className='border-2 border-black' autoPlay={true} ref={videoRef} />
 								<div className='flex flex-row justify-center m-10 gap-16'>
 									{audioEnabled ? (
 										<Button

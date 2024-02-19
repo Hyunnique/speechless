@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from 'flowbite-react';
 import { CustomButton } from '../../../components/CustomButton.tsx';
 
@@ -11,6 +11,8 @@ import { useSpeechSessionStore } from '../../../stores/session.ts';
 import { Device, OpenVidu, Publisher, Session, SignalEvent, StreamManager, Subscriber } from 'openvidu-browser';
 import { OpenViduVideo } from '../../../components/OpenViduVideo.tsx';
 
+import moment from 'moment';
+
 //import { FaceAnalyzer } from '../../../utils/FaceAnalyzer.ts';
 import * as faceapi from 'face-api.js';
 
@@ -18,11 +20,14 @@ export const SpeechPage = () => {
 	const localAxios = useLocalAxios();
 	const navigate = useNavigate();
 
+	let sessionInterval: ReturnType<typeof setTimeout>;
+
 	const speechSessionStore = useSpeechSessionStore();
 
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const subscriberVideosRef = useRef<HTMLDivElement>(null);
 
+	const [sessionTime, setSessionTime] = useState<number>(0);
 	const [OV, setOV] = useState<OpenVidu | null>(null);
 	const [session, setSession] = useState<Session | null>(null);
 	const [mainStreamManager, setMainStreamManager] = useState<StreamManager | null>(null);
@@ -116,6 +121,11 @@ export const SpeechPage = () => {
 		setCurrentVideoDevice(_currentVideoDevice);
 
 		setOV(ov);
+
+		if (sessionInterval) clearInterval(sessionInterval);
+		sessionInterval = setInterval(() => {
+			setSessionTime(moment.duration(moment().diff(moment(speechSessionStore.detail?.sessionStart))).asSeconds());
+		}, 1000);
 
 		return () => {
 			subscriberVideosRef.current?.childNodes.forEach((node) => {
@@ -245,8 +255,39 @@ export const SpeechPage = () => {
 	return (
 		<div className='w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col items-center'>
 			<div className='p-10 w-[90vw] h-[80vh]'>
-				<div className='session-header flex justify-end'>
-					<CustomButton onClick={disconnectAndQuit} size='sm' color='negative' className='mr-12'>
+				<div className='session-header flex justify-between items-center'>
+					<div className='flex gap-5 text-lg'>
+						<div className='flex items-center gap-2'>
+							<span className='font-semibold'>방 제목</span>
+							<span>{ speechSessionStore.detail?.title }</span>
+						</div>
+						<div className='flex items-center gap-1.5'>
+							<span className='text-2xl text-yellow-400'>
+								<svg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'>
+									<path
+										fill='currentColor'
+										d='M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14z'
+									/>
+								</svg>
+							</span>
+							<span className='font-semibold'>{ speechSessionStore.detail?.writer }</span>
+						</div>
+						<div className='flex items-center gap-1'>
+							<span className='material-symbols-outlined'>person</span>
+							<span>{subscribers.length + 1}</span>
+						</div>
+						<div className='flex items-center gap-1'>
+							<span className='material-symbols-outlined'>timer</span>
+							<span>
+								{
+									Math.floor(sessionTime / 60).toLocaleString('ko-KR', { minimumIntegerDigits: 2 })
+									+ ':' +
+									Math.floor(sessionTime % 60).toLocaleString('ko-KR', { minimumIntegerDigits: 2})
+								}
+							</span>
+						</div>
+					</div>
+					<CustomButton onClick={disconnectAndQuit} size='lg' color='negative' className='mr-12'>
 						발표 나가기
 					</CustomButton>
 				</div>

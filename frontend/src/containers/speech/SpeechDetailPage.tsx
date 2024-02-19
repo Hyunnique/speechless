@@ -107,6 +107,7 @@ export const SpeechDetailPage = () => {
 			speechSessionStore.clearSession();
 		}
 
+		speechSessionStore.setDetail(speechDetail);
 		speechSessionStore.setSessionId(response.data);
 
 		navigate('/session/speech');
