@@ -5,7 +5,6 @@ import { useLocalAxios } from '../../../utils/axios.ts';
 import { useNavigate } from 'react-router-dom';
 import { useInterviewSessionStore } from '../../../stores/session.ts';
 import { Device, OpenVidu, Publisher, Session, StreamManager, Subscriber, SignalEvent } from 'openvidu-browser';
-import * as faceapi from 'face-api.js';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import { InterviewQuestion } from '../../../types/Interview.ts';
 
@@ -24,6 +23,23 @@ interface AnswerStopResponse {
 
 interface SignalData {
 	feedback?: string;
+}
+
+interface WorkerMessage {
+	type: 'LOAD_MODELS' | 'ANALYZE_FACE';
+	data?: {
+		imageData: ImageData;
+		modelUrl?: string;
+	};
+}
+
+interface WorkerResponse {
+	type: 'MODELS_LOADED' | 'ANALYSIS_RESULT' | 'ERROR';
+	result?: {
+		score: number | null;
+		emotion: EmotionData | null;
+	};
+	error?: string;
 }
 
 const PRESET_QUESTIONS: string[] = [
@@ -83,6 +99,8 @@ export const InterviewPage = () => {
 	const interviewSessionStore = useInterviewSessionStore();
 
 	const videoRef = useRef<HTMLVideoElement>(null);
+	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const faceWorkerRef = useRef<Worker | null>(null);
 	const questionsRef = useRef<InterviewQuestion[]>([]);
 	const questionCursor = useRef<number>(0);
 	const feedbackCursor = useRef<number>(0);
@@ -127,7 +145,7 @@ export const InterviewPage = () => {
 		try {
 			await setPresetQuestions();
 			await initSession();
-			await loadFaceApiModels();
+			initializeFaceWorker();
 			initializeTTS();
 			stopTimer();
 		} catch (error) {
@@ -138,6 +156,10 @@ export const InterviewPage = () => {
 
 	const cleanup = (): void => {
 		window.speechSynthesis.onvoiceschanged = null;
+		if (faceWorkerRef.current) {
+			faceWorkerRef.current.terminate();
+			faceWorkerRef.current = null;
+		}
 	};
 
 	const handleSessionError = (): void => {
@@ -149,6 +171,67 @@ export const InterviewPage = () => {
 				message: '세션을 찾지 못했습니다. 이미 종료된 세션일 가능성이 높습니다.',
 			},
 		});
+	};
+
+	const initializeFaceWorker = (): void => {
+		if (faceWorkerRef.current) {
+			faceWorkerRef.current.terminate();
+		}
+
+		faceWorkerRef.current = new Worker('/face-worker.js');
+		
+		faceWorkerRef.current.onmessage = (event: MessageEvent<WorkerResponse>) => {
+			const { type, result, error } = event.data;
+			
+			switch (type) {
+				case 'MODELS_LOADED':
+					console.log('Face models loaded in worker');
+					break;
+				case 'ANALYSIS_RESULT':
+					handleFaceAnalysisResult(result);
+					break;
+				case 'ERROR':
+					console.error('Face worker error:', error);
+					handleFaceAnalysisError();
+					break;
+			}
+		};
+
+		faceWorkerRef.current.onerror = (error) => {
+			console.error('Face worker error:', error);
+			handleFaceAnalysisError();
+		};
+
+		const loadMessage: WorkerMessage = { 
+			type: 'LOAD_MODELS', 
+			data: { modelUrl: MODEL_URL } 
+		};
+		faceWorkerRef.current.postMessage(loadMessage);
+
+		if (!canvasRef.current) {
+			canvasRef.current = document.createElement('canvas');
+		}
+	};
+
+	const handleFaceAnalysisResult = (result?: { score: number | null; emotion: EmotionData | null }): void => {
+		if (!result) {
+			handleFaceAnalysisError();
+			return;
+		}
+
+		if (result.score !== null && result.emotion) {
+			scoresRef.current.push(result.score);
+			setLastEmotion(result.emotion);
+			setLastScore(result.score);
+		} else {
+			const lastScore = scoresRef.current.length === 0 ? 0 : scoresRef.current[scoresRef.current.length - 1];
+			scoresRef.current.push(lastScore);
+		}
+	};
+
+	const handleFaceAnalysisError = (): void => {
+		const lastScore = scoresRef.current.length === 0 ? 0 : scoresRef.current[scoresRef.current.length - 1];
+		scoresRef.current.push(lastScore);
 	};
 
 	const setPresetQuestions = async (): Promise<void> => {
@@ -343,46 +426,39 @@ export const InterviewPage = () => {
 		navigate('/interview');
 	};
 
-	const loadFaceApiModels = async (): Promise<void> => {
-		await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-		await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-		await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-		await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+	const captureVideoFrame = (): ImageData | null => {
+		if (!videoRef.current || !canvasRef.current) return null;
+
+		const video = videoRef.current;
+		const canvas = canvasRef.current;
+		const ctx = canvas.getContext('2d');
+		
+		if (!ctx || video.videoWidth === 0 || video.videoHeight === 0) return null;
+
+		canvas.width = video.videoWidth;
+		canvas.height = video.videoHeight;
+		ctx.drawImage(video, 0, 0);
+
+		return ctx.getImageData(0, 0, canvas.width, canvas.height);
 	};
 
-	const analyzeFace = async (): Promise<void> => {
-		if (!videoRef.current) return;
+	const analyzeFaceWithWorker = (): void => {
+		if (!faceWorkerRef.current) return;
 
-		const detections = await faceapi
-			.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-			.withFaceLandmarks()
-			.withFaceExpressions();
+		const imageData = captureVideoFrame();
+		if (!imageData) return;
 
-		if (!detections || detections.length === 0) {
-			const lastScore = scoresRef.current.length === 0 ? 0 : scoresRef.current[scoresRef.current.length - 1];
-			scoresRef.current.push(lastScore);
-			return;
-		}
+		const message: WorkerMessage = {
+			type: 'ANALYZE_FACE',
+			data: { imageData }
+		};
 
-		const detection = detections[0];
-		const happyScore = Math.floor(detection.expressions.happy * 50);
-		const negativeScore = Math.floor(
-			(detection.expressions.sad +
-			detection.expressions.angry +
-			detection.expressions.fearful +
-			detection.expressions.disgusted +
-			detection.expressions.surprised) * 50
-		);
-
-		const score = 50 + happyScore - negativeScore;
-		scoresRef.current.push(score);
-		setLastEmotion(detection.expressions.asSortedArray()[0]);
-		setLastScore(score);
+		faceWorkerRef.current.postMessage(message);
 	};
 
 	const startFaceAnalyze = (): void => {
 		if (intervalId.current !== null) return;
-		intervalId.current = window.setInterval(analyzeFace, 1000);
+		intervalId.current = window.setInterval(analyzeFaceWithWorker, 1000);
 	};
 
 	const stopFaceAnalyze = (): void => {
@@ -670,6 +746,7 @@ export const InterviewPage = () => {
 
 	return (
 		<div className='w-[100vw] h-[100vh] bg-gradient-to-b from-white to-gray-200 flex flex-col items-center'>
+			<canvas ref={canvasRef} style={{ display: 'none' }} />
 			<div className='p-10 w-[90vw] h-[80vh]'>
 				<div className='session-header flex justify-end'>
 					<CustomButton onClick={disconnectAndQuit} size='lg' color='negative' className='mr-12'>
